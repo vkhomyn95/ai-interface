@@ -3,7 +3,7 @@ docker rm -f ai-interface
 docker build -t vk/ai-interface .
 docker run -d --restart always --net=host -v /stor:/stor -v /etc/localtime:/etc/localtime:ro \
         --log-opt max-size=500m --log-opt max-file=5 \
-        -e APP_HOST='127.0.0.1' \
+        -e APP_HOST='0.0.0.0' \
         -e APP_PORT='5000' \
         -e AUDIO_DIR='/stor/data/audio/' \
         -e LOGGER_DIR='/stor/data/logs/interface/' \

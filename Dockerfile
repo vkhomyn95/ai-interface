@@ -6,6 +6,8 @@ COPY requirements.txt requirements.txt
 
 RUN python -m venv venv
 
+RUN python -m pip install Flask
+
 RUN venv/bin/pip3 install --no-cache-dir -r requirements.txt
 
 COPY . ./

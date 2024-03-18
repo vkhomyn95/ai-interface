@@ -8,6 +8,8 @@ RUN python -m venv venv
 
 RUN python -m pip install Flask
 
+RUN python -m pip install mariadb
+
 RUN venv/bin/pip3 install --no-cache-dir -r requirements.txt
 
 COPY . ./

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+<!--  admin header-->
+{% with role=role %}
+{% include 'header.html' %}
+{% endwith %}
+<!--    admin action buttons-->
+<div class="container is-fluid my-5 is-flex is-justify-content-space-between">
+    <form id="filterForm" action="{{ url_for('recognitions') }}" class="is-flex is-justify-content-space-around is-align-items-center">
+        <div class="is-flex is-flex-direction-row is-align-items-center">
+            {% if role == 'admin' %}
+            <div class="control has-icons-left">
+                <div class="select is-info input-texted mr-4">
+                    <label>User</label>
+                    <select name="user_id" style="width: 300px">
+                        <option value="">Select user</option>
+                        {% for user in users %}
+                        <option value="{{user.id}}">{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <span class="icon is-large is-left">
+            <i class="fas fa-user"></i>
+            </span>
+            </div>
+            {% endif %}
+            <div class="input-texted mr-4">
+                <p class="control has-icons-left">
+                    <label>Request uuid</label>
+                    <input class="input is-normal is-info" type="text" name="request_uuid"
+                           placeholder="Enter request uuid"/>
+                    <span class="icon is-small is-left">
+                      <i class="fas fa-fingerprint"></i>
+                    </span>
+                </p>
+            </div>
+            <div class="input-texted">
+                <p class="control has-icons-left">
+                    <label>Extension</label>
+                    <input class="input is-normal is-info" type="text" name="extension" placeholder="Enter extension"/>
+                    <span class="icon is-small is-left">
+              <i class="fas fa-phone"></i>
+            </span>
+                </p>
+            </div>
+        </div>
+
+        <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">
+            <button type="submit" class="button is-link">
+                <span class="icon mr-2">
+                  <i class="fa-solid fa-filter"></i>
+                </span>
+                <span>Filter</span>
+            </button>
+        </div>
+        <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">
+            <button onclick="resetForm()" class="button is-link">
+                <span class="icon mr-2">
+                  <i class="fa-regular fa-trash-can"></i>
+                </span>
+                <span>Clear</span>
+            </button>
+        </div>
+    </form>
+</div>
+<!--    admin recognition tables-->
+<div class="container is-fluid mt-5">
+    <table class="table is-hoverable container-table is-fullwidth bd-navbar">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Created date</th>
+            <th>Request uuid</th>
+            <th>Audio uuid</th>
+            <th>Final</th>
+            <th>Confidence</th>
+            <th>Prediction</th>
+            <th>Extension</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for recognition in recognitions %}
+        <tr>
+            <th>{{ recognition.id }}</th>
+            <td>{{ recognition.created_date }}</td>
+            <td>{{ recognition.request_uuid }}</td>
+            <td>{{ recognition.audio_uuid }}</td>
+            <td>{{ recognition.final|byte_to_bool }}</td>
+            <td>{{ recognition.confidence }}</td>
+            <td>{{ recognition.prediction }}</td>
+            <td>{{ recognition.extension }}</td>
+
+            <td>
+                <div class="is-flex-direction-row is-align-content-center">
+                    <a href="{{ url_for('recognition', recognition_id=recognition.id) }}">
+                      <span class="icon">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                      </span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!--  admin pagination-->
+{% with page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, template='recognitions' %}
+{% include "pagination.html" %}
+{% endwith %}
+
+<script>
+    function resetForm() {
+        document.getElementById('filterForm').reset();
+        document.getElementById('filterForm').submit();
+    }
+</script>
+</body>
+</html>

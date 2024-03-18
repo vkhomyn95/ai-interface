@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include 'head.html' %}
+<body>
+<!--  admin header-->
+{% with role=role %}
+{% include 'header.html' %}
+{% endwith %}
+<div class="container is-fluid my-5">
+    <div class="tile is-ancestor">
+        <div class="tile is-4 is-vertical is-parent">
+            <div class="tile is-child box">
+                <p class="subtitle is-4 mb-4">Information</p>
+                <table class="table is-fullwidth">
+                    <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ recognition.id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Created Date</td>
+                        <td>{{ recognition.created_date }}</td>
+                    </tr>
+                    <tr>
+                        <td>Final</td>
+                        <td>{{ recognition.final|byte_to_bool }}</td>
+                    </tr>
+                    <tr>
+                        <td>Request uuid</td>
+                        <td>{{ recognition.request_uuid }}</td>
+                    </tr>
+                    <tr>
+                        <td class="w-space">Request audio</td>
+                        <td class="w-space">
+                            <audio controls>
+                                <source
+                                        src="{{ url_for('serve_audio', filename=recognition.request_uuid|obj_to_str) }}"
+                                        type="audio/wav"
+                                >
+                                Your browser does not support the audio element.
+                            </audio>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Audio uuid</td>
+                        <td>{{ recognition.audio_uuid }}</td>
+                    </tr>
+                    <tr>
+                        <td>Confidence</td>
+                        <td>{{ recognition.confidence }} %</td>
+                    </tr>
+                    <tr>
+                        <td>Prediction</td>
+                        <td>{{ recognition.prediction }}</td>
+                    </tr>
+                    <tr>
+                        <td>Extension</td>
+                        <td>{{ recognition.extension }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tile is-child box">
+                <p class="subtitle is-4 mb-4">User</p>
+                <table class="table is-fullwidth">
+                    <tbody>
+                    <tr>
+                        <td>ID</td>
+                        <td>{{ recognition.user_id }}</td>
+                    </tr>
+                    <tr>
+                        <td>Last name</td>
+                        <td>{{ recognition.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>First name</td>
+                        <td>{{ recognition.first_name }}</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>{{ recognition.email }}</td>
+                    </tr>
+                    <tr>
+                        <td>Phone</td>
+                        <td>{{ recognition.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td>Audience</td>
+                        <td>{{ recognition.audience }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tile is-parent">
+            <div class="tile is-child box">
+                <p class="subtitle is-4 mb-4">Related</p>
+                <table class="table is-fullwidth">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Final</th>
+                        <th>Audio</th>
+                        <th>Confidence</th>
+                        <th>Prediction</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in related_recognitions %}
+                    <tr>
+                        <th class="w-space">{{ r.id }}</th>
+                        <td class="w-space">{{ r.created_date }}</td>
+                        <td class="w-space">{{ r.final|byte_to_bool }}</td>
+                        <td class="w-space">
+                            <div class="is-flex is-flex-direction-column">
+                                <div>
+                                    <audio controls>
+                                        <source
+                                                src="{{ url_for('serve_audio', filename=r.audio_uuid|obj_to_str) }}"
+                                                type="audio/wav"
+                                        >
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+<!--                                <div>-->
+<!--                                    <span class="tag is-link is-light">{{ r.audio_uuid }}</span>-->
+<!--                                </div>-->
+                            </div>
+
+                        </td>
+                        <td class="w-space">{{ r.confidence }} %</td>
+                        <td class="w-space">{{ r.prediction }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

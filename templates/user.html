@@ -1,0 +1,569 @@
+<html lang="en">
+{% include 'head.html' %}
+<body>
+<!--  admin header-->
+{% with role=role %}
+{% include 'header.html' %}
+{% endwith %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+<div class="notification is-danger is-light" onclick="this.remove()">
+    <button class="delete"></button>
+    {{ message }}
+</div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="container is-fluid py-5">
+    <form method="POST"
+          onsubmit="event.preventDefault(); validateUserForm();"
+          id="userForm"
+          action="{% if not user.id %}{{ url_for('create_user') }}{% else %}{{ url_for('user', user_id=user.id) }}{% endif %}">
+        <div class="tile is-ancestor">
+            <div class="tile is-parent">
+                <article class="tile is-child box">
+                    <p class="subtitle is-3">User</p>
+                    <div class="field">
+                        <label class="label">Username</label>
+                        <div class="control has-icons-left has-icons-right">
+                            <input class="input is-success" type="hidden" name="id" value="{{ user.id }}">
+                            <input class="input is-success" type="hidden" name="tariff_id" value="{{ user.tariff_id }}">
+                            <input class="input is-success" type="hidden" name="recognition_id"
+                                   value="{{ user.recognition_id }}">
+                            <input
+                                    class="input"
+                                    type="text"
+                                    id="username"
+                                    name="username"
+                                    placeholder="Username"
+                                    value="{{ user.username }}"
+                                    oninput="validateInput(this)"
+                            />
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <span class="icon is-small is-right">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Last name</label>
+                        <div class="control">
+                            <input
+                                    class="input"
+                                    type="text"
+                                    id="last_name"
+                                    name="last_name"
+                                    placeholder="Last name"
+                                    value="{{ user.last_name }}"
+                                    oninput="validateInput(this)"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">First name</label>
+                        <div class="control">
+                            <input
+                                    class="input"
+                                    type="text"
+                                    id="first_name"
+                                    name="first_name"
+                                    value="{{ user.first_name }}"
+                                    placeholder="Text input"
+                                    oninput="validateInput(this)"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <div class="control has-icons-left has-icons-right">
+                            <input
+                                    class="input"
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Email input"
+                                    value="{{ user.email }}"
+                                    oninput="validateInput(this)"
+                            >
+                            <span class="icon is-small is-left">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <span class="icon is-small is-right">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Phone</label>
+                        <div class="control">
+                            <input
+                                    class="input"
+                                    type="text"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="Phone"
+                                    value="{{ user.phone }}"
+                                    oninput="validateInput(this)"
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Api key</label>
+                        <div class="control is-flex is-flex is-flex-direction-row is-align-items-center">
+                            <div style="width: 100%">
+                                <input
+                                    class="input"
+                                    type="text"
+                                    id="api_key"
+                                    name="api_key"
+                                    value="{{ user.api_key }}"
+                             />
+                            </div>
+                             <div class="tag is-link is-medium ml-2" onclick="generateUrlSafe32()">
+                                 <i class="fa-solid fa-key"></i>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Password</label>
+                        <div class="control">
+                            <input
+                                    class="input"
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value="{{ user.password }}"
+                                    oninput="validateInput(this)"
+                            />
+                        </div>
+                    </div>
+                    <div class="field ">
+                        <label class="label">Audience</label>
+                        <div class="control">
+                            <input
+                                    class="input"
+                                    type="text"
+                                    id="audience"
+                                    name="audience"
+                                    value="{{ user.audience }}"
+                                    placeholder="voiptime.net"
+                                    oninput="validateInput(this)"
+                            />
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="tile is-parent">
+                <article class="tile is-child box">
+                    <p class="subtitle is-3">License</p>
+                    <div class="field">
+                        <label class="label">Active</label>
+                        <div class="control py-2">
+                            <label class="radio">
+                                <input type="radio" name="active" value="True"
+                                       {% if user.active|byte_to_bool %}checked{% endif %}
+                                       {% if role=='guest' %}disabled{% endif %}
+                                >
+                                <span class="pl-2">Yes</span>
+                            </label>
+                            <label class="radio pl-2">
+                                <input type="radio" name="active" value="False"
+                                       {% if not user.active|byte_to_bool %}checked{% endif %}
+                                       {% if role=='guest' %}disabled{% endif %}
+                                >
+                                <span class="pl-2">No</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Total</label>
+                        <div class="control">
+                            {% if role=='guest' %}
+                            <h4 class="subtitle is-4">{{ user.total }}</h4>
+                            {% endif %}
+                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"
+                                   name="total" placeholder="100"
+                                   value="{{ user.total }}"
+                                   {% if role=='guest' %}disabled{% endif %}
+                            />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label">Used</label>
+                        <div class="control">
+                            {% if role=='guest' %}
+                            <h4 class="subtitle is-4"><span class="tag is-warning is-light is-medium">{{ user.used }}</span>
+                                / <span class="tag is-danger is-light is-medium">{{ user.total }}</span></h4>
+                            {% endif %}
+                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"
+                                   name="used" placeholder="100"
+                                   value="{{ user.used }}"
+                                   {% if role=='guest' %}disabled{% endif %}
+                            />
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <div class="tile is-parent">
+                <article class="tile is-child box">
+                    <p class="subtitle is-3">Recognition</p>
+                    <div class="tabs is-boxed">
+                        <ul>
+                            <li class="interim-tab-header is-active" onclick="changeRecognitionTab(this, 'interim')">
+                                <a>
+                                    <span class="icon is-small">
+                                        <i class="fas fa-arrows-left-right-to-line" aria-hidden="true"></i>
+                                    </span>
+                                    <span>Configuration</span>
+                                </a>
+                            </li>
+                            <li class="voice-tab-header" onclick="changeRecognitionTab(this, 'voice')">
+                                <a>
+                                    <span class="icon is-small">
+                                        <i class="fas fa-arrows-left-right-to-line" aria-hidden="true"></i>
+                                    </span>
+                                    <span>Voice</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="interim-tab">
+                        <div class="field">
+                            <label class="label">Interim</label>
+                            <div class="control py-2">
+                                <label class="radio">
+                                    <input type="radio" name="interim" value="{{ user.interim }}" {% if
+                                           user.interim|byte_to_bool %}checked{%
+                                           endif %}>
+                                    <span class="pl-2">Yes</span>
+                                </label>
+                                <label class="radio pl-2">
+                                    <input type="radio" name="interim" value="{{ user.interim }}" {% if
+                                           user.interim|byte_to_bool== False
+                                           %}checked{% endif %}>
+                                    <span class="pl-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Interval length</label>
+                            <div class="control">
+                                <input
+                                        class="input"
+                                        type="number"
+                                        name="interval_length"
+                                        placeholder="2"
+                                        min="1"
+                                        max="5"
+                                        onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
+                                        value="{{ user.interval_length }}"/>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Predictions</label>
+                            <div class="control">
+                                <input
+                                        class="input"
+                                        type="number"
+                                        name="predictions"
+                                        placeholder="2"
+                                        min="1"
+                                        max="5"
+                                        onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
+                                        value="{{ user.predictions }}"/>
+                            </div>
+                        </div>
+                        <div class="is-flex is-justify-content-end is-align-items-center">
+                            <div class="mr-4" style="width: 60px">
+                                <input
+                                        class="input is-small"
+                                        id="rowIntervalSize"
+                                        type="number"
+                                        min="1"
+                                        max="5"
+                                        placeholder="2"
+                                        onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
+                                >
+                            </div>
+                            <div class="tag is-link is-medium" onclick="addRowToTable()">Add interval</div>
+                        </div>
+                    </div>
+                    <div class="voice-tab is-hidden">
+                        <div class="field">
+                            <label class="label">Sample rate (Hz)</label>
+                            <div class="control">
+                                <input
+                                        class="input"
+                                        type="number"
+                                        name="rate"
+                                        placeholder="8000"
+                                        value="{{ user.rate }}"/>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="label">Encoding</label>
+                            <div class="control">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        name="encoding"
+                                        placeholder="slin"
+                                        value="{{ user.encoding }}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table is-fullwidth">
+                        <tbody>
+                        </tbody>
+                    </table>
+                </article>
+            </div>
+        </div>
+
+        <div class="field is-grouped is-justify-content-flex-end">
+            <div class="control">
+                <button class="button is-link">Submit</button>
+            </div>
+            <div class="control">
+                <button class="button is-link is-light">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    function changeRecognitionTab(el, tab) {
+        el.classList.add("is-active");
+        if (tab === 'interim') {
+            document.querySelector(".voice-tab-header").classList.remove("is-active");
+            document.querySelector(".interim-tab").classList.remove("is-hidden");
+            document.querySelector(".voice-tab").classList.add("is-hidden");
+        }
+        if (tab === 'voice') {
+            document.querySelector(".interim-tab").classList.add("is-hidden");
+            document.querySelector(".voice-tab").classList.remove("is-hidden");
+            document.querySelector(".interim-tab-header").classList.remove("is-active");
+        }
+    }
+
+    function validateInput(event) {
+        if (event.value.length >= 5) {
+            if (event.classList.contains("is-danger"))
+                event.classList.replace("is-danger", "is-success")
+        } else {
+            if (event.classList.contains("is-success"))
+                event.classList.replace("is-success", "is-danger")
+        }
+    }
+
+    function validateUserForm() {
+        /**
+         * User form validation */
+        let isValid = true;
+
+        let username = document.getElementById("username");
+        isValid = validateField(username);
+        let firstName = document.getElementById("first_name");
+        isValid = validateField(firstName);
+        let lastName = document.getElementById("last_name");
+        isValid = validateField(lastName);
+        let email = document.getElementById("email");
+        isValid = validateField(email);
+        let phone = document.getElementById("phone");
+        isValid = validateField(phone);
+        let apiKey = document.getElementById("api_key");
+        isValid = validateField(apiKey);
+        let password = document.getElementById("password");
+        isValid = validateField(password);
+        let audience = document.getElementById("audience");
+        isValid = validateField(audience);
+
+        if (isValid)
+            document.getElementById("userForm").submit();
+    }
+
+    function validateField(field) {
+        /**
+         * User field validation */
+        console.log(field)
+        if (field.value.length >= 5) {
+            if (field.classList.contains("is-danger")) {
+                field.classList.replace("is-danger", "is-success")
+                return true;
+            } else {
+                field.classList.add("is-success");
+                return true;
+            }
+        } else {
+            if (field.classList.contains("is-success")) {
+                field.classList.replace("is-success", "is-danger")
+                return false;
+            } else {
+                field.classList.add("is-danger");
+                return false;
+            }
+        }
+    }
+
+    function generateUrlSafe32() {
+        let characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_';
+        let result = '';
+        let charactersLength = characters.length;
+        for (let i = 0; i < 32; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        document.getElementById("api_key").value = result;
+    }
+
+    function addRowToTable() {
+        // columnSize+=1;
+        let columnSize = +document.getElementById("rowIntervalSize").value;
+        columnSize += 1;
+        // Get reference to table body
+        var tbody = document.querySelector('table tbody');
+
+        // Create new row element
+        var newRow = document.createElement('tr');
+
+        // Loop to create cells and inputs for each column
+        for (var i = 0; i < columnSize; i++) {
+            // Create new cell element
+            var cell = document.createElement('td');
+
+            // Create new div element with radio inputs
+            var radioDiv = document.createElement('div');
+            radioDiv.classList.add('field');
+            radioDiv.classList.add('control');
+            radioDiv.classList.add('is-flex');
+            radioDiv.classList.add('is-flex-direction-column');
+            radioDiv.classList.add('py-2');
+
+            // Create radio inputs and labels
+            for (var j = 0; j < 3; j++) {
+                var childRadioDiv = document.createElement('div');
+                childRadioDiv.classList.add('is-flex');
+                childRadioDiv.classList.add('is-flex-direction-row');
+                childRadioDiv.classList.add('is-align-items-center');
+                if (j === 0) {
+                    var tag = document.createElement('span');
+                    tag.classList.add("tag")
+                    tag.classList.add(((i + 1) !== columnSize) ? 'is-success' : 'is-warning')
+                    tag.classList.add("mb-1")
+                    tag.textContent = (i + 1) !== columnSize ? 'Interval ' + (i + 1) : 'Result';
+                    childRadioDiv.appendChild(tag);
+                } else {
+                    var radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.name = (i + 1) !== columnSize ? ((tbody.children.length + 1) + '_interval_' + (i + 1)) : ((tbody.children.length + 1) + '_result_' + (columnSize));
+                    radioInput.value = (j === 1) ? 'True' : 'False';
+                    if (j === 1)
+                        radioInput.checked = true;
+
+                    var label = document.createElement('span');
+                    label.classList.add('pl-2');
+                    label.textContent = (j === 1) ? 'Human' : 'Voicemail';
+
+                    // Append radio input and label to radio div
+                    childRadioDiv.appendChild(radioInput);
+                    childRadioDiv.appendChild(label);
+                }
+                radioDiv.appendChild(childRadioDiv);
+            }
+
+            // Append radio div to cell
+            cell.appendChild(radioDiv);
+
+            // Append cell to row
+            newRow.appendChild(cell);
+        }
+
+        // Append new row to table body
+        tbody.appendChild(newRow);
+    }
+
+    function parseRows(criteria) {
+        criteria = criteria.replaceAll('&#34;', '"');
+        console.log(criteria)
+        let data = JSON.parse(criteria);
+        let intervals = {};
+
+        let results = {};
+        let tbody = document.querySelector('table tbody');
+
+        // Group keys by suffix
+        for (const key in data) {
+            if (data.hasOwnProperty(key)) {
+                const suffix = key.split('_')[1];
+                if (suffix.startsWith('interval')) {
+                    intervals[key] = data[key];
+                } else if (suffix.startsWith('result')) {
+                    results[key] = data[key];
+                }
+            }
+        }
+        let html = '';
+
+        // Generate rows based on the result keys
+        for (const resultKey in results) {
+            html = ''
+            if (results.hasOwnProperty(resultKey)) {
+                html += '<tr>';
+                let row = +resultKey.split("_").shift();
+                for (const intervalKey in intervals) {
+                    if (intervals.hasOwnProperty(intervalKey) && intervalKey.startsWith(row.toString())) {
+                        const interval = intervalKey.split("_").pop()
+                        html += `
+                            <td>
+                                <div class="field">
+                                    <div class="control py-2 is-flex is-flex-direction-column">
+                                        <div class="is-flex is-flex-direction-row is-align-items-center">
+                                            <span class="tag is-success mb-1">Interval ${interval}</span>
+                                        </div>
+                                        <div class="is-flex is-flex-direction-row is-align-items-center">
+                                            <input type="radio" name="${intervalKey}" value="True" ${data[intervalKey] === 'True' ? 'checked' : ''}>
+                                            <span class="pl-2">Human</span>
+                                        </div>
+                                        <div class="is-flex is-flex-direction-row is-align-items-center">
+                                            <input type="radio" name="${intervalKey}" value="False" ${data[intervalKey] === 'False' ? 'checked' : ''}>
+                                            <span class="pl-2">Voicemail</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                    }
+                }
+                html += `
+                    <td>
+                        <div class="field">
+                            <div class="control py-2 is-flex is-flex-direction-column">
+                                <div class="is-flex is-flex-direction-row is-align-items-center">
+                                    <span class="tag is-warning mb-1">Result</span>
+                                </div>
+                                <div class="is-flex is-flex-direction-row is-align-items-center">
+                                    <input type="radio" name="${resultKey}" value="True" ${data[resultKey] === 'True' ? 'checked' : ''}>
+                                    <span class="pl-2">Human</span>
+                                </div>
+                                <div class="is-flex is-flex-direction-row is-align-items-center">
+                                    <input type="radio" name="${resultKey}" value="False" ${data[resultKey] === 'False' ? 'checked' : ''}>
+                                    <span class="pl-2">Voicemail</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                html += '</tr>';
+                tbody.innerHTML += html;
+            }
+        }
+    }
+
+    const criteria = "{{ user.prediction_criteria|string }}"
+    parseRows(criteria)
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<html lang="en">
+{% include 'head.html' %}
+<body>
+<!--  admin header-->
+{% with role=role %}
+{% include 'header.html' %}
+{% endwith %}
+<!--    admin action buttons-->
+<div class="container is-fluid my-5">
+    <div class="is-flex is-justify-content-flex-end">
+        <a href="{{ url_for('create_user') }}">
+            <button class="button is-link">
+                <span class="icon mr-2"><i class="fa-solid fa-plus"></i></span>
+                <span>Create user</span>
+            </button>
+        </a>
+    </div>
+</div>
+<!--    admin user tables-->
+<div class="container is-fluid">
+    <table class="table is-hoverable container-table is-fullwidth bd-navbar">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Created date</th>
+            <th>Last name</th>
+            <th>First name</th>
+            <th>Phone</th>
+            <th>Audience</th>
+            <th>Active</th>
+            <th>Total</th>
+            <th>Used</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+        <tr>
+            <th>{{ user.id }}</th>
+            <td>{{ user.created_date }}</td>
+            <td>{{ user.last_name }}</td>
+            <td>{{ user.first_name }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.audience }}</td>
+            <td>{{ user.active|byte_to_bool }}</td>
+            <td>{{ user.total }}</td>
+            <td>{{ user.used }}</td>
+            <td>
+                <div class="is-flex-direction-row is-align-content-center">
+                    <a href="{{ url_for('user', user_id=user.id) }}">
+                      <span class="icon">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                      </span>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!--  admin pagination-->
+{% with page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, template='users' %}
+{% include "pagination.html" %}
+{% endwith %}
+</body>
+</html>

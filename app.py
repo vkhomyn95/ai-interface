@@ -386,4 +386,4 @@ def is_admin():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host=variables.app_host, port=variables.app_port)

@@ -20,7 +20,7 @@ db = Database(
 
 app.config['SECRET_KEY'] = variables.secret_key
 
-initial = db.load_user_by_username("admin")
+initial = db.load_user_by_username("admin", None)
 
 if initial is None:
     db.insert_user(
@@ -40,7 +40,7 @@ if initial is None:
         {
             "username": "admin",
             "password": generate_password_hash("password"),
-            "email": "amd.voiptime.net",
+            "email": "amd@voiptime.net",
             "first_name": "Administrator",
             "last_name": "Administrator",
             "phone": "",
@@ -68,7 +68,7 @@ def login():
             username = username.strip()
             password = password.strip()
 
-        user = db.load_user_by_username(username)
+        user = db.load_user_by_username(username, None)
 
         if user and check_password_hash(user['password'], password):
             session["user"] = user
@@ -94,14 +94,24 @@ def dashboard():
     user = get_user()
 
     if user:
-        user_id = request.args.get('user_id', user["id"], type=int)
+        if is_admin():
+            user_id = request.args.get(
+                'user_id',
+                user["id"] if not "dashboard_filter" in session else session["dashboard_filter"],
+                type=int
+            )
+        else:
+            user_id = user["id"]
+
+        session["dashboard_filter"] = user_id
 
         board = db.load_user_dashboard(user_id if is_admin() else user["id"])
         return render_template(
             'dashboard.html',
             users=db.load_simple_users() if is_admin() else [],
             dashboard={key: int(value) if value is not None else 0 for key, value in board.items()},
-            role=user["role_name"]
+            role=user["role_name"],
+            filter=session["dashboard_filter"]
         )
     else:
         return redirect(url_for("login"))
@@ -154,6 +164,7 @@ def user(user_id: int):
         user = db.load_user_by_id(int(user_id))
         if request.method == "GET":
             # Render the template with the data
+            user["password"] = ""
             return render_template(
                 'user.html',
                 user=user,
@@ -194,11 +205,12 @@ def create_user():
             else:
                 redirect(url_for('user', user_id=current_user["id"]))
         else:
-
-            user = db.load_user_by_username(request.form["username"])
+            user = db.load_user_by_username(request.form["username"], request.form["email"])
 
             if user is not None:
-                flash("User with username {} already exists".format(request.form["username"]))
+                flash("User with username {} or email {} already exists".format(
+                    request.form["username"], request.form["email"])
+                )
                 merged_dict = {}
                 merged_dict.update(to_tariff_obj(request))
                 merged_dict.update(to_recognition_obj(request))
@@ -323,12 +335,30 @@ def byte_to_bool(value):
         return False
     if not value:
         return False
+    if value == True:
+        return True
     return bool(int.from_bytes(value, byteorder='big'))
 
 
 @app.template_filter('obj_to_str')
 def obj_to_str(value):
     return str(value)
+
+
+@app.template_filter('calculate_avg_prediction_confidence')
+def calculate_avg_prediction_confidence(arr):
+    if len(arr) == 0:
+        return 0
+    total = sum(obj["confidence"] for obj in arr)
+    return total / len(arr)
+
+
+@app.template_filter('calculate_prediction_result')
+def calculate_prediction_result(arr):
+    for o in arr:
+        if byte_to_bool(o["final"]):
+            return o["prediction"]
+    return "Not predicted"
 
 
 def to_tariff_obj(request):
@@ -351,10 +381,14 @@ def to_recognition_obj(request):
 
 
 def to_user_obj(request, user):
-    if user and request.form.get("password") != user["password"] or not user:
-        password = generate_password_hash(request.form.get("password"))
+    # check if update form
+    if user:
+        if request.form.get("password") != "":
+            password = generate_password_hash(request.form.get("password"))
+        else:
+            password = user["password"]
     else:
-        password = user["password"]
+        password = generate_password_hash(request.form.get("password"))
 
     return {
         "id": request.form.get("id"),

@@ -7,14 +7,14 @@
 {% endwith %}
 
 {% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for message in messages %}
-<div class="notification is-danger is-light" onclick="this.remove()">
-    <button class="delete"></button>
-    {{ message }}
-</div>
-{% endfor %}
-{% endif %}
+  {% if messages %}
+    {% for message in messages %}
+        <div class="notification is-danger is-light" onclick="this.remove()">
+            <button class="delete"></button>
+            {{ message }}
+        </div>
+    {% endfor %}
+  {% endif %}
 {% endwith %}
 
 <div class="container is-fluid py-5">
@@ -29,7 +29,7 @@
                     <div class="field">
                         <label class="label">Username</label>
                         <div class="control has-icons-left has-icons-right">
-                            <input class="input is-success" type="hidden" name="id" value="{{ user.id }}">
+                            <input class="input is-success" type="hidden" id="user_id" name="id" value="{{ user.id }}">
                             <input class="input is-success" type="hidden" name="tariff_id" value="{{ user.tariff_id }}">
                             <input class="input is-success" type="hidden" name="recognition_id"
                                    value="{{ user.recognition_id }}">
@@ -40,7 +40,7 @@
                                     name="username"
                                     placeholder="Username"
                                     value="{{ user.username }}"
-                                    oninput="validateInput(this)"
+                                    oninput="validateField(this)"
                             />
                             <span class="icon is-small is-left">
                                 <i class="fas fa-user"></i>
@@ -60,7 +60,7 @@
                                     name="last_name"
                                     placeholder="Last name"
                                     value="{{ user.last_name }}"
-                                    oninput="validateInput(this)"
+                                    oninput="validateField(this)"
                             />
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                                     name="first_name"
                                     value="{{ user.first_name }}"
                                     placeholder="Text input"
-                                    oninput="validateInput(this)"
+                                    oninput="validateField(this)"
                             />
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                                     name="email"
                                     placeholder="Email input"
                                     value="{{ user.email }}"
-                                    oninput="validateInput(this)"
+                                    oninput="validateField(this)"
                             >
                             <span class="icon is-small is-left">
                                 <i class="fas fa-envelope"></i>
@@ -108,7 +108,7 @@
                                     name="phone"
                                     placeholder="Phone"
                                     value="{{ user.phone }}"
-                                    oninput="validateInput(this)"
+                                    oninput="validateField(this)"
                             />
                         </div>
                     </div>
@@ -134,11 +134,11 @@
                         <div class="control">
                             <input
                                     class="input"
-                                    type="password"
+                                    type="text"
                                     id="password"
                                     name="password"
-                                    value="{{ user.password }}"
-                                    oninput="validateInput(this)"
+                                    placeholder="Hidden"
+                                    oninput="validatePassword(this)"
                             />
                         </div>
                     </div>
@@ -152,7 +152,7 @@
                                     name="audience"
                                     value="{{ user.audience }}"
                                     placeholder="voiptime.net"
-                                    oninput="validateInput(this)"
+                                    oninput="validateField(this)"
                             />
                         </div>
                     </div>
@@ -234,23 +234,6 @@
                     </div>
                     <div class="interim-tab">
                         <div class="field">
-                            <label class="label">Interim</label>
-                            <div class="control py-2">
-                                <label class="radio">
-                                    <input type="radio" name="interim" value="{{ user.interim }}" {% if
-                                           user.interim|byte_to_bool %}checked{%
-                                           endif %}>
-                                    <span class="pl-2">Yes</span>
-                                </label>
-                                <label class="radio pl-2">
-                                    <input type="radio" name="interim" value="{{ user.interim }}" {% if
-                                           user.interim|byte_to_bool== False
-                                           %}checked{% endif %}>
-                                    <span class="pl-2">No</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="field">
                             <label class="label">Interval length</label>
                             <div class="control">
                                 <input
@@ -265,17 +248,36 @@
                             </div>
                         </div>
                         <div class="field">
+                            <label class="label">Interim</label>
+                            <div class="control py-2">
+                                <label class="radio">
+                                    <input type="radio" name="interim" value="True"  {% if
+                                           user.interim|byte_to_bool %}checked{%
+                                           endif %} onchange="changeInterim(false)">
+                                    <span class="pl-2">Yes</span>
+                                </label>
+                                <label class="radio pl-2">
+                                    <input type="radio" name="interim" value="False" {% if
+                                           not user.interim|byte_to_bool
+                                           %}checked{% endif %} onchange="changeInterim(true)">
+                                    <span class="pl-2">No</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="field">
                             <label class="label">Predictions</label>
                             <div class="control">
                                 <input
                                         class="input"
                                         type="number"
                                         name="predictions"
+                                        id="predictions"
                                         placeholder="2"
                                         min="1"
                                         max="5"
                                         onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
-                                        value="{{ user.predictions }}"/>
+                                        value="{{ user.predictions }}"
+                                />
                             </div>
                         </div>
                         <div class="is-flex is-justify-content-end is-align-items-center">
@@ -286,7 +288,6 @@
                                         type="number"
                                         min="1"
                                         max="5"
-                                        placeholder="2"
                                         onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
                                 >
                             </div>
@@ -325,15 +326,15 @@
             </div>
         </div>
 
-        <div class="field is-grouped is-justify-content-flex-end">
-            <div class="control">
-                <button class="button is-link">Submit</button>
-            </div>
-            <div class="control">
-                <button class="button is-link is-light">Cancel</button>
-            </div>
-        </div>
     </form>
+    <div class="field is-grouped is-justify-content-flex-end">
+        <div class="control">
+            <button onclick="saveForm()" class="button is-link">Submit</button>
+        </div>
+        <div class="control">
+            <button class="button is-link is-light" onclick="window.location.href = '/users'">Cancel</button>
+        </div>
+    </div>
 </div>
 <script>
     function changeRecognitionTab(el, tab) {
@@ -350,13 +351,10 @@
         }
     }
 
-    function validateInput(event) {
-        if (event.value.length >= 5) {
-            if (event.classList.contains("is-danger"))
-                event.classList.replace("is-danger", "is-success")
-        } else {
-            if (event.classList.contains("is-success"))
-                event.classList.replace("is-success", "is-danger")
+    function validatePassword(event) {
+        const userId = +document.getElementById("user_id").value;
+        if (userId === 0 || event.value.length >= 1) {
+            validateField(event)
         }
     }
 
@@ -389,7 +387,6 @@
     function validateField(field) {
         /**
          * User field validation */
-        console.log(field)
         if (field.value.length >= 5) {
             if (field.classList.contains("is-danger")) {
                 field.classList.replace("is-danger", "is-success")
@@ -419,6 +416,10 @@
         document.getElementById("api_key").value = result;
     }
 
+    function changeInterim(value) {
+        document.getElementById("predictions").disabled = value
+    }
+
     function addRowToTable() {
         // columnSize+=1;
         let columnSize = +document.getElementById("rowIntervalSize").value;
@@ -428,6 +429,8 @@
 
         // Create new row element
         var newRow = document.createElement('tr');
+        let itemsSize = ((tbody.children.length + 1) + '_result_' + (columnSize));
+        newRow.id = itemsSize;
 
         // Loop to create cells and inputs for each column
         for (var i = 0; i < columnSize; i++) {
@@ -460,8 +463,9 @@
                     radioInput.type = 'radio';
                     radioInput.name = (i + 1) !== columnSize ? ((tbody.children.length + 1) + '_interval_' + (i + 1)) : ((tbody.children.length + 1) + '_result_' + (columnSize));
                     radioInput.value = (j === 1) ? 'True' : 'False';
-                    if (j === 1)
+                    if (j === 1) {
                         radioInput.checked = true;
+                    }
 
                     var label = document.createElement('span');
                     label.classList.add('pl-2');
@@ -481,13 +485,71 @@
             newRow.appendChild(cell);
         }
 
+        let actionDivCol = document.createElement("td");
+        let actionDivField = document.createElement("div");
+
+        actionDivField.classList.add("field");
+
+        let childActionDivField = document.createElement('div');
+        childActionDivField.classList.add('control');
+        childActionDivField.classList.add('py-2');
+        childActionDivField.classList.add('is-flex');
+        childActionDivField.classList.add('is-flex-direction-column');
+        childActionDivField.classList.add('is-align-items-center');
+
+        let actionHeadingDiv = document.createElement("div");
+        actionHeadingDiv.classList.add('is-flex');
+        actionHeadingDiv.classList.add('is-flex-direction-row');
+        actionHeadingDiv.classList.add('is-align-items-center');
+
+        let actionHeadingSpan = document.createElement("span");
+        actionHeadingSpan.classList.add("tag");
+        actionHeadingSpan.classList.add("is-danger");
+        actionHeadingSpan.classList.add("mb-1");
+        actionHeadingSpan.innerText = "Action";
+
+        actionHeadingDiv.append(actionHeadingSpan);
+
+        let actionContentDiv = document.createElement("div");
+        actionContentDiv.classList.add('is-flex');
+        actionContentDiv.classList.add('is-flex-direction-row');
+        actionContentDiv.classList.add('is-align-items-center');
+
+        let actionRemove = document.createElement("i");
+        actionRemove.classList.add("fa-solid");
+        actionRemove.classList.add("fa-trash");
+        actionRemove.addEventListener("click", () => removeInterim(`${itemsSize}`))
+
+        actionContentDiv.append(actionRemove);
+
+        childActionDivField.appendChild(actionHeadingDiv);
+        childActionDivField.appendChild(actionContentDiv);
+
+        actionDivField.appendChild(childActionDivField);
+        actionDivCol.appendChild(actionDivField);
+
+        newRow.appendChild(actionDivCol)
+        // newRow.innerHTML +=`
+        //     <td>
+        //         <div class="field">
+        //             <div class="control py-2 is-flex is-flex-direction-column is-align-items-center">
+        //                 <div class="is-flex is-flex-direction-row is-align-items-center">
+        //                     <span class="tag is-danger mb-1">Action</span>
+        //                 </div>
+        //                 <div class="is-flex is-flex-direction-row is-align-items-center">
+        //                     <i class="fa-solid fa-trash" onclick="removeInterim('${((tbody.children.length + 1) + '_result_' + (columnSize))}')"></i>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     </td>
+        // `
+
         // Append new row to table body
         tbody.appendChild(newRow);
     }
 
     function parseRows(criteria) {
         criteria = criteria.replaceAll('&#34;', '"');
-        console.log(criteria)
         let data = JSON.parse(criteria);
         let intervals = {};
 
@@ -511,7 +573,7 @@
         for (const resultKey in results) {
             html = ''
             if (results.hasOwnProperty(resultKey)) {
-                html += '<tr>';
+                html += '<tr id="' + resultKey + '">';
                 let row = +resultKey.split("_").shift();
                 for (const intervalKey in intervals) {
                     if (intervals.hasOwnProperty(intervalKey) && intervalKey.startsWith(row.toString())) {
@@ -556,14 +618,37 @@
                         </div>
                     </td>
                 `;
+
+                html += `
+                    <td>
+                        <div class="field">
+                            <div class="control py-2 is-flex is-flex-direction-column is-align-items-center">
+                                <div class="is-flex is-flex-direction-row is-align-items-center">
+                                    <span class="tag is-danger mb-1">Action</span>
+                                </div>
+                                <div class="is-flex is-flex-direction-row is-align-items-center">
+                                    <i class="fa-solid fa-trash" onclick="removeInterim('${resultKey}')"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                `;
                 html += '</tr>';
                 tbody.innerHTML += html;
             }
         }
     }
 
+    function removeInterim(key) {
+        document.getElementById(key).remove()
+    }
+
     const criteria = "{{ user.prediction_criteria|string }}"
     parseRows(criteria)
+
+    function saveForm() {
+        document.getElementById("userForm").submit();
+    }
 </script>
 </body>
 </html>

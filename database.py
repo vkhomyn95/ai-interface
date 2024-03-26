@@ -215,23 +215,24 @@ class Database:
 
         return self.cur.lastrowid
 
-    def load_user_by_username(self, username: str):
+    def load_user_by_username(self, username: str, email: str):
         try:
             self.cur.execute(
                 f'SELECT u.id as id, '
                 f'u.first_name as first_name,'
                 f' u.last_name as last_name,'
                 f' u.username as username,'
+                f' u.email as email,'
                 f' u.password as password,'
                 f' u.role_id as role_id,'
-                f' r.name as role_name from user u left join user_role r on r.id=u.role_id where u.username=?',
-                (username,)
+                f' r.name as role_name from user u left join user_role r on r.id=u.role_id where u.username=? or u.email=?',
+                (username, email, )
             )
             return self.cur.fetchone()
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
-            return self.load_user_by_username(username)
+            return self.load_user_by_username(username, email)
 
     def load_users(self, limit: int, offset: int):
         try:
@@ -359,9 +360,9 @@ class Database:
                 query += f' where user_id={user_id}'
             if request_uuid:
                 if not user_id:
-                    query += f' where request_uuid={request_uuid}'
+                    query += f' where request_uuid="{request_uuid}"'
                 else:
-                    query += f' and request_uuid={request_uuid}'
+                    query += f' and request_uuid="{request_uuid}"'
             if extension:
                 if not user_id and not request_uuid:
                     query += f' where extension="{extension}"'
@@ -409,7 +410,11 @@ class Database:
     def load_recognition_by_id(self, recognition_id: int):
         try:
             self.cur.execute(
-                f'SELECT * from recognition r left join user u on r.user_id=u.id where r.id=? ',
+                f'SELECT r.id as id, r.created_date as created_date, r.final as final, r.request_uuid as request_uuid,'
+                f'r.audio_uuid as audio_uuid, r.confidence as confidence, r.prediction as prediction,'
+                f'r.extension as extension, r.user_id as user_id, u.first_name as first_name, u.last_name as last_name,'
+                f'u.email as email, u.phone as phone, u.username as username, u.audience as audience'
+                f' from recognition r left join user u on r.user_id=u.id where r.id=? ',
                 (recognition_id,)
             )
             return self.cur.fetchone()

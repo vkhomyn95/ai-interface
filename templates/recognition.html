@@ -14,10 +14,6 @@
                 <table class="table is-fullwidth">
                     <tbody>
                     <tr>
-                        <td>ID</td>
-                        <td>{{ recognition.id }}</td>
-                    </tr>
-                    <tr>
                         <td>Created Date</td>
                         <td>{{ recognition.created_date }}</td>
                     </tr>
@@ -107,8 +103,18 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <tfoot>
+                        <tr>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th></th>
+                          <th class="has-background-warning-light">{{ related_recognitions|calculate_avg_prediction_confidence}} %</th>
+                          <th class="has-background-warning-light">{{ related_recognitions|calculate_prediction_result}}</th>
+                        </tr>
+                      </tfoot>
                     {% for r in related_recognitions %}
-                    <tr>
+                    <tr class="{% if r.final|byte_to_bool %}has-background-success-light{% else %}has-background-danger-light{% endif %}">
                         <th class="w-space">{{ r.id }}</th>
                         <td class="w-space">{{ r.created_date }}</td>
                         <td class="w-space">{{ r.final|byte_to_bool }}</td>

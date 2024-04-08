@@ -5,10 +5,7 @@
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 {% for message in messages %}
-<div class="notification is-danger is-light" onclick="this.remove()">
-    <button class="delete"></button>
-    {{ message }}
-</div>
+    {% include 'toast.html' %}
 {% endfor %}
 {% endif %}
 {% endwith %}
@@ -16,7 +13,7 @@
 
 <div class="authentication flex flex-direction-row flex-content-center flex-align-center">
     <div class="authentication-wrapper flex flex-direction-column flex-content-center flex-align-center">
-        <div class="authentication-wrapper-logo mb-4">
+        <div class="authentication-wrapper-logo mb-20">
             <svg width="252" height="60" viewBox="0 30 375 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g clip-path="url(#clip0_537_42)">
                     <path d="M267.811 42.1793C268.645 41.4048 269.409 40.8415 270.104 40.1374C276.495 34.0821 284.068 32.7443 292.057 35.4199C299.977 38.0251 304.979 43.7284 306.577 52.1777C306.925 53.8675 306.925 55.6982 306.925 57.4585C306.994 62.528 306.925 67.5976 306.925 72.7376C306.925 74.7091 305.952 76.0469 304.285 76.8214C302.617 77.5959 300.95 77.3143 299.491 76.1877C298.379 75.2724 297.962 74.1458 297.962 72.6672C297.962 67.1752 297.962 61.6831 297.962 56.1911C297.962 49.9245 293.794 44.6437 287.75 43.3059C280.942 41.8273 273.786 46.6856 272.605 53.5859C272.535 54.0788 272.535 54.5716 272.535 55.0645C272.535 60.7678 272.535 66.471 272.535 72.1743C272.535 75.554 269.409 77.948 266.422 76.8918C264.546 76.2581 263.434 74.8499 263.434 72.7376C263.434 66.8231 263.434 60.979 263.434 55.0645C263.434 47.8826 256.417 41.7569 249.331 42.7426C242.384 43.7284 238.007 48.8684 238.007 56.0503C238.007 61.3311 238.007 66.6823 238.007 71.9631C238.007 73.9346 237.034 75.3428 235.367 76.1877C233.769 76.9622 232.171 76.751 230.712 75.6948C229.601 74.9203 229.045 73.7938 229.045 72.456C229.045 66.3302 228.837 60.2749 229.114 54.1492C229.531 43.0243 238.91 34.0117 249.817 33.7301C257.112 33.5188 263.087 36.0536 267.742 41.8273C267.672 41.9681 267.811 42.1089 267.811 42.1793Z"
@@ -55,7 +52,7 @@
 
         <div class="authentication-wrapper-form">
             <form id="login" action="{{ url_for('login')}}" method="post">
-                <div class="authentication-wrapper-form-item pb-5">
+                <div class="authentication-wrapper-form-item mb-20">
                     <label class="authentication-wrapper-form-item-label label-required_danger">Username</label>
                     <input
                             class="authentication-wrapper-form-item-input"
@@ -63,16 +60,18 @@
                             autocomplete="false"
                     />
                 </div>
-                <div class="authentication-wrapper-form-item mb-5">
+                <div class="authentication-wrapper-form-item mb-20">
                     <label class="authentication-wrapper-form-item-label label-required_danger">Password</label>
                     <div class="authentication-wrapper-form-item-password">
                         <input
                                 class="authentication-wrapper-form-item-input"
                                 type="password"
                                 name="password"
+                                id="passwordLoginField"
                                 autocomplete="false"
                         />
                         <svg class="authentication-wrapper-form-item-password-icon" width="24" height="24"
+                             onclick="showHideUserPassword()"
                              viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
                                     fill-rule="evenodd"
@@ -84,16 +83,28 @@
                     </div>
                 </div>
 
-                <div class="authentication-wrapper-form-item">
+                <div class="authentication-wrapper-form-item mb-20">
                     <button class="authentication-wrapper-button">Login</button>
                 </div>
 
-                <div class="authentication-wrapper-form-item is-flex is-justify-content-center mt-4">
+                <div class="authentication-wrapper-form-item flex flex-content-center">
                     <a class="authentication-wrapper-link" href="#">Privacy Policy</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+<script>
+    let isLoginPasswordVisible = false;
+    function showHideUserPassword() {
+        if (isLoginPasswordVisible) {
+            document.getElementById("passwordLoginField").type = "password";
+            isLoginPasswordVisible = !isLoginPasswordVisible;
+        } else {
+            document.getElementById("passwordLoginField").type = "text";
+            isLoginPasswordVisible = !isLoginPasswordVisible;
+        }
+    }
+</script>
 </body>
 </html>`

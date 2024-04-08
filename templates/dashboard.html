@@ -25,39 +25,39 @@
 
         <div class="content">
 
-<!--            <form-->
-<!--                    action="{{ url_for('dashboard') }}"-->
-<!--                    class="flex flex-direction-row flex-align-center mb-4"-->
-<!--            >-->
-<!--                {% if role == 'admin' %}-->
-<!--                <div class="control has-icons-left">-->
-<!--                    <div class="select is-info input-texted">-->
-<!--                        <label for="user_filter">User</label>-->
-<!--                        <select id="user_filter" name="user_id" style="width: 300px">-->
-<!--                            {% for user in users %}-->
-<!--                            <option-->
-<!--                                    value="{{user.id}}"-->
-<!--                                    {% if filter == user.id %}selected{% endif %}-->
-<!--                            >-->
-<!--                                {{ user.username }}-->
-<!--                            </option>-->
-<!--                            {% endfor %}-->
-<!--                        </select>-->
-<!--                    </div>-->
-<!--                    <span class="icon is-large is-left">-->
-<!--            <i class="fas fa-user"></i>-->
-<!--            </span>-->
-<!--                </div>-->
-<!--                <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">-->
-<!--                    <button type="submit" class="button is-link">-->
-<!--                <span class="icon mr-2">-->
-<!--                  <i class="fa-solid fa-filter"></i>-->
-<!--                </span>-->
-<!--                        <span>Filter</span>-->
-<!--                    </button>-->
-<!--                </div>-->
-<!--                {% endif %}-->
-<!--            </form>-->
+            <form
+                    action="{{ url_for('dashboard') }}"
+                    class="flex flex-direction-row flex-align-center mb-4"
+            >
+                {% if role == 'admin' %}
+                <div class="control has-icons-left">
+                    <div class="select is-info input-texted">
+                        <label for="user_filter">User</label>
+                        <select id="user_filter" name="user_id" style="width: 300px">
+                            {% for user in users %}
+                            <option
+                                    value="{{user.id}}"
+                                    {% if filter == user.id %}selected{% endif %}
+                            >
+                                {{ user.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <span class="icon is-large is-left">
+            <i class="fas fa-user"></i>
+            </span>
+                </div>
+                <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">
+                    <button type="submit" class="button is-link">
+                <span class="icon mr-2">
+                  <i class="fa-solid fa-filter"></i>
+                </span>
+                        <span>Filter</span>
+                    </button>
+                </div>
+                {% endif %}
+            </form>
 
             <div class="flex flex-direction-row flex-content-between">
 

@@ -518,7 +518,18 @@
 
         // Create new row element
         var newRow = document.createElement('tr');
-        let itemsSize = ((tbody.children.length + 1) + '_result_' + (columnSize));
+
+        let max = tbody.children.length + 1;
+        for (let i = 0; i < tbody.children.length; i++) {
+            const child = tbody.children[i];
+            const number = +child.id.split("_");
+            if (number[2] === columnSize) {
+                if (number[1] > max) {
+                    max = number[1] + 1;
+                }
+            }
+        }
+        let itemsSize = ((max + 1) + '_result_' + (columnSize));
         newRow.id = itemsSize;
 
         // Loop to create cells and inputs for each column
@@ -550,7 +561,7 @@
                 } else {
                     var radioInput = document.createElement('input');
                     radioInput.type = 'radio';
-                    radioInput.name = (i + 1) !== columnSize ? ((tbody.children.length + 1) + '_interval_' + (i + 1)) : ((tbody.children.length + 1) + '_result_' + (columnSize));
+                    radioInput.name = (i + 1) !== columnSize ? ((max + 1) + '_interval_' + (i + 1)) : ((max + 1) + '_result_' + (columnSize));
                     radioInput.value = (j === 1) ? 'True' : 'False';
                     if (j === 1) {
                         radioInput.checked = true;

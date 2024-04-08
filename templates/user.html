@@ -66,7 +66,7 @@
                                         name="username"
                                         placeholder="Логін"
                                         value="{{ user.username }}"
-                                        {% if id in user and user.id > 0 %}disabled{% endif %}
+                                        {% if "id" in user and user.id > 0 %}disabled{% endif %}
                                         oninput="validateField(this)"
                                 />
                             </div>
@@ -112,7 +112,7 @@
                                         name="email"
                                         placeholder="Email"
                                         value="{{ user.email }}"
-                                        {% if id in user and user.id > 0 %}disabled{% endif %}
+                                        {% if "id" in user and user.id > 0 %}disabled{% endif %}
                                         oninput="validateField(this)"
                                 />
                             </div>

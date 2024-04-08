@@ -156,6 +156,28 @@ def users():
         return redirect(url_for('login'))
 
 
+@app.route('/profile', methods=['POST', 'GET'])
+def profile():
+    current_user = session.get("user")
+
+    if current_user:
+        user = db.load_user_by_id(int(current_user["id"]))
+        if request.method == "GET":
+            # Render the template with the data
+            user["password"] = ""
+            return render_template(
+                'user.html',
+                user=user,
+                role=current_user["role_name"]
+            )
+        else:
+            db.update_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
+
+            return redirect(url_for('users'))
+    else:
+        return redirect(url_for('login'))
+
+
 @app.route('/users/<user_id>', methods=['POST', 'GET'])
 def user(user_id: int):
     current_user = session.get("user")

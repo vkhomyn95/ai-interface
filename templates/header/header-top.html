@@ -16,10 +16,10 @@
 <!--              </div>-->
 
               <div class="mb-10">
-                <div class="top-panel-user-menu-li flex flex-align-center" @click.prevent="navigateSettings">
+                <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('profile') }}">
                     {% include 'header/icons/icon-me.html' %}
                   <span class="top-panel-user-menu-li-title">Профіль</span>
-                </div>
+                </a>
               </div>
 
               <div>

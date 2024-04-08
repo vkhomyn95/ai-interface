@@ -204,6 +204,9 @@ input[type="radio"] {
 .flex-content-center {
     justify-content: center;
 }
+.flex-wrap {
+    flex-wrap: wrap;
+}
 .flex-align-center {
     align-items: center;
 }
@@ -419,4 +422,22 @@ input[type="radio"] {
     font-size: 1.1rem;
     padding: 8px 15px;
   }
+}
+#day-chart-content .apexcharts-canvas {
+    width: 100%!important;
+}
+#day-chart-content .apexcharts-canvas svg {
+    width: 100%!important;
+}
+#week-chart-content .apexcharts-canvas {
+    width: 100%!important;
+}
+#week-chart-content .apexcharts-canvas svg {
+    width: 100%!important;
+}
+#month-chart-content .apexcharts-canvas {
+    width: 100%!important;
+}
+#month-chart-content .apexcharts-canvas svg{
+    width: 100%!important;
 }

@@ -287,10 +287,36 @@ def recognition(recognition_id: int):
             recognition = db.load_recognition_by_id(recognition_id)
             if recognition is not None:
                 related_recognitions = db.load_related_recognitions(recognition["request_uuid"])
+                k = 0
+                l = 0
+                r = ''
+                for r in related_recognitions:
+                    if r["prediction"] != "ring":
+                        k += r["confidence"]
+                        l += 1
+                    if r["final"]:
+                        r = r["prediction"]
+                if len(related_recognitions) > 0:
+                    if l != 0:
+                        recognition["confidence"] = k / l
+                    recognition["prediction"] = r
         else:
             recognition = db.load_recognition_by_id_related_to_user(recognition_id, current_user["id"])
             if recognition is not None:
                 related_recognitions = db.load_related_recognitions(recognition["request_uuid"])
+                k = 0
+                l = 0
+                r = ''
+                for r in related_recognitions:
+                    if r["prediction"] != "ring":
+                        k += r["confidence"]
+                        l += 1
+                    if r["final"]:
+                        r = r["prediction"]
+                if len(related_recognitions) > 0:
+                    if l != 0:
+                        recognition["confidence"] = k / l
+                    recognition["prediction"] = r
         # Render the template with the data
         return render_template(
             'recognition.html',

@@ -1,338 +1,427 @@
+<!DOCTYPE html>
 <html lang="en">
+
 {% include 'head.html' %}
+
 <body>
-<!--  admin header-->
-{% with role=role %}
-{% include 'header.html' %}
-{% endwith %}
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    {% for message in messages %}
-        <div class="notification is-danger is-light" onclick="this.remove()">
-            <button class="delete"></button>
-            {{ message }}
+{% include 'header/header-top.html' %}
+
+<!--{% with messages = get_flashed_messages() %}-->
+<!--  {% if messages %}-->
+<!--    {% for message in messages %}-->
+<!--        <div class="notification is-danger is-light" onclick="this.remove()">-->
+<!--            <button class="delete"></button>-->
+<!--            {{ message }}-->
+<!--        </div>-->
+<!--    {% endfor %}-->
+<!--  {% endif %}-->
+<!--{% endwith %}-->
+
+<div class="container">
+
+    {% include 'header/header-left.html' %}
+
+    <div class="container-main">
+        <div class="breadcrumb">
+            <div class="breadcrumb-navigation flex flex-align-center">
+                {% include 'header/icons/icon-breadcrumb.html' %}
+            </div>
+            <div class="breadcrumb-heading flex flex-align-center">
+                <div class="breadcrumb-heading-previous ml-15">
+                    Користувачі
+                </div>
+            </div>
         </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
 
-<div class="container is-fluid py-5">
-    <form method="POST"
-          onsubmit="event.preventDefault(); validateUserForm();"
-          id="userForm"
-          action="{% if not user.id %}{{ url_for('create_user') }}{% else %}{{ url_for('user', user_id=user.id) }}{% endif %}">
-        <div class="tile is-ancestor">
-            <div class="tile is-parent">
-                <article class="tile is-child box">
-                    <p class="subtitle is-3">User</p>
-                    <div class="field">
-                        <label class="label">Username</label>
-                        <div class="control has-icons-left has-icons-right">
-                            <input class="input is-success" type="hidden" id="user_id" name="id" value="{{ user.id }}">
-                            <input class="input is-success" type="hidden" name="tariff_id" value="{{ user.tariff_id }}">
-                            <input class="input is-success" type="hidden" name="recognition_id"
-                                   value="{{ user.recognition_id }}">
-                            <input
-                                    class="input"
-                                    type="text"
-                                    id="username"
-                                    name="username"
-                                    placeholder="Username"
-                                    value="{{ user.username }}"
-                                    oninput="validateField(this)"
-                            />
-                            <span class="icon is-small is-left">
-                                <i class="fas fa-user"></i>
-                            </span>
-                            <span class="icon is-small is-right">
-                                <i class="fas fa-check"></i>
-                            </span>
-                        </div>
+        <div class="content">
+            <form
+                    method="POST"
+                    onsubmit="event.preventDefault(); validateUserForm();"
+                    id="userForm"
+                    class="flex flex-direction-row"
+                    action="{% if not user.id %}{{ url_for('create_user') }}{% else %}{{ url_for('user', user_id=user.id) }}{% endif %}">
+
+                <div class="card">
+                    <div class="p-20">
+                        <span class="card-title">
+                            Користувач
+                        </span>
                     </div>
-                    <div class="field">
-                        <label class="label">Last name</label>
-                        <div class="control">
-                            <input
-                                    class="input"
-                                    type="text"
-                                    id="last_name"
-                                    name="last_name"
-                                    placeholder="Last name"
-                                    value="{{ user.last_name }}"
-                                    oninput="validateField(this)"
-                            />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">First name</label>
-                        <div class="control">
-                            <input
-                                    class="input"
-                                    type="text"
-                                    id="first_name"
-                                    name="first_name"
-                                    value="{{ user.first_name }}"
-                                    placeholder="Text input"
-                                    oninput="validateField(this)"
-                            />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Email</label>
-                        <div class="control has-icons-left has-icons-right">
-                            <input
-                                    class="input"
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    placeholder="Email input"
-                                    value="{{ user.email }}"
-                                    oninput="validateField(this)"
-                            >
-                            <span class="icon is-small is-left">
-                                <i class="fas fa-envelope"></i>
-                            </span>
-                            <span class="icon is-small is-right">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Phone</label>
-                        <div class="control">
-                            <input
-                                    class="input"
-                                    type="text"
-                                    id="phone"
-                                    name="phone"
-                                    placeholder="Phone"
-                                    value="{{ user.phone }}"
-                                    oninput="validateField(this)"
-                            />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Api key</label>
-                        <div class="control is-flex is-flex is-flex-direction-row is-align-items-center">
-                            <div style="width: 100%">
-                                <input
-                                    class="input"
-                                    type="text"
-                                    id="api_key"
-                                    name="api_key"
-                                    value="{{ user.api_key }}"
-                             />
-                            </div>
-                             <div class="tag is-link is-medium ml-2" onclick="generateUrlSafe32()">
-                                 <i class="fa-solid fa-key"></i>
-                             </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Password</label>
-                        <div class="control">
-                            <input
-                                    class="input"
-                                    type="text"
-                                    id="password"
-                                    name="password"
-                                    placeholder="Hidden"
-                                    oninput="validatePassword(this)"
-                            />
-                        </div>
-                    </div>
-                    <div class="field ">
-                        <label class="label">Audience</label>
-                        <div class="control">
-                            <input
-                                    class="input"
-                                    type="text"
-                                    id="audience"
-                                    name="audience"
-                                    value="{{ user.audience }}"
-                                    placeholder="voiptime.net"
-                                    oninput="validateField(this)"
-                            />
-                        </div>
-                    </div>
-                </article>
-            </div>
-            <div class="tile is-parent">
-                <article class="tile is-child box">
-                    <p class="subtitle is-3">License</p>
-                    <div class="field">
-                        <label class="label">Active</label>
-                        <div class="control py-2">
-                            <label class="radio">
-                                <input type="radio" name="active" value="True"
-                                       {% if user.active|byte_to_bool %}checked{% endif %}
-                                       {% if role=='guest' %}disabled{% endif %}
-                                >
-                                <span class="pl-2">Yes</span>
-                            </label>
-                            <label class="radio pl-2">
-                                <input type="radio" name="active" value="False"
-                                       {% if not user.active|byte_to_bool %}checked{% endif %}
-                                       {% if role=='guest' %}disabled{% endif %}
-                                >
-                                <span class="pl-2">No</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Total</label>
-                        <div class="control">
-                            {% if role=='guest' %}
-                            <h4 class="subtitle is-4">{{ user.total }}</h4>
-                            {% endif %}
-                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"
-                                   name="total" placeholder="100"
-                                   value="{{ user.total }}"
-                                   {% if role=='guest' %}disabled{% endif %}
-                            />
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label">Used</label>
-                        <div class="control">
-                            {% if role=='guest' %}
-                            <h4 class="subtitle is-4"><span class="tag is-warning is-light is-medium">{{ user.used }}</span>
-                                / <span class="tag is-danger is-light is-medium">{{ user.total }}</span></h4>
-                            {% endif %}
-                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"
-                                   name="used" placeholder="100"
-                                   value="{{ user.used }}"
-                                   {% if role=='guest' %}disabled{% endif %}
-                            />
-                        </div>
-                    </div>
-                </article>
-            </div>
-            <div class="tile is-parent">
-                <article class="tile is-child box">
-                    <p class="subtitle is-3">Recognition</p>
-                    <div class="tabs is-boxed">
-                        <ul>
-                            <li class="interim-tab-header is-active" onclick="changeRecognitionTab(this, 'interim')">
-                                <a>
-                                    <span class="icon is-small">
-                                        <i class="fas fa-arrows-left-right-to-line" aria-hidden="true"></i>
-                                    </span>
-                                    <span>Configuration</span>
-                                </a>
-                            </li>
-                            <li class="voice-tab-header" onclick="changeRecognitionTab(this, 'voice')">
-                                <a>
-                                    <span class="icon is-small">
-                                        <i class="fas fa-arrows-left-right-to-line" aria-hidden="true"></i>
-                                    </span>
-                                    <span>Voice</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="interim-tab">
-                        <div class="field">
-                            <label class="label">Interval length</label>
-                            <div class="control">
-                                <input
-                                        class="input"
-                                        type="number"
-                                        name="interval_length"
-                                        placeholder="2"
-                                        min="1"
-                                        max="5"
-                                        onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
-                                        value="{{ user.interval_length }}"/>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="label">Interim</label>
-                            <div class="control py-2">
-                                <label class="radio">
-                                    <input type="radio" name="interim" value="True"  {% if
-                                           user.interim|byte_to_bool %}checked{%
-                                           endif %} onchange="changeInterim(false)">
-                                    <span class="pl-2">Yes</span>
-                                </label>
-                                <label class="radio pl-2">
-                                    <input type="radio" name="interim" value="False" {% if
-                                           not user.interim|byte_to_bool
-                                           %}checked{% endif %} onchange="changeInterim(true)">
-                                    <span class="pl-2">No</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="label">Predictions</label>
-                            <div class="control">
-                                <input
-                                        class="input"
-                                        type="number"
-                                        name="predictions"
-                                        id="predictions"
-                                        placeholder="2"
-                                        min="1"
-                                        max="5"
-                                        onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
-                                        value="{{ user.predictions }}"
-                                />
-                            </div>
-                        </div>
-                        <div class="is-flex is-justify-content-end is-align-items-center">
-                            <div class="mr-4" style="width: 60px">
-                                <input
-                                        class="input is-small"
-                                        id="rowIntervalSize"
-                                        type="number"
-                                        min="1"
-                                        max="5"
-                                        onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
-                                >
-                            </div>
-                            <div class="tag is-link is-medium" onclick="addRowToTable()">Add interval</div>
-                        </div>
-                    </div>
-                    <div class="voice-tab is-hidden">
-                        <div class="field">
-                            <label class="label">Sample rate (Hz)</label>
-                            <div class="control">
-                                <input
-                                        class="input"
-                                        type="number"
-                                        name="rate"
-                                        placeholder="8000"
-                                        value="{{ user.rate }}"/>
-                            </div>
-                        </div>
-                        <div class="field">
-                            <label class="label">Encoding</label>
-                            <div class="control">
+                    <div class="card-border"></div>
+                    <div class="p-20">
+                        <input class="input is-success" type="hidden" id="user_id" name="id" value="{{ user.id }}">
+                        <input class="input is-success" type="hidden" name="tariff_id" value="{{ user.tariff_id }}">
+                        <input class="input is-success" type="hidden" name="recognition_id"
+                               value="{{ user.recognition_id }}">
+
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="username">Логін</label>
+                            <div class="w-100">
                                 <input
                                         class="input"
                                         type="text"
-                                        name="encoding"
-                                        placeholder="slin"
-                                        value="{{ user.encoding }}"/>
+                                        id="username"
+                                        name="username"
+                                        placeholder="Логін"
+                                        value="{{ user.username }}"
+                                        {% if id in user and user.id > 0 %}disabled{% endif %}
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="last_name">Прізвище</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        id="last_name"
+                                        name="last_name"
+                                        placeholder="Прізвище"
+                                        value="{{ user.last_name }}"
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="first_name">Ім'я</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        id="first_name"
+                                        name="first_name"
+                                        placeholder="Ім'я"
+                                        value="{{ user.first_name }}"
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="email">Email</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        id="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        value="{{ user.email }}"
+                                        {% if id in user and user.id > 0 %}disabled{% endif %}
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="phone">Телефон</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        id="phone"
+                                        name="phone"
+                                        placeholder="Телефон"
+                                        value="{{ user.phone }}"
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="phone">API ключ</label>
+                            <div class="w-100">
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            id="api_key"
+                                            name="api_key"
+                                            placeholder="Api key"
+                                            value="{{ user.api_key }}"
+                                            oninput="validateField(this)"
+                                    />
+                                </div>
+                                <div class="tag is-link is-medium ml-2" onclick="generateUrlSafe32()">
+                                    <i class="fa-solid fa-key"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="password">Пароль</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        id="password"
+                                        name="password"
+                                        placeholder="Hidden"
+                                        oninput="validatePassword(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="audience">Домен</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="text"
+                                        id="audience"
+                                        name="audience"
+                                        value="{{ user.audience }}"
+                                        placeholder="voiptime.net"
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="card ml-15">
+                    <div class="p-20">
+                        <span class="card-title">
+                            Ліцензія
+                        </span>
+                    </div>
+                    <div class="card-border"></div>
+                    <div class="p-20">
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="active">Активна</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="checkbox"
+                                        id="active"
+                                        name="active"
+                                        value="{{ user.active }}"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center mb-20">
+                            <label class="label label-required_danger" for="total">Загалом</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="number"
+                                        id="total"
+                                        name="total"
+                                        value="{{ user.total }}"
+                                        placeholder="1000"
+                                        oninput="validateField(this)"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="flex flex-direction-row flex-align-center">
+                            <label class="label label-required_danger" for="used">Використано</label>
+                            <div class="w-100">
+                                <input
+                                        class="input"
+                                        type="number"
+                                        id="used"
+                                        name="used"
+                                        value="{{ user.used }}"
+                                        placeholder="1000"
+                                        oninput="validateField(this)"
+                                />
                             </div>
                         </div>
                     </div>
-                    <table class="table is-fullwidth">
-                        <tbody>
-                        </tbody>
-                    </table>
-                </article>
-            </div>
+                    <div class="p-20">
+                        <span class="card-title">
+                            Налаштування
+                        </span>
+                    </div>
+                    <div class="card-border"></div>
+
+                    <div class="flex flex-direction-row tabs">
+                        <div class="interim-tab-header is-active" onclick="changeRecognitionTab(this, 'interim')">
+                            <a>
+                                <span class="icon is-small">
+                                    {% include 'header/icons/icon-configuration.html' %}
+                                </span>
+                                <span>Configuration</span>
+                            </a>
+                        </div>
+                        <div class="voice-tab-header" onclick="changeRecognitionTab(this, 'voice')">
+                            <a>
+                                <span class="icon is-small">
+                                    {% include 'header/icons/icon-voice.html' %}
+                                </span>
+                                <span>Voice</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="p-20">
+                        <div class="interim-tab">
+                            <div class="field">
+                                <label class="label">Interval length</label>
+                                <div class="control">
+                                    <input
+                                            class="input"
+                                            type="number"
+                                            name="interval_length"
+                                            placeholder="2"
+                                            min="1"
+                                            max="5"
+                                            onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
+                                            value="{{ user.interval_length }}"/>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Interim</label>
+                                <div class="control py-2">
+                                    <label class="radio">
+                                        <input type="radio" name="interim" value="True" {% if
+                                               user.interim|byte_to_bool %}checked{%
+                                               endif %} onchange="changeInterim(false)">
+                                        <span class="pl-2">Yes</span>
+                                    </label>
+                                    <label class="radio pl-2">
+                                        <input type="radio" name="interim" value="False" {% if
+                                               not user.interim|byte_to_bool
+                                               %}checked{% endif %} onchange="changeInterim(true)">
+                                        <span class="pl-2">No</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Predictions</label>
+                                <div class="control">
+                                    <input
+                                            class="input"
+                                            type="number"
+                                            name="predictions"
+                                            id="predictions"
+                                            placeholder="2"
+                                            min="1"
+                                            max="5"
+                                            onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
+                                            value="{{ user.predictions }}"
+                                    />
+                                </div>
+                            </div>
+                            <div class="is-flex is-justify-content-end is-align-items-center">
+                                <div class="mr-4" style="width: 60px">
+                                    <input
+                                            class="input is-small"
+                                            id="rowIntervalSize"
+                                            type="number"
+                                            min="1"
+                                            max="5"
+                                            onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
+                                    >
+                                </div>
+                                <div class="tag is-link is-medium" onclick="addRowToTable()">Add interval</div>
+                            </div>
+                            <table class="table is-fullwidth">
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="voice-tab is-hidden">
+                            <div class="field">
+                                <label class="label">Sample rate (Hz)</label>
+                                <div class="control">
+                                    <input
+                                            class="input"
+                                            type="number"
+                                            name="rate"
+                                            placeholder="8000"
+                                            value="{{ user.rate }}"/>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <label class="label">Encoding</label>
+                                <div class="control">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            name="encoding"
+                                            placeholder="slin"
+                                            value="{{ user.encoding }}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
 
-    </form>
-    <div class="field is-grouped is-justify-content-flex-end">
-        <div class="control">
-            <button onclick="saveForm()" class="button is-link">Submit</button>
-        </div>
-        <div class="control">
-            <button class="button is-link is-light" onclick="window.location.href = '/users'">Cancel</button>
+
+<!--        <div class="tile is-ancestor">-->
+            <!--            <div class="tile is-parent">-->
+            <!--                <article class="tile is-child box">-->
+            <!--                    <p class="subtitle is-3">License</p>-->
+            <!--                    <div class="field">-->
+            <!--                        <label class="label">Active</label>-->
+            <!--                        <div class="control py-2">-->
+            <!--                            <label class="radio">-->
+            <!--                                <input type="radio" name="active" value="True"-->
+            <!--                                       {% if user.active|byte_to_bool %}checked{% endif %}-->
+            <!--                                       {% if role=='guest' %}disabled{% endif %}-->
+            <!--                                >-->
+            <!--                                <span class="pl-2">Yes</span>-->
+            <!--                            </label>-->
+            <!--                            <label class="radio pl-2">-->
+            <!--                                <input type="radio" name="active" value="False"-->
+            <!--                                       {% if not user.active|byte_to_bool %}checked{% endif %}-->
+            <!--                                       {% if role=='guest' %}disabled{% endif %}-->
+            <!--                                >-->
+            <!--                                <span class="pl-2">No</span>-->
+            <!--                            </label>-->
+            <!--                        </div>-->
+            <!--                    </div>-->
+            <!--                    <div class="field">-->
+            <!--                        <label class="label">Total</label>-->
+            <!--                        <div class="control">-->
+            <!--                            {% if role=='guest' %}-->
+            <!--                            <h4 class="subtitle is-4">{{ user.total }}</h4>-->
+            <!--                            {% endif %}-->
+            <!--                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"-->
+            <!--                                   name="total" placeholder="100"-->
+            <!--                                   value="{{ user.total }}"-->
+            <!--                                   {% if role=='guest' %}disabled{% endif %}-->
+            <!--                            />-->
+            <!--                        </div>-->
+            <!--                    </div>-->
+            <!--                    <div class="field">-->
+            <!--                        <label class="label">Used</label>-->
+            <!--                        <div class="control">-->
+            <!--                            {% if role=='guest' %}-->
+            <!--                            <h4 class="subtitle is-4"><span-->
+            <!--                                    class="tag is-warning is-light is-medium">{{ user.used }}</span>-->
+            <!--                                / <span class="tag is-danger is-light is-medium">{{ user.total }}</span></h4>-->
+            <!--                            {% endif %}-->
+            <!--                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"-->
+            <!--                                   name="used" placeholder="100"-->
+            <!--                                   value="{{ user.used }}"-->
+            <!--                                   {% if role=='guest' %}disabled{% endif %}-->
+            <!--                            />-->
+            <!--                        </div>-->
+            <!--                    </div>-->
+            <!--                </article>-->
+            <!--            </div>-->
+
+<!--        </div>-->
+
+<!--        </form>-->
+        <div class="field is-grouped is-justify-content-flex-end">
+            <div class="control">
+                <button onclick="saveForm()" class="button is-link">Submit</button>
+            </div>
+            <div class="control">
+                <button class="button is-link is-light" onclick="window.location.href = '/users'">Cancel</button>
+            </div>
         </div>
     </div>
 </div>

@@ -1,102 +1,121 @@
+<!DOCTYPE html>
 <html lang="en">
+
 {% include 'head.html' %}
+
 <body>
-<!--  admin header-->
-{% with role=role %}
-{% include 'header.html' %}
-{% endwith %}
 
-<div class="container is-fluid my-5">
-    <form
-            action="{{ url_for('dashboard') }}"
-            class="is-flex is-flex-direction-row is-align-items-center mb-4"
-    >
-        {% if role == 'admin' %}
-        <div class="control has-icons-left">
-            <div class="select is-info input-texted">
-                <label for="user_filter">User</label>
-                <select id="user_filter" name="user_id" style="width: 300px">
-                    {% for user in users %}
-                    <option
-                            value="{{user.id}}"
-                            {% if filter == user.id %}selected{% endif %}
-                    >
-                        {{ user.username }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <span class="icon is-large is-left">
-            <i class="fas fa-user"></i>
-            </span>
-        </div>
-        <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">
-            <button type="submit" class="button is-link">
-                <span class="icon mr-2">
-                  <i class="fa-solid fa-filter"></i>
-                </span>
-                <span>Filter</span>
-            </button>
-        </div>
-        {% endif %}
-    </form>
+{% include 'header/header-top.html' %}
 
-    <div class="columns">
-        <div class="column">
-            <div class="card">
-                <header class="card-header">
-                    <p class="card-header-title">
-                        <span class="icon"><i class="mdi mdi-finance"></i></span>
-                        Today
-                    </p>
-                    <a href="#" class="card-header-icon">
-                        <span class="icon"><i class="mdi mdi-reload"></i></span>
-                    </a>
-                </header>
-                <div class="card-content">
-                    <div id="say-chart">
-                        <div id="day-chart-content"></div>
-                    </div>
+<div class="container">
+
+     {% include 'header/header-left.html' %}
+
+     <div class="container-main">
+        <div class="breadcrumb">
+            <div class="breadcrumb-navigation flex flex-align-center">
+                {% include 'header/icons/icon-breadcrumb.html' %}
+            </div>
+            <div class="breadcrumb-heading flex flex-align-center">
+                <div class="breadcrumb-heading-previous ml-15">
+                    Дашборд
                 </div>
             </div>
         </div>
-        <div class="column">
-            <div class="card">
-                <header class="card-header">
-                    <p class="card-header-title">
-                        <span class="icon"><i class="mdi mdi-finance"></i></span>
-                        Week
-                    </p>
-                    <a href="#" class="card-header-icon">
-                        <span class="icon"><i class="mdi mdi-reload"></i></span>
-                    </a>
-                </header>
-                <div class="card-content">
-                    <div id="week-chart">
-                        <div id="week-chart-content"></div>
+
+        <div class="content">
+
+<!--            <form-->
+<!--                    action="{{ url_for('dashboard') }}"-->
+<!--                    class="flex flex-direction-row flex-align-center mb-4"-->
+<!--            >-->
+<!--                {% if role == 'admin' %}-->
+<!--                <div class="control has-icons-left">-->
+<!--                    <div class="select is-info input-texted">-->
+<!--                        <label for="user_filter">User</label>-->
+<!--                        <select id="user_filter" name="user_id" style="width: 300px">-->
+<!--                            {% for user in users %}-->
+<!--                            <option-->
+<!--                                    value="{{user.id}}"-->
+<!--                                    {% if filter == user.id %}selected{% endif %}-->
+<!--                            >-->
+<!--                                {{ user.username }}-->
+<!--                            </option>-->
+<!--                            {% endfor %}-->
+<!--                        </select>-->
+<!--                    </div>-->
+<!--                    <span class="icon is-large is-left">-->
+<!--            <i class="fas fa-user"></i>-->
+<!--            </span>-->
+<!--                </div>-->
+<!--                <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">-->
+<!--                    <button type="submit" class="button is-link">-->
+<!--                <span class="icon mr-2">-->
+<!--                  <i class="fa-solid fa-filter"></i>-->
+<!--                </span>-->
+<!--                        <span>Filter</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                {% endif %}-->
+<!--            </form>-->
+
+            <div class="flex flex-direction-row flex-content-between">
+
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <span class="icon"><i class="mdi mdi-finance"></i></span>
+                            Today
+                        </p>
+                        <a href="#" class="card-header-icon">
+                            <span class="icon"><i class="mdi mdi-reload"></i></span>
+                        </a>
+                    </header>
+                    <div class="card-content">
+                        <div id="say-chart">
+                            <div id="day-chart-content"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="column">
-            <div class="card">
-                <header class="card-header">
-                    <p class="card-header-title">
-                        <span class="icon"><i class="mdi mdi-finance"></i></span>
-                        Month
-                    </p>
-                    <a href="#" class="card-header-icon">
-                        <span class="icon"><i class="mdi mdi-reload"></i></span>
-                    </a>
-                </header>
-                <div class="card-content">
-                    <div id="month-chart">
-                        <div id="month-chart-content"></div>
+
+                <div class="card ml-15">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <span class="icon"><i class="mdi mdi-finance"></i></span>
+                            Week
+                        </p>
+                        <a href="#" class="card-header-icon">
+                            <span class="icon"><i class="mdi mdi-reload"></i></span>
+                        </a>
+                    </header>
+                    <div class="card-content">
+                        <div id="week-chart">
+                            <div id="week-chart-content"></div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="card  ml-15">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            <span class="icon"><i class="mdi mdi-finance"></i></span>
+                            Month
+                        </p>
+                        <a href="#" class="card-header-icon">
+                            <span class="icon"><i class="mdi mdi-reload"></i></span>
+                        </a>
+                    </header>
+                    <div class="card-content">
+                        <div id="month-chart">
+                            <div id="month-chart-content"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-    </div>
+
+
 </div>
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

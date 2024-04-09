@@ -7,25 +7,25 @@
                 <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=1) }}" aria-label="Goto page 1">1</a>
             </li>
             {% if page > 3 %}
-                <li>
+                <li class="ml-20">
                     <span class="pagination-ellipsis">&hellip;</span>
                 </li>
             {% endif %}
         {% endif %}
 
         {% for p in range(start_page, end_page + 1) %}
-            <li class="pagination-wrapper-option">
+            <li class="pagination-wrapper-option ml-20">
                 <a class="pagination-wrapper-option-button {% if p == page %}pagination-wrapper-option-button-active{% endif %}" href="{{ url_for(template, page=p) }}" aria-label="Page {{ p }}" aria-current="{% if p == page %}page{% endif %}">{{ p }}</a>
             </li>
         {% endfor %}
 
         {% if page != total_pages and total_pages > 3 and (page + 1) != total_pages and (page + 2) != total_pages %}
             {% if page < total_pages - 2 %}
-                <li>
+                <li class="ml-20">
                     <span class="pagination-ellipsis">&hellip;</span>
                 </li>
             {% endif %}
-            <li class="pagination-wrapper-option">
+            <li class="pagination-wrapper-option ml-20">
                 <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=total_pages) }}" aria-label="Goto page {{ total_pages }}">{{ total_pages }}</a>
             </li>
         {% endif %}

@@ -234,7 +234,7 @@ class Database:
             self.conn.reconnect()
             return self.load_user_by_username(username, email)
 
-    def load_users(self, limit: int, offset: int):
+    def load_users(self, limit: int, offset: int, current_user_id: int):
         try:
             self.cur.execute(
                 f'SELECT u.id as id, '
@@ -253,14 +253,14 @@ class Database:
                 f' t.active as active,'
                 f' t.total as total,'
                 f' t.used as used'
-                f' from user u left join tariff t on t.id=u.tariff_id limit {limit} offset {offset}',
-                (limit, offset, )
+                f' from user u left join tariff t on t.id=u.tariff_id where u.id<>{current_user_id} limit {limit} offset {offset}',
+                (limit, offset, current_user_id, )
             )
             return self.cur.fetchall()
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
-            return self.load_users(limit, offset)
+            return self.load_users(limit, offset, current_user_id)
 
     def load_simple_users(self):
         try:

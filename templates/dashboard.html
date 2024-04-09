@@ -24,38 +24,29 @@
         </div>
 
         <div class="content">
-
+            {% if role == 'admin' %}
             <form
                     action="{{ url_for('dashboard') }}"
-                    class="flex flex-direction-row flex-align-center mb-4"
+                    class="flex flex-direction-row flex-align-end mb-20"
             >
-                {% if role == 'admin' %}
-                <div class="control has-icons-left">
-                    <div class="select is-info input-texted">
-                        <label for="user_filter">User</label>
-                        <select id="user_filter" name="user_id" style="width: 300px">
+                <div class="flex flex-direction-column">
+                    <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
+                    <div class="w-100">
+                        <select name="user_id" id="user_id" style="width: 300px">
+                            <option value="">Оберіть користувача</option>
                             {% for user in users %}
-                            <option
-                                    value="{{user.id}}"
-                                    {% if filter == user.id %}selected{% endif %}
-                            >
-                                {{ user.username }}
-                            </option>
+                            <option value="{{user.id}}">{{ user.username }}</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
 
-                <div class="is-flex is-justify-content-flex-end is-align-items-center ml-4">
-                    <button type="submit" class="button is-link">
-                        <span class="icon mr-2">
-                          <i class="fa-solid fa-filter"></i>
-                        </span>
-                        <span>Filter</span>
-                    </button>
-                </div>
-                {% endif %}
+                <button type="submit" class="button button-primary ml-15">
+                    {% include 'header/icons/icon-filter.html' %}
+                    <span style="margin-left: 10px">Фільтрувати</span>
+                </button>
             </form>
+            {% endif %}
 
             <div class="flex flex-direction-row flex-content-between">
 

@@ -132,7 +132,7 @@ def users():
             limit = request.args.get('limit', 10, type=int)
             offset = (page - 1) * limit
 
-            users = db.load_users(limit, offset)
+            users = db.load_users(limit, offset, current_user["id"])
             users_count = db.count_users()["count"]
             total_pages = 1 if users_count <= limit else (users_count + (limit - 1)) // limit
 

@@ -35,30 +35,78 @@
                         </div>
                     </div>
                     <div class="content-wrapper-head-actions">
-                        <button class="button button-main">
-                            {% include 'header/icons/icon-add.html' %}
-                            <span style="margin-left: 10px">Фільтрувати</span>
-                        </button>
+                        <form id="filterForm" action="{{ url_for('recognitions') }}" class="flex flex-direction-row flex-align-end">
+
+                            {% if role == 'admin' %}
+                                <div class="flex flex-direction-column ml-15">
+                                    <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
+                                    <div class="w-100">
+                                        <select name="user_id" id="user_id" style="width: 300px">
+                                            <option value="">Оберіть користувача</option>
+                                            {% for user in users %}
+                                            <option value="{{user.id}}">{{ user.username }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+
+                            <div class="flex flex-direction-column ml-15">
+                                <label class="label label-required_danger mb-5" for="request_uuid" style="white-space: nowrap">Ідентифікатор запиту</label>
+                                <div class="w-100">
+                                    <input
+                                            style="width: 300px"
+                                            class="input"
+                                            type="text"
+                                            id="request_uuid"
+                                            name="request_uuid"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-direction-column ml-15">
+                                <label class="label label-required_danger mb-5" for="extension">Телефон</label>
+                                <div class="w-100">
+                                    <input
+                                            style="width: 300px"
+                                            class="input"
+                                            type="text"
+                                            id="extension"
+                                            name="extension"
+                                    />
+                                </div>
+                            </div>
+
+
+                            <button class="button button-secondary ml-15" onclick="resetForm()">
+                                {% include 'header/icons/icon-filter-clear.html' %}
+                                <span style="margin-left: 10px">Скинути</span>
+                            </button>
+                            <button type="submit" class="button button-primary ml-15">
+                                {% include 'header/icons/icon-filter.html' %}
+                                <span style="margin-left: 10px">Фільтрувати</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
 
                 {% set headings = [
-                    {'name': 'ID'},
                     {'name': 'Дата створення'},
-                    {'name': 'Ідентифікатор запиту'},
-                    {'name': "Ідентифікатор розпізнавання"},
-                    {'name': 'Остаточний'},
-                    {'name': 'Точність'},
-                    {'name': 'Результат'},
+                    {'name': 'Ідентифікатор запиту', 'iden': True},
+                    {'name': "Ідентифікатор розпізнавання", 'iden': True},
+                    {'name': 'Остаточний', 'small': True},
+                    {'name': 'Точність', 'small': True},
+                    {'name': 'Результат', 'small': True},
                     {'name': 'Номер'},
-                    {'name': 'Дії'},
+                    {'name': 'Дії', 'actions': True},
                 ] %}
 
                 <div class="table-header">
                    {% for heading in headings %}
-                        <div style="{% if heading != 'Дії' %}width: 11%{% else %}width: 60px{% endif %}">
-                            {{ heading.name }}
-                        </div>
+                    <div style="width: {% if heading.actions %}50px{% else %}{% if heading.iden %}20%{% else %}{% if heading.small %}9.5%{% else %}12%{% endif %}{% endif %}{% endif %};">
+                        {{ heading.name }}
+                    </div>
                     {% endfor %}
                 </div>
 
@@ -66,18 +114,17 @@
                     <div class="table-content">
                         {% for recognition in recognitions %}
                         <div class="table-row">
-                            <div style="width: 10%">{{ recognition.id }}</div>
                             <div style="width: 12%">{{ recognition.created_date }}</div>
-                            <div style="width: 12%">{{ recognition.request_uuid }}</div>
-                            <div style="width: 11%">{{ recognition.audio_uuid }}</div>
-                            <div style="width: 11%">{{ recognition.final|byte_to_bool }}</div>
-                            <div style="width: 11%">{{ recognition.confidence }}</div>
-                            <div style="width: 11%">{{ recognition.prediction }}</div>
-                            <div style="width: 11%">{{ recognition.extension }}</div>
+                            <div style="width: 20%">{{ recognition.request_uuid }}</div>
+                            <div style="width: 20%">{{ recognition.audio_uuid }}</div>
+                            <div style="width: 10%">{{ recognition.final|byte_to_bool }}</div>
+                            <div style="width: 10%">{{ recognition.confidence }}</div>
+                            <div style="width: 10%">{{ recognition.prediction }}</div>
+                            <div style="width: 12%">{{ recognition.extension }}</div>
 
                             <div style="width: 50px">
                                 <div class="is-flex-direction-row is-align-content-center">
-                                    <a href="{{ url_for('recognition', recognition_id=recognition.id) }}">
+                                    <a href="{{ url_for('recognition', recognition_id=recognition.id) }}" style="color: #00475A">
                                        {% include 'header/icons/icon-edit.html' %}
                                     </a>
                                 </div>
@@ -93,6 +140,12 @@
         {% endwith %}
     </div>
 </div>
+<script>
+    function resetForm() {
+        document.getElementById('filterForm').reset();
+        document.getElementById('filterForm').submit();
+    }
+</script>
 </body>
 </html>
 

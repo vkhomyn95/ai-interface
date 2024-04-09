@@ -14,9 +14,9 @@
 
     <div class="container-main">
          <div class="breadcrumb">
-            <div class="breadcrumb-navigation flex flex-align-center">
+            <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('recognitions') }}">
                 {% include 'header/icons/icon-breadcrumb.html' %}
-            </div>
+            </a>
             <div class="breadcrumb-heading flex flex-align-center">
                 <div class="breadcrumb-heading-previous ml-15">
                     Розпізнавання
@@ -31,93 +31,95 @@
                         </span>
                 </div>
                 <div class="card-border"></div>
-                <div class="p-20">
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Дата запиту</div>
-                        <div class="w-50">{{ recognition.created_date }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Ідентифікатор запиту</div>
-                        <div class="w-50">{{ recognition.request_uuid }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Ацдіозапис запиту</div>
-                        <div class="w-50">
-                            <audio controls>
-                                <source
-                                        src="{{ url_for('serve_audio', filename=recognition.request_uuid|obj_to_str) }}"
-                                        type="audio/wav"
-                                >
-                                Your browser does not support the audio element.
-                            </audio>
+                <div class="card-body">
+                    <div class="card-body-wrapper pt-20 pb-20">
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Дата запиту</div>
+                            <div class="w-50">{{ recognition.created_date }}</div>
                         </div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Середня точність</div>
-                        <div class="w-50">{{ recognition.confidence }} %</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Результат</div>
-                        <div class="w-50">{{ recognition.prediction }} </div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Номер</div>
-                        <div class="w-50">{{ recognition.extension }}</div>
-                    </div>
-                </div>
-                <div class="p-20">
-                    <span class="card-title">
-                        Користувач
-                    </span>
-                </div>
-                <div class="card-border"></div>
-                <div class="p-20">
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Ідентифікатор</div>
-                        <div class="w-50">{{ recognition.user_id }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Last name</div>
-                        <div class="w-50">{{ recognition.last_name }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">First name</div>
-                        <div class="w-50">{{ recognition.first_name }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Email</div>
-                        <div class="w-50">{{ recognition.email }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Phone</div>
-                        <div class="w-50">{{ recognition.phone }}</div>
-                    </div>
-                    <div class="flex flex-direction-row flex-align-center">
-                        <div class="w-50">Audience</div>
-                        <div class="w-50">{{ recognition.audience }}</div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Ідентифікатор запиту</div>
+                            <div class="w-50">{{ recognition.request_uuid }}</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Аудіозапис запиту</div>
+                            <div class="w-50">
+                                <audio controls>
+                                    <source
+                                            src="{{ url_for('serve_audio', filename=recognition.request_uuid|obj_to_str) }}"
+                                            type="audio/wav"
+                                    >
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Середня точність</div>
+                            <div class="w-50">{{ recognition.confidence }} %</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Результат</div>
+                            <div class="w-50">{{ recognition.prediction }} </div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Номер</div>
+                            <div class="w-50">{{ recognition.extension }}</div>
+                        </div>
+                        {% if role == 'admin' %}
+                        <div class="p-20">
+                            <span class="card-title">
+                                Користувач
+                            </span>
+                        </div>
+                        <div class="card-border mb-20"></div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Ідентифікатор</div>
+                            <div class="w-50">{{ recognition.user_id }}</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Last name</div>
+                            <div class="w-50">{{ recognition.last_name }}</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">First name</div>
+                            <div class="w-50">{{ recognition.first_name }}</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Email</div>
+                            <div class="w-50">{{ recognition.email }}</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Phone</div>
+                            <div class="w-50">{{ recognition.phone }}</div>
+                        </div>
+                        <div class="flex flex-direction-row flex-align-center py-20 mb-20">
+                            <div class="w-50">Audience</div>
+                            <div class="w-50">{{ recognition.audience }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <div class="card">
+            <div class="card ml-15">
                 <div class="p-20">
                     <span class="card-title">
                         Пов'язані розпізнавання
                     </span>
                 </div>
-                <div class="card-border"></div>
-                <div class="p-20">
-                    {% set headings = [
-                        {'name': 'ID'},
-                        {'name': 'Дата'},
-                        {'name': 'Остаточний'},
-                        {'name': 'Аудіо'},
-                        {'name': 'Точність'},
-                        {'name': 'Результат'},
+                <div class="card-body">
+                    <div class="card-body-wrapper pb-20">
+                     {% set headings = [
+                        {'name': 'ID', 'width': '8%'},
+                        {'name': 'Дата', 'width': '25%'},
+                        {'name': 'Остаточний', 'width': '10%'},
+                        {'name': 'Аудіо', 'width': '32%'},
+                        {'name': 'Точність', 'width': '12%'},
+                        {'name': 'Результат', 'width': '12%'},
                     ] %}
 
                     <div class="table-header">
                         {% for heading in headings %}
-                        <div style="width: 16%">
+                        <div style="width: {{heading.width}};">
                             {{ heading.name }}
                         </div>
                         {% endfor %}
@@ -126,12 +128,13 @@
                     <div class="content-wrapper-info" id="table-related">
                         <div class="table-content">
                             {% for r in related_recognitions %}
+                            {% if not r.final|byte_to_bool%}
                             <div class="table-row">
-                                <div style="width: 16%">{{ r.id }}</div>
-                                <div style="width: 16%">{{ r.created_date }}</div>
-                                <div style="width: 16%">{{ r.final|byte_to_bool }}</div>
-                                <div style="width: 16%">
-                                    <audio controls>
+                                <div style="width: 8%">{{ r.id }}</div>
+                                <div style="width: 25%">{{ r.created_date }}</div>
+                                <div style="width: 10%">{{ r.final|byte_to_bool }}</div>
+                                <div style="width: 32%">
+                                    <audio controls style="width: 250px">
                                         <source
                                                 src="{{ url_for('serve_audio', filename=r.audio_uuid|obj_to_str) }}"
                                                 type="audio/wav"
@@ -139,71 +142,17 @@
                                         Your browser does not support the audio element.
                                     </audio>
                                 </div>
-                                <div style="width: 16%">{{ r.confidence }} %</div>
-                                <div style="width: 16%">{{ r.prediction }}</div>
+                                <div style="width: 12%">{{ r.confidence }} %</div>
+                                <div style="width: 12%">{{ r.prediction }}</div>
                             </div>
+                            {%endif%}
                             {% endfor %}
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
         </div>
-
-<!--        <div class="tile is-parent">-->
-<!--            <div class="tile is-child box">-->
-<!--                <p class="subtitle is-4 mb-4">Related</p>-->
-<!--                <table class="table is-fullwidth">-->
-<!--                    <thead>-->
-<!--                    <tr>-->
-<!--                        <th>ID</th>-->
-<!--                        <th>Date</th>-->
-<!--                        <th>Final</th>-->
-<!--                        <th>Audio</th>-->
-<!--                        <th>Confidence</th>-->
-<!--                        <th>Prediction</th>-->
-<!--                    </tr>-->
-<!--                    </thead>-->
-<!--                    <tbody>-->
-<!--                    <tfoot>-->
-<!--                        <tr>-->
-<!--                          <th></th>-->
-<!--                          <th></th>-->
-<!--                          <th></th>-->
-<!--                          <th></th>-->
-<!--                          <th class="has-background-warning-light">{{ related_recognitions|calculate_avg_prediction_confidence}} %</th>-->
-<!--                          <th class="has-background-warning-light">{{ related_recognitions|calculate_prediction_result}}</th>-->
-<!--                        </tr>-->
-<!--                      </tfoot>-->
-<!--                    {% for r in related_recognitions %}-->
-<!--                    <tr class="{% if r.final|byte_to_bool %}has-background-success-light{% else %}has-background-danger-light{% endif %}">-->
-<!--                        <th class="w-space">{{ r.id }}</th>-->
-<!--                        <td class="w-space">{{ r.created_date }}</td>-->
-<!--                        <td class="w-space">{{ r.final|byte_to_bool }}</td>-->
-<!--                        <td class="w-space">-->
-<!--                            <div class="is-flex is-flex-direction-column">-->
-<!--                                <div>-->
-<!--                                    <audio controls>-->
-<!--                                        <source-->
-<!--                                                src="{{ url_for('serve_audio', filename=r.audio_uuid|obj_to_str) }}"-->
-<!--                                                type="audio/wav"-->
-<!--                                        >-->
-<!--                                        Your browser does not support the audio element.-->
-<!--                                    </audio>-->
-<!--                                </div>-->
-<!--&lt;!&ndash;                                <div>&ndash;&gt;-->
-<!--&lt;!&ndash;                                    <span class="tag is-link is-light">{{ r.audio_uuid }}</span>&ndash;&gt;-->
-<!--&lt;!&ndash;                                </div>&ndash;&gt;-->
-<!--                            </div>-->
-
-<!--                        </td>-->
-<!--                        <td class="w-space">{{ r.confidence }} %</td>-->
-<!--                        <td class="w-space">{{ r.prediction }}</td>-->
-<!--                    </tr>-->
-<!--                    {% endfor %}-->
-<!--                    </tbody>-->
-<!--                </table>-->
-<!--            </div>-->
-<!--        </div>-->
     </div>
 </div>
 </body>

@@ -13,17 +13,19 @@
   position: relative;
   display: flex;
   align-items: center;
+  list-style: none;
 }
 
 .pagination-wrapper-option {
   display: inline-block;
+  list-style: none;
 }
 
 .pagination-wrapper-option-button {
   display: flex;
   color: #bdbdbd;
   cursor: pointer;
-  padding: 3px 11px;
+  padding: 6px 11px;
   border-radius: 50px;
   text-decoration: none;
 }

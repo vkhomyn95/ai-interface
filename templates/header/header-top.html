@@ -9,16 +9,12 @@
                  {% include 'header/icons/icon-user.html' %}
             </div>
 
-            <div class="top-panel-user-menu absolute flex flex-direction-column flex-content-around p-20" style="display: none">
-<!--              <div class="top-panel-user-menu-main-li flex">-->
-<!--                  {% include 'header/icons/icon-me.html' %}-->
-<!--                <span class="top-panel-user-menu-li-main-title">Super Admin</span>-->
-<!--              </div>-->
+            <div class="top-panel-user-menu absolute flex flex-direction-column flex-content-around" style="display: none">
 
               <div class="mb-10">
                 <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('profile') }}">
                     {% include 'header/icons/icon-me.html' %}
-                  <span class="top-panel-user-menu-li-title">Профіль</span>
+                  <span class="top-panel-user-menu-li-title">{{ username }}</span>
                 </a>
               </div>
 

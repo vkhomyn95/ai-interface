@@ -148,7 +148,8 @@ def users():
                 page=page,
                 start_page=start_page,
                 end_page=end_page,
-                role=current_user["role_name"]
+                role=current_user["role_name"],
+                username=current_user["first_name"] + " " + current_user["last_name"]
             )
         else:
             return redirect(url_for("user", user_id=current_user["id"]))
@@ -168,7 +169,8 @@ def profile():
             return render_template(
                 'user.html',
                 user=user,
-                role=current_user["role_name"]
+                role=current_user["role_name"],
+                username=current_user["first_name"] + " " + current_user["last_name"]
             )
         else:
             db.update_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
@@ -190,7 +192,8 @@ def user(user_id: int):
             return render_template(
                 'user.html',
                 user=user,
-                role=current_user["role_name"]
+                role=current_user["role_name"],
+                username=current_user["first_name"] + " " + current_user["last_name"]
             )
         else:
             db.update_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
@@ -222,7 +225,8 @@ def create_user():
                         "predictions": 2,
                         "prediction_criteria": ""
                     },
-                    role=current_user["role_name"]
+                    role=current_user["role_name"],
+                    username=current_user["first_name"] + " " + current_user["last_name"]
                 )
             else:
                 redirect(url_for('user', user_id=current_user["id"]))
@@ -240,7 +244,8 @@ def create_user():
                 return render_template(
                     'user.html',
                     user=merged_dict,
-                    role=current_user["role_name"]
+                    role=current_user["role_name"],
+                    username=current_user["first_name"] + " " + current_user["last_name"]
                 )
             else:
                 db.insert_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
@@ -292,7 +297,13 @@ def recognitions():
             start_page=start_page,
             end_page=end_page,
             role=current_user["role_name"],
-            users=db.load_simple_users() if current_user["role_name"] == "admin" else []
+            users=db.load_simple_users() if current_user["role_name"] == "admin" else [],
+            username=current_user["first_name"] + " " + current_user["last_name"],
+            filter={
+                "user_id": user_id,
+                "request_uuid": request_uuid,
+                "extension": extension,
+            }
         )
     else:
         return redirect(url_for('login'))
@@ -344,7 +355,8 @@ def recognition(recognition_id: int):
             'recognition.html',
             recognition=recognition,
             related_recognitions=related_recognitions,
-            role=current_user["role_name"]
+            role=current_user["role_name"],
+            username=current_user["first_name"] + " " + current_user["last_name"]
         )
     else:
         return redirect(url_for('login'))
@@ -391,6 +403,14 @@ def byte_to_bool(value):
 @app.template_filter('obj_to_str')
 def obj_to_str(value):
     return str(value)
+
+
+@app.template_filter('str_to_int')
+def str_to_int(value):
+    if value is not None:
+        return int(value)
+    else:
+        return None
 
 
 @app.template_filter('calculate_avg_prediction_confidence')

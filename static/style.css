@@ -350,6 +350,7 @@ select {
     color: #ffffff;
     padding: 8px 15px;
     margin-left: 10px;
+    cursor: pointer;
 }
 .label {
     width: 35%;
@@ -370,6 +371,7 @@ select {
 .tab {
     margin-top: 12px;
     color: #BDBDBD;
+    cursor: pointer;
 }
 .is-active {
     color: #00475A;
@@ -586,4 +588,7 @@ select {
     border: 1px solid #E0E0E0;
     border-radius: 5px;
     margin-top: 20px;
+}
+.is-danger {
+    border-color: #e2b6b6;
 }

@@ -288,7 +288,7 @@
                             <div class="p-20">
                             <div class="interim-tab">
                                 <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger" for="total">Довжина інтервалу</label>
+                                    <label class="label label-required_danger" for="total">Максимальна тривалість інтервалу</label>
                                     <div class="w-100">
                                         <input
                                                 class="input"
@@ -324,7 +324,7 @@
                                 </div>
 
                                 <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger" for="total">Кількість передбачувань</label>
+                                    <label class="label label-required_danger" for="total">Кількість спроб розпізнавання</label>
                                     <div class="w-100">
                                         <input
                                                 class="input"
@@ -348,11 +348,12 @@
                                                 type="number"
                                                 min="1"
                                                 max="5"
+                                                placeholder="2"
                                                 onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
                                         >
                                     </div>
                                     <div class="interval-button" onclick="addRowToTable()">
-                                        Add interval
+                                        Додати інтервал
                                     </div>
                                 </div>
                                 <div class="table w-100" id="table">
@@ -360,7 +361,7 @@
                             </div>
                             <div class="voice-tab is-hidden">
                                 <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger" for="total">Sample rate (Hz)</label>
+                                    <label class="label label-required_danger" for="total">Частота (Hz)</label>
                                     <div class="w-100">
                                         <input
                                                 class="input"
@@ -373,7 +374,7 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger" for="total">Sample rate (Hz)</label>
+                                    <label class="label label-required_danger" for="total">Формат кодування голосу</label>
                                     <div class="w-100">
                                         <input
                                                 class="input"
@@ -551,6 +552,12 @@
     function addRowToTable() {
         // columnSize+=1;
         let columnSize = +document.getElementById("rowIntervalSize").value;
+        if (columnSize === 0) {
+            document.getElementById("rowIntervalSize").classList.add("is-danger")
+            return;
+        } else {
+            document.getElementById("rowIntervalSize").classList.remove("is-danger")
+        }
         columnSize += 1;
         // Get reference to table body
         var tbody = document.getElementById('table');

@@ -27,9 +27,8 @@
 -- Create table recognition config if does not exists
     CREATE TABLE IF NOT EXISTS `recognition_configuration` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
-        `encoding` varchar(128) DEFAULT NULL,
+        `encoding` varchar(128) DEFAULT 'slin',
         `rate` int(11) NOT NULL,
-        `interim` bit(1) DEFAULT 1,
         `interval_length` int(11) NOT NULL,
         `predictions` int(11) NOT NULL,
         `prediction_criteria` text DEFAULT NULL,
@@ -71,6 +70,9 @@
         `confidence` int(11) NOT NULL,
         `prediction` varchar(64) DEFAULT NULL,
         `extension` varchar(64) DEFAULT NULL,
+        `company_id` int(11) DEFAULT NULL,
+        `campaign_id` int(11) DEFAULT NULL,
+        `application_id` int(11) DEFAULT NULL,
         `user_id` int(11) DEFAULT NULL,
         PRIMARY KEY (`id`),
         KEY `fk_recognition_user` (`user_id`),

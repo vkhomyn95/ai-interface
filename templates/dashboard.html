@@ -35,7 +35,11 @@
                         <select name="user_id" id="user_id" style="width: 300px">
                             <option value="">Оберіть користувача</option>
                             {% for user in users %}
-                            <option value="{{user.id}}">{{ user.username }}</option>
+                            {% if filter == user.id %}
+                                <option value="{{user.id}}" selected>{{ user.username }}</option>
+                            {% else %}
+                                <option value="{{user.id}}">{{ user.username }}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>

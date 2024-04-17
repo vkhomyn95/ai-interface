@@ -7,16 +7,13 @@
 
 {% include 'header/header-top.html' %}
 
-<!--{% with messages = get_flashed_messages() %}-->
-<!--  {% if messages %}-->
-<!--    {% for message in messages %}-->
-<!--        <div class="notification is-danger is-light" onclick="this.remove()">-->
-<!--            <button class="delete"></button>-->
-<!--            {{ message }}-->
-<!--        </div>-->
-<!--    {% endfor %}-->
-<!--  {% endif %}-->
-<!--{% endwith %}-->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+    {% include 'toast.html' %}
+{% endfor %}
+{% endif %}
+{% endwith %}
 
 <div class="container">
 
@@ -24,12 +21,22 @@
 
     <div class="container-main">
         <div class="breadcrumb">
-            <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('users') }}">
-                {% include 'header/icons/icon-breadcrumb.html' %}
-            </a>
+            {% if is_profile %}
+                <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('dashboard') }}">
+                 {% include 'header/icons/icon-breadcrumb.html' %}
+                </a>
+            {% else %}
+                <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('users') }}">
+                    {% include 'header/icons/icon-breadcrumb.html' %}
+                </a>
+            {% endif %}
             <div class="breadcrumb-heading flex flex-align-center">
                 <div class="breadcrumb-heading-previous ml-15">
-                    Користувачі
+                    {% if is_profile %}
+                        Дашборд
+                    {% else %}
+                        Користувачі
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -37,7 +44,6 @@
         <div class="content">
             <form
                     method="POST"
-                    onsubmit="event.preventDefault(); validateUserForm();"
                     id="userForm"
                     class="mange-wrapper"
                     action="{% if not user.id %}{{ url_for('create_user') }}{% else %}{{ url_for('user', user_id=user.id) }}{% endif %}">
@@ -166,6 +172,7 @@
                                             name="password"
                                             placeholder="Приховано"
                                             oninput="validatePassword(this)"
+                                            autocomplete="off"
                                     />
                                 </div>
                             </div>
@@ -228,7 +235,7 @@
                                                 name="total"
                                                 value="{{ user.total }}"
                                                 placeholder="1000"
-                                                oninput="validateField(this)"
+                                                oninput="validateFieldLength(this, 1)"
                                         />
                                         {% else %}
                                         <div>
@@ -249,11 +256,11 @@
                                                 name="used"
                                                 value="{{ user.used }}"
                                                 placeholder="1000"
-                                                oninput="validateField(this)"
+                                                oninput="validateFieldLength(this, 1)"
                                         />
                                         {% else %}
                                         <div>
-                                            {{ user.total }}
+                                            {{ user.used }}
                                         </div>
                                         {% endif %}
                                     </div>
@@ -301,25 +308,6 @@
                                                 placeholder="2"
                                                 onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
                                         />
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger">Автовизначення проміжків</label>
-                                    <div class="w-100">
-                                        <span id="toggleInterim">
-                                            {% if user.interim|byte_to_bool %}
-                                                <span onclick="toggleUserInterim(true)">
-                                                    {% include 'header/icons/icon-square-checked.html' %}
-                                                    <input type="hidden" id="interimChecked" name="interim" value="True">
-                                                </span>
-                                            {% else %}
-                                                <span onclick="toggleUserInterim(false)">
-                                                    {% include 'header/icons/icon-square.html' %}
-                                                    <input type="hidden" id="interimNotChecked" name="interim" value="False">
-                                                </span>
-                                            {% endif %}
-                                        </span>
                                     </div>
                                 </div>
 
@@ -378,9 +366,9 @@
                                     <div class="w-100">
                                         <input
                                                 class="input"
-                                                type="number"
+                                                type="text"
                                                 id="encoding"
-                                                name="rate"
+                                                name="encoding"
                                                 value="{{ user.encoding }}"
                                                 placeholder="slin"
                                         />
@@ -483,8 +471,9 @@
     function validatePassword(event) {
         const userId = +document.getElementById("user_id").value;
         if (userId === 0 || event.value.length >= 1) {
-            validateField(event)
+            return validateField(event)
         }
+        return true
     }
 
     function validateUserForm() {
@@ -494,21 +483,36 @@
 
         let username = document.getElementById("username");
         isValid = validateField(username);
+        if (!isValid)
+            return;
         let firstName = document.getElementById("first_name");
         isValid = validateField(firstName);
+        if (!isValid)
+            return;
         let lastName = document.getElementById("last_name");
         isValid = validateField(lastName);
+        if (!isValid)
+            return;
         let email = document.getElementById("email");
         isValid = validateField(email);
+        if (!isValid)
+            return;
         let phone = document.getElementById("phone");
         isValid = validateField(phone);
+        if (!isValid)
+            return;
         let apiKey = document.getElementById("api_key");
         isValid = validateField(apiKey);
+        if (!isValid)
+            return;
         let password = document.getElementById("password");
-        isValid = validateField(password);
+        if (!isValid)
+            return;
+        isValid = validatePassword(password);
+        if (!isValid)
+            return;
         let audience = document.getElementById("audience");
         isValid = validateField(audience);
-
         if (isValid)
             document.getElementById("userForm").submit();
     }
@@ -517,6 +521,28 @@
         /**
          * User field validation */
         if (field.value.length >= 5) {
+            if (field.classList.contains("is-danger")) {
+                field.classList.replace("is-danger", "is-success")
+                return true;
+            } else {
+                field.classList.add("is-success");
+                return true;
+            }
+        } else {
+            if (field.classList.contains("is-success")) {
+                field.classList.replace("is-success", "is-danger")
+                return false;
+            } else {
+                field.classList.add("is-danger");
+                return false;
+            }
+        }
+    }
+
+    function validateFieldLength(field, l) {
+        /**
+         * User field validation */
+        if (field.value.length >= l) {
             if (field.classList.contains("is-danger")) {
                 field.classList.replace("is-danger", "is-success")
                 return true;
@@ -668,6 +694,7 @@
         actionRemove.setAttribute("height", "36");
         actionRemove.setAttribute("viewBox", "0 0 36 36");
         actionRemove.setAttribute("fill", "none");
+        actionRemove.classList.add("pointer")
         path1.setAttribute("d", "M12.5 14.5447H23.5M13.1875 14.5447L13.875 23.2113C13.875 23.5944 14.0199 23.9618 14.2777 24.2327C14.5356 24.5036 14.8853 24.6558 15.25 24.6558H20.75C21.1147 24.6558 21.4644 24.5036 21.7223 24.2327C21.9801 23.9618 22.125 23.5944 22.125 23.2113L22.8125 14.5447M15.9375 14.5447V12.378C15.9375 12.1864 16.0099 12.0027 16.1389 11.8673C16.2678 11.7319 16.4427 11.6558 16.625 11.6558H19.375C19.5573 11.6558 19.7322 11.7319 19.8611 11.8673C19.9901 12.0027 20.0625 12.1864 20.0625 12.378V14.5447M16.625 18.1558L19.375 21.0447M19.375 18.1558L16.625 21.0447");
         path1.setAttribute("stroke", "#00475A");
         path1.setAttribute("stroke-width", "1.33333");
@@ -785,7 +812,7 @@
                                     <span class="tag is-danger mb-1"></span>
                                 </div>
                                 <div class="is-flex is-flex-direction-row is-align-items-center">
-                                    <svg  onclick="removeInterim('${resultKey}')" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <svg  onclick="removeInterim('${resultKey}')" class="pointer" width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <g clip-path="url(#clip0_1_1127)">
                                         <path d="M12.5 14.5447H23.5M13.1875 14.5447L13.875 23.2113C13.875 23.5944 14.0199 23.9618 14.2777 24.2327C14.5356 24.5036 14.8853 24.6558 15.25 24.6558H20.75C21.1147 24.6558 21.4644 24.5036 21.7223 24.2327C21.9801 23.9618 22.125 23.5944 22.125 23.2113L22.8125 14.5447M15.9375 14.5447V12.378C15.9375 12.1864 16.0099 12.0027 16.1389 11.8673C16.2678 11.7319 16.4427 11.6558 16.625 11.6558H19.375C19.5573 11.6558 19.7322 11.7319 19.8611 11.8673C19.9901 12.0027 20.0625 12.1864 20.0625 12.378V14.5447M16.625 18.1558L19.375 21.0447M19.375 18.1558L16.625 21.0447" stroke="#00475A" stroke-width="1.33333" stroke-linecap="round" stroke-linejoin="round"/>
                                         </g>
@@ -814,7 +841,8 @@
     parseRows(criteria)
 
     function saveForm() {
-        document.getElementById("userForm").submit();
+        event.preventDefault();
+        validateUserForm();
     }
     function toggleUserActive(newValue) {
         const activeSpan = document.getElementById('toggleActive');
@@ -830,25 +858,6 @@
                     {% include 'header/icons/icon-square-checked.html' %}
                     <input type="hidden" id="activeChecked" name="active" value="True">
                 </span>`;
-        }
-    }
-
-    function toggleUserInterim(newValue) {
-        const activeSpan = document.getElementById('toggleInterim');
-        if (newValue) {
-            activeSpan.innerHTML = `
-                <span onclick="toggleUserInterim(false)">
-                    {% include 'header/icons/icon-square.html' %}
-                    <input type="hidden" id="interimNotChecked" name="active" value="False">
-                </span>`;
-            document.getElementById("predictions").disabled = true
-        } else {
-            activeSpan.innerHTML = `
-                <span onclick="toggleUserInterim(true)">
-                    {% include 'header/icons/icon-square-checked.html' %}
-                    <input type="hidden" id="interimChecked" name="active" value="True">
-                </span>`;
-            document.getElementById("predictions").disabled = false
         }
     }
 </script>

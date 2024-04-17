@@ -32,7 +32,6 @@ if initial is None:
         {
             "encoding": "slin",
             "rate": 8000,
-            "interim": False,
             "interval_length": 2,
             "predictions": 2,
             "prediction_criteria": ""
@@ -111,7 +110,8 @@ def dashboard():
             users=db.load_simple_users() if is_admin() else [],
             dashboard={key: int(value) if value is not None else 0 for key, value in board.items()},
             role=user["role_name"],
-            filter=session["dashboard_filter"]
+            filter=session["dashboard_filter"],
+            username=user["first_name"] + " " + user["last_name"]
         )
     else:
         return redirect(url_for("login"))
@@ -170,10 +170,11 @@ def profile():
                 'user.html',
                 user=user,
                 role=current_user["role_name"],
-                username=current_user["first_name"] + " " + current_user["last_name"]
+                username=current_user["first_name"] + " " + current_user["last_name"],
+                is_profile=True
             )
         else:
-            db.update_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
+            db.update_user(to_tariff_obj(request, user), to_recognition_obj(request), to_user_obj(request, user))
 
             return redirect(url_for('users'))
     else:
@@ -196,7 +197,7 @@ def user(user_id: int):
                 username=current_user["first_name"] + " " + current_user["last_name"]
             )
         else:
-            db.update_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
+            db.update_user(to_tariff_obj(request, user), to_recognition_obj(request), to_user_obj(request, user))
 
             return redirect(url_for('users'))
     else:
@@ -220,7 +221,6 @@ def create_user():
                         "used": 0,
                         "encoding": "slin",
                         "rate": 8000,
-                        "interim": True,
                         "interval_length": 2,
                         "predictions": 2,
                         "prediction_criteria": ""
@@ -238,7 +238,7 @@ def create_user():
                     request.form["username"], request.form["email"])
                 )
                 merged_dict = {}
-                merged_dict.update(to_tariff_obj(request))
+                merged_dict.update(to_tariff_obj(request, user))
                 merged_dict.update(to_recognition_obj(request))
                 merged_dict.update(to_user_obj(request, user))
                 return render_template(
@@ -248,7 +248,7 @@ def create_user():
                     username=current_user["first_name"] + " " + current_user["last_name"]
                 )
             else:
-                db.insert_user(to_tariff_obj(request), to_recognition_obj(request), to_user_obj(request, user))
+                db.insert_user(to_tariff_obj(request, user), to_recognition_obj(request), to_user_obj(request, user))
 
             return redirect(url_for('users'))
     else:
@@ -429,11 +429,11 @@ def calculate_prediction_result(arr):
     return "Not predicted"
 
 
-def to_tariff_obj(request):
+def to_tariff_obj(request, user):
     return {
         "active": byte_to_bool(request.form.get("active")),
-        "total": request.form.get("total"),
-        "used": request.form.get("used")
+        "total": request.form.get("total") if user["role_name"] == "admin" else user["total"],
+        "used": request.form.get("used") if user["role_name"] == "admin" else user["used"]
     }
 
 
@@ -441,7 +441,6 @@ def to_recognition_obj(request):
     return {
         "encoding": request.form.get("encoding"),
         "rate": request.form.get("rate"),
-        "interim": byte_to_bool(request.form.get("interim")),
         "interval_length": request.form.get("interval_length"),
         "predictions": request.form.get("predictions"),
         "prediction_criteria": parse_criteria(request.form)
@@ -460,7 +459,7 @@ def to_user_obj(request, user):
 
     return {
         "id": request.form.get("id"),
-        "username": request.form.get("username"),
+        "username": request.form.get("username") if not user else user["username"],
         "password": password,
         "first_name": request.form.get("first_name"),
         "last_name": request.form.get("last_name"),

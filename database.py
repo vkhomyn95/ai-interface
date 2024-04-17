@@ -98,12 +98,11 @@ class Database:
         tariff_id = self.cur.lastrowid
 
         self.cur.execute(
-            f'INSERT into recognition_configuration (encoding, rate, interim, interval_length, predictions, prediction_criteria) '
+            f'INSERT into recognition_configuration (encoding, rate, interval_length, predictions, prediction_criteria) '
             f'VALUES (?, ?, ?, ?, ?, ?)',
             (
                 recognition["encoding"],
                 recognition["rate"],
-                recognition["interim"],
                 recognition["interval_length"],
                 recognition["predictions"],
                 recognition["prediction_criteria"]
@@ -172,7 +171,6 @@ class Database:
             SET
                 encoding = ?,
                 rate = ?,
-                interim = ?,
                 interval_length = ?,
                 predictions = ?,
                 prediction_criteria = ?
@@ -206,7 +204,6 @@ class Database:
         self.cur.execute(recognition_query, (
             recognition["encoding"],
             recognition["rate"],
-            recognition["interim"],
             recognition["interval_length"],
             recognition["predictions"],
             recognition["prediction_criteria"],
@@ -295,7 +292,6 @@ class Database:
                 f' t.used as used,'
                 f' rc.encoding as encoding,'
                 f' rc.rate as rate,'
-                f' rc.interim as interim,'
                 f' rc.interval_length as interval_length,'
                 f' rc.predictions as predictions,'
                 f' rc.prediction_criteria as prediction_criteria'

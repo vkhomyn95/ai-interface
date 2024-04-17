@@ -592,3 +592,6 @@ select {
 .is-danger {
     border-color: #e2b6b6;
 }
+.pointer {
+    cursor: pointer;
+}

@@ -147,8 +147,10 @@
     function resetForm() {
         event.preventDefault();
         document.getElementById('request_uuid').value = "";
-        document.getElementById('user_id').value = "";
         document.getElementById('extension').value = "";
+        const uId = document.getElementById('user_id');
+        if (uId !== null)
+            uId.value = "";
         document.getElementById('filterForm').submit();
     }
 </script>

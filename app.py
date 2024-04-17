@@ -432,8 +432,8 @@ def calculate_prediction_result(arr):
 def to_tariff_obj(request, user):
     return {
         "active": byte_to_bool(request.form.get("active")),
-        "total": request.form.get("total") if user["role_name"] == "admin" else user["total"],
-        "used": request.form.get("used") if user["role_name"] == "admin" else user["used"]
+        "total": request.form.get("total") if get_user()["role_name"] == "admin" else user["total"],
+        "used": request.form.get("used") if get_user()["role_name"] == "admin" else user["used"]
     }
 
 

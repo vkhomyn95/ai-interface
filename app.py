@@ -466,6 +466,7 @@ def to_user_obj(request, user):
         "email": request.form.get("email"),
         "phone": request.form.get("phone"),
         "api_key": request.form.get("api_key"),
+        "voiptime_api_key": request.form.get("voiptime_api_key"),
         "audience": request.form.get("audience"),
         "tariff_id": request.form.get("tariff_id"),
         "recognition_id": request.form.get("recognition_id"),

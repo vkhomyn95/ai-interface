@@ -99,7 +99,7 @@ class Database:
 
         self.cur.execute(
             f'INSERT into recognition_configuration (encoding, rate, interval_length, predictions, prediction_criteria) '
-            f'VALUES (?, ?, ?, ?, ?, ?)',
+            f'VALUES (?, ?, ?, ?, ?)',
             (
                 recognition["encoding"],
                 recognition["rate"],
@@ -112,8 +112,8 @@ class Database:
         recognition_id = self.cur.lastrowid
 
         self.cur.execute(
-            f'INSERT into user (created_date, updated_date, username, password, first_name, last_name, email, phone, api_key, audience, tariff_id, recognition_id, role_id) '
-            f'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            f'INSERT into user (created_date, updated_date, username, password, first_name, last_name, email, phone, api_key, voiptime_api_key, audience, tariff_id, recognition_id, role_id) '
+            f'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (
                 current_date,
                 current_date,
@@ -124,6 +124,7 @@ class Database:
                 user["email"],
                 user["phone"],
                 user["api_key"],
+                user["voiptime_api_key"],
                 user["audience"],
                 tariff_id,
                 recognition_id,
@@ -148,6 +149,7 @@ class Database:
                 username = ?,
                 password = ?,
                 api_key = ?,
+                voiptime_api_key = ?,
                 email = ?,
                 phone = ?,
                 audience = ?,
@@ -185,6 +187,7 @@ class Database:
             user["username"],
             user["password"],
             user["api_key"],
+            user["voiptime_api_key"],
             user["email"],
             user["phone"],
             user["audience"],
@@ -280,6 +283,7 @@ class Database:
                 f' u.username as username,'
                 f' u.password as password,'
                 f' u.api_key as api_key,'
+                f' u.voiptime_api_key as voiptime_api_key,'
                 f' u.email as email,'
                 f' u.phone as phone,'
                 f' u.audience as audience,'
@@ -364,6 +368,10 @@ class Database:
                     query += f' where extension="{extension}"'
                 else:
                     query += f' and extension="{extension}"'
+            if not extension and not request_uuid and not user_id:
+                query += f' where final=true'
+            else:
+                query += f' and final=true'
             query += f' order by id desc limit {limit} offset {offset}'
             self.cur.execute(
                 query,
@@ -377,13 +385,12 @@ class Database:
 
     def load_recognitions_related_to_user(self, user_id: int, request_uuid: str, extension: str, limit: int, offset: int):
         try:
-            query = f'SELECT * from recognition where user_id={user_id}'
+            query = f'SELECT * from recognition where user_id={user_id} and final=true'
             if request_uuid:
                 query += f' and request_uuid="{request_uuid}"'
             if extension:
                 query += f' and extension={extension}'
             query += f' order by id desc limit {limit} offset {offset}'
-            print(query)
             self.cur.execute(
                 query,
                 (user_id, limit, offset, )
@@ -392,7 +399,7 @@ class Database:
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
-            return self.load_recognitions_related_to_user(limit, request_uuid, extension, offset)
+            return self.load_recognitions_related_to_user(limit, request_uuid, extension, limit, offset)
 
     def load_related_recognitions(self, request_uuid):
         try:

@@ -46,6 +46,7 @@
         `phone` varchar(128) DEFAULT NULL,
         `username` varchar(128) DEFAULT NULL,
         `api_key` varchar(255) DEFAULT NULL,
+        `voiptime_api_key` varchar(255) DEFAULT NULL,
         `password` varchar(255) DEFAULT NULL,
         `audience` varchar(255) DEFAULT NULL,
         `tariff_id` int(11) DEFAULT NULL,

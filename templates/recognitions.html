@@ -40,7 +40,7 @@
                                 <div class="flex flex-direction-column ml-15">
                                     <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
                                     <div class="w-100">
-                                        <select name="user_id" id="user_id" style="width: 300px">
+                                        <select name="user_id" id="user_id" style="width: 250px">
                                             <option value="">Оберіть користувача</option>
                                             {% for user in users %}
                                             <option value="{{user.id}}" {% if filter.user_id and filter.user_id|str_to_int == user.id %}selected{% endif %}>{{ user.username }}</option>
@@ -50,12 +50,26 @@
                                 </div>
                             {% endif %}
 
+                            <div class="flex flex-direction-column ml-15">
+                                <label class="label label-required_danger mb-5" for="campaign_id" style="white-space: nowrap">Телемаркетинг</label>
+                                <div class="w-100">
+                                    <input
+                                            style="width: 250px"
+                                            class="input"
+                                            type="number"
+                                            id="campaign_id"
+                                            name="campaign_id"
+                                            value="{{ filter.campaign_id }}"
+                                            autocomplete="off"
+                                    />
+                                </div>
+                            </div>
 
                             <div class="flex flex-direction-column ml-15">
                                 <label class="label label-required_danger mb-5" for="request_uuid" style="white-space: nowrap">Ідентифікатор запиту</label>
                                 <div class="w-100">
                                     <input
-                                            style="width: 300px"
+                                            style="width: 250px"
                                             class="input"
                                             type="text"
                                             id="request_uuid"
@@ -70,7 +84,7 @@
                                 <label class="label label-required_danger mb-5" for="extension">Телефон</label>
                                 <div class="w-100">
                                     <input
-                                            style="width: 300px"
+                                            style="width: 250px"
                                             class="input"
                                             type="text"
                                             id="extension"
@@ -148,6 +162,7 @@
         event.preventDefault();
         document.getElementById('request_uuid').value = "";
         document.getElementById('extension').value = "";
+        document.getElementById('campaign_id').value = "";
         const uId = document.getElementById('user_id');
         if (uId !== null)
             uId.value = "";

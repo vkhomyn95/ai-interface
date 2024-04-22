@@ -353,25 +353,17 @@ class Database:
             self.conn.reconnect()
             return self.load_user_by_id(api_key)
 
-    def load_recognitions(self, user_id: int, request_uuid: str, extension: str, limit: int, offset: int):
+    def load_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str, limit: int, offset: int):
         try:
-            query = f'SELECT * from recognition'
+            query = f'SELECT * from recognition where final=true'
             if user_id:
-                query += f' where user_id={user_id}'
+                query += f' and user_id={user_id} '
+            if campaign_id:
+                query += f' and campaign_id={campaign_id}'
             if request_uuid:
-                if not user_id:
-                    query += f' where request_uuid="{request_uuid}"'
-                else:
-                    query += f' and request_uuid="{request_uuid}"'
+                query += f' and request_uuid="{request_uuid}"'
             if extension:
-                if not user_id and not request_uuid:
-                    query += f' where extension="{extension}"'
-                else:
-                    query += f' and extension="{extension}"'
-            if not extension and not request_uuid and not user_id:
-                query += f' where final=true'
-            else:
-                query += f' and final=true'
+                query += f' and extension="{extension}"'
             query += f' order by id desc limit {limit} offset {offset}'
             self.cur.execute(
                 query,
@@ -381,11 +373,13 @@ class Database:
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
-            return self.load_recognitions(user_id, request_uuid, extension, limit, offset)
+            return self.load_recognitions(user_id, campaign_id, request_uuid, extension, limit, offset)
 
-    def load_recognitions_related_to_user(self, user_id: int, request_uuid: str, extension: str, limit: int, offset: int):
+    def load_recognitions_related_to_user(self, user_id: int, campaign_id: int, request_uuid: str, extension: str, limit: int, offset: int):
         try:
             query = f'SELECT * from recognition where user_id={user_id} and final=true'
+            if campaign_id:
+                query += f' and campaign_id={campaign_id}'
             if request_uuid:
                 query += f' and request_uuid="{request_uuid}"'
             if extension:
@@ -399,7 +393,7 @@ class Database:
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
-            return self.load_recognitions_related_to_user(limit, request_uuid, extension, limit, offset)
+            return self.load_recognitions_related_to_user(user_id, campaign_id, request_uuid, extension, limit, offset)
 
     def load_related_recognitions(self, request_uuid):
         try:
@@ -438,18 +432,23 @@ class Database:
             self.conn.reconnect()
             return self.load_recognition_by_id_related_to_user(recognition_id, user_id)
 
-    def count_recognitions(self, user_id: int, request_uuid: str, extension: str,):
+    def count_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str,):
         try:
             query = f'SELECT count(*) as count from recognition'
             if user_id:
                 query += f' where user_id={user_id}'
-            if request_uuid:
+            if campaign_id:
                 if not user_id:
+                    query += f' where campaign_id={campaign_id}'
+                else:
+                    query += f' and campaign_id={campaign_id}'
+            if request_uuid:
+                if not user_id and not campaign_id:
                     query += f' where request_uuid="{request_uuid}"'
                 else:
                     query += f' and request_uuid="{request_uuid}"'
             if extension:
-                if not user_id and not request_uuid:
+                if not user_id and not campaign_id and not request_uuid:
                     query += f' where extension="{extension}"'
                 else:
                     query += f' and extension="{extension}"'
@@ -458,7 +457,7 @@ class Database:
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
-            return self.count_recognitions(user_id, request_uuid, extension)
+            return self.count_recognitions(user_id, campaign_id, request_uuid, extension)
 
     def increment_tariff(self, tariff_id, audio_size):
         try:

@@ -270,17 +270,18 @@ def recognitions():
         limit = request.args.get('limit', 10, type=int)
         offset = (page - 1) * limit
 
+        campaign_id = request.args.get('campaign_id', '', type=str).strip()
         request_uuid = request.args.get('request_uuid', '', type=str).strip()
         extension = request.args.get('extension', '', type=str).strip()
 
         if current_user["role_name"] == "admin":
             user_id = request.args.get('user_id', '', type=str).strip()
-            recognitions = db.load_recognitions(user_id, request_uuid, extension, limit, offset)
+            recognitions = db.load_recognitions(user_id, campaign_id, request_uuid, extension, limit, offset)
         else:
             user_id = current_user["id"]
-            recognitions = db.load_recognitions_related_to_user(user_id, request_uuid, extension, limit, offset)
+            recognitions = db.load_recognitions_related_to_user(user_id, campaign_id, request_uuid, extension, limit, offset)
 
-        recognitions_count = db.count_recognitions(user_id, request_uuid, extension)["count"]
+        recognitions_count = db.count_recognitions(user_id, campaign_id, request_uuid, extension)["count"]
 
         total_pages = 1 if recognitions_count <= limit else (recognitions_count + (limit - 1)) // limit
 
@@ -301,6 +302,7 @@ def recognitions():
             username=current_user["first_name"] + " " + current_user["last_name"],
             filter={
                 "user_id": user_id,
+                "campaign_id": campaign_id,
                 "request_uuid": request_uuid,
                 "extension": extension,
             }

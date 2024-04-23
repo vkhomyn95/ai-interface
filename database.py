@@ -434,24 +434,15 @@ class Database:
 
     def count_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str,):
         try:
-            query = f'SELECT count(*) as count from recognition'
+            query = f'SELECT count(*) as count from recognition where final=true'
             if user_id:
-                query += f' where user_id={user_id}'
+                query += f' and user_id={user_id}'
             if campaign_id:
-                if not user_id:
-                    query += f' where campaign_id={campaign_id}'
-                else:
-                    query += f' and campaign_id={campaign_id}'
+                query += f' and campaign_id={campaign_id}'
             if request_uuid:
-                if not user_id and not campaign_id:
-                    query += f' where request_uuid="{request_uuid}"'
-                else:
-                    query += f' and request_uuid="{request_uuid}"'
+                query += f' and request_uuid="{request_uuid}"'
             if extension:
-                if not user_id and not campaign_id and not request_uuid:
-                    query += f' where extension="{extension}"'
-                else:
-                    query += f' and extension="{extension}"'
+                query += f' and extension="{extension}"'
             self.cur.execute(query, ())
             return self.cur.fetchone()
         except mariadb.InterfaceError as e:

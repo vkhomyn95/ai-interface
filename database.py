@@ -2,9 +2,11 @@ import datetime
 import logging
 import re
 import sys
+from dataclasses import dataclass
 
 import mariadb
 from mariadb import OperationalError, ProgrammingError
+from werkzeug.security import generate_password_hash
 
 
 class Database:
@@ -56,6 +58,36 @@ class Database:
 
             # Run migrations
             self.exec_migrations("db.sql")
+
+            initial = self.load_user_by_username("admin", None)
+
+            if initial is None:
+                self.insert_user(
+                    {
+                        "active": True,
+                        "limit": 1000,
+                        "used": 0
+                    },
+                    {
+                        "encoding": "slin",
+                        "rate": 8000,
+                        "interval_length": 2,
+                        "predictions": 2,
+                        "prediction_criteria": ""
+                    },
+                    {
+                        "username": "admin",
+                        "password": generate_password_hash("password"),
+                        "email": "amd@voiptime.net",
+                        "first_name": "Administrator",
+                        "last_name": "Administrator",
+                        "phone": "",
+                        "api_key": "",
+                        "audience": "",
+                        "uuid": "",
+                        "role_id": 1,
+                    }
+                )
 
         else:
             raise Exception("{}: Cannot construct, an instance is already running.".format(__file__))
@@ -112,7 +144,7 @@ class Database:
         recognition_id = self.cur.lastrowid
 
         self.cur.execute(
-            f'INSERT into user (created_date, updated_date, username, password, first_name, last_name, email, phone, api_key, voiptime_api_key, audience, tariff_id, recognition_id, role_id) '
+            f'INSERT into user (created_date, updated_date, username, password, first_name, last_name, email, phone, api_key, audience, uuid, tariff_id, recognition_id, role_id) '
             f'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             (
                 current_date,
@@ -124,8 +156,8 @@ class Database:
                 user["email"],
                 user["phone"],
                 user["api_key"],
-                user["voiptime_api_key"],
                 user["audience"],
+                user["uuid"],
                 tariff_id,
                 recognition_id,
                 user["role_id"]
@@ -149,7 +181,6 @@ class Database:
                 username = ?,
                 password = ?,
                 api_key = ?,
-                voiptime_api_key = ?,
                 email = ?,
                 phone = ?,
                 audience = ?,
@@ -187,7 +218,6 @@ class Database:
             user["username"],
             user["password"],
             user["api_key"],
-            user["voiptime_api_key"],
             user["email"],
             user["phone"],
             user["audience"],
@@ -226,7 +256,7 @@ class Database:
                 f' u.password as password,'
                 f' u.role_id as role_id,'
                 f' r.name as role_name from user u left join user_role r on r.id=u.role_id where u.username=? or u.email=?',
-                (username, email, )
+                (username, email,)
             )
             return self.cur.fetchone()
         except mariadb.InterfaceError as e:
@@ -247,6 +277,7 @@ class Database:
                 f' u.email as email,'
                 f' u.phone as phone,'
                 f' u.audience as audience,'
+                f' u.uuid as uuid,'
                 f' u.role_id as role_id,'
                 f' u.recognition_id as recognition_id,'
                 f' t.id as tariff_id,'
@@ -254,7 +285,7 @@ class Database:
                 f' t.total as total,'
                 f' t.used as used'
                 f' from user u left join tariff t on t.id=u.tariff_id where u.id<>{current_user_id} limit {limit} offset {offset}',
-                (limit, offset, current_user_id, )
+                (limit, offset, current_user_id,)
             )
             return self.cur.fetchall()
         except mariadb.InterfaceError as e:
@@ -278,15 +309,17 @@ class Database:
         try:
             self.cur.execute(
                 f'SELECT u.id as id, '
-                f'u.first_name as first_name,'
+                f'u.created_date as created_date,'
+                f' u.updated_date as updated_date,'
+                f' u.first_name as first_name,'
                 f' u.last_name as last_name,'
                 f' u.username as username,'
                 f' u.password as password,'
                 f' u.api_key as api_key,'
-                f' u.voiptime_api_key as voiptime_api_key,'
                 f' u.email as email,'
                 f' u.phone as phone,'
                 f' u.audience as audience,'
+                f' u.uuid as uuid,'
                 f' u.role_id as role_id,'
                 f' u.recognition_id as recognition_id,'
                 f' r.name as role_name,'
@@ -309,6 +342,44 @@ class Database:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
             return self.load_user_by_id(user_id)
+
+    def load_user_by_uuid(self, user_uuid: str):
+        try:
+            self.cur.execute(
+                f'SELECT u.id as id, '
+                f'u.created_date as created_date,'
+                f' u.updated_date as updated_date,'
+                f' u.first_name as first_name,'
+                f' u.last_name as last_name,'
+                f' u.username as username,'
+                f' u.password as password,'
+                f' u.api_key as api_key,'
+                f' u.email as email,'
+                f' u.phone as phone,'
+                f' u.audience as audience,'
+                f' u.uuid as uuid,'
+                f' u.role_id as role_id,'
+                f' u.recognition_id as recognition_id,'
+                f' r.name as role_name,'
+                f' t.id as tariff_id,'
+                f' t.active as active,'
+                f' t.total as total,'
+                f' t.used as used,'
+                f' rc.encoding as encoding,'
+                f' rc.rate as rate,'
+                f' rc.interval_length as interval_length,'
+                f' rc.predictions as predictions,'
+                f' rc.prediction_criteria as prediction_criteria'
+                f' from user u left join user_role r on r.id=u.role_id left join tariff t on t.id=u.tariff_id '
+                f' left join recognition_configuration rc on rc.id=u.recognition_id '
+                f'where u.id=?',
+                (user_uuid,)
+            )
+            return self.cur.fetchone()
+        except mariadb.InterfaceError as e:
+            logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
+            self.conn.reconnect()
+            return self.load_user_by_uuid(user_uuid)
 
     def load_user_dashboard(self, user_id: int):
         try:
@@ -353,7 +424,8 @@ class Database:
             self.conn.reconnect()
             return self.load_user_by_id(api_key)
 
-    def load_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str, limit: int, offset: int):
+    def load_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str, limit: int,
+                          offset: int):
         try:
             query = f'SELECT * from recognition where final=true'
             if user_id:
@@ -367,7 +439,7 @@ class Database:
             query += f' order by id desc limit {limit} offset {offset}'
             self.cur.execute(
                 query,
-                (limit, offset, )
+                (limit, offset,)
             )
             return self.cur.fetchall()
         except mariadb.InterfaceError as e:
@@ -375,7 +447,8 @@ class Database:
             self.conn.reconnect()
             return self.load_recognitions(user_id, campaign_id, request_uuid, extension, limit, offset)
 
-    def load_recognitions_related_to_user(self, user_id: int, campaign_id: int, request_uuid: str, extension: str, limit: int, offset: int):
+    def load_recognitions_related_to_user(self, user_id: int, campaign_id: int, request_uuid: str, extension: str,
+                                          limit: int, offset: int):
         try:
             query = f'SELECT * from recognition where user_id={user_id} and final=true'
             if campaign_id:
@@ -387,7 +460,7 @@ class Database:
             query += f' order by id desc limit {limit} offset {offset}'
             self.cur.execute(
                 query,
-                (user_id, limit, offset, )
+                (user_id, limit, offset,)
             )
             return self.cur.fetchall()
         except mariadb.InterfaceError as e:
@@ -424,7 +497,7 @@ class Database:
         try:
             self.cur.execute(
                 f'SELECT * from recognition r left join user u on r.user_id=u.id where r.id=? and r.user_id=? ',
-                (recognition_id, user_id, )
+                (recognition_id, user_id,)
             )
             return self.cur.fetchone()
         except mariadb.InterfaceError as e:
@@ -432,7 +505,7 @@ class Database:
             self.conn.reconnect()
             return self.load_recognition_by_id_related_to_user(recognition_id, user_id)
 
-    def count_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str,):
+    def count_recognitions(self, user_id: int, campaign_id: int, request_uuid: str, extension: str, ):
         try:
             query = f'SELECT count(*) as count from recognition where final=true'
             if user_id:
@@ -454,9 +527,48 @@ class Database:
         try:
             self.cur.execute(
                 f'UPDATE tariff SET request_size = request_size + 1, audio_size = audio_size + ?  where id = ?',
-                (audio_size,  tariff_id,)
+                (audio_size, tariff_id,)
             )
         except mariadb.InterfaceError as e:
             logging.error(f'  >> Error connecting to MariaDB Platform: {e}')
             self.conn.reconnect()
             return self.increment_tariff(tariff_id, audio_size)
+
+
+@dataclass
+class Tariff:
+    id: int
+    created_date: datetime = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    updated_date: datetime = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    active: bool = False
+    total: int = 0
+    used: int = 0
+
+
+@dataclass
+class RecognitionConfiguration:
+    id: int
+    encoding: str = "slin"
+    rate: int = 8000
+    interval_length: int = 0
+    predictions: int = 0
+    prediction_criteria: str = ""
+
+
+@dataclass
+class User:
+    id: int
+    tariff: Tariff
+    configuration: RecognitionConfiguration
+    created_date: datetime = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    updated_date: datetime = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+    first_name: str = ""
+    last_name: str = ""
+    email: str = ""
+    phone: str = ""
+    username: str = ""
+    api_key: str = ""
+    password: str = ""
+    audience: str = ""
+    role_id: int = 2
+

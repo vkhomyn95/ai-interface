@@ -3,7 +3,7 @@ import json
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from database import Database
+from database import Database, User, Tariff, RecognitionConfiguration
 from variables import Variables
 
 app = Flask(__name__)
@@ -19,35 +19,6 @@ db = Database(
 )
 
 app.config['SECRET_KEY'] = variables.secret_key
-
-initial = db.load_user_by_username("admin", None)
-
-if initial is None:
-    db.insert_user(
-        {
-            "active": True,
-            "limit": 1000,
-            "used": 0
-        },
-        {
-            "encoding": "slin",
-            "rate": 8000,
-            "interval_length": 2,
-            "predictions": 2,
-            "prediction_criteria": ""
-        },
-        {
-            "username": "admin",
-            "password": generate_password_hash("password"),
-            "email": "amd@voiptime.net",
-            "first_name": "Administrator",
-            "last_name": "Administrator",
-            "phone": "",
-            "api_key": "",
-            "audience": "",
-            "role_id": 1,
-        }
-    )
 
 """
     Define auth routing controller
@@ -253,6 +224,108 @@ def create_user():
             return redirect(url_for('users'))
     else:
         return redirect(url_for('login'))
+
+
+@app.route('/api/user/<uuid>', methods=['POST', 'GET', 'PUT'])
+def api_user(uuid: str):
+    access_token = request.args.get('access_token')
+    if access_token and access_token != variables.license_server_access_token:
+        return {
+            "success": False,
+            "data": "Invalid access token"
+        }
+
+    if request.method == "GET":
+        if uuid is not None and uuid != '':
+            searched_user = db.load_user_by_uuid(uuid)
+            if searched_user is not None:
+                return {
+                    "success": True,
+                    "data": User(
+                        id=searched_user["id"],
+                        created_date=searched_user["created_date"],
+                        updated_date=searched_user["updated_date"],
+                        first_name=searched_user["first_name"],
+                        last_name=searched_user["last_name"],
+                        email=searched_user["email"],
+                        phone=searched_user["phone"],
+                        username=searched_user["username"],
+                        api_key=searched_user["api_key"],
+                        audience=searched_user["audience"],
+                        tariff=Tariff(
+                            searched_user["tariff_id"],
+                            searched_user["created_date"],
+                            searched_user["updated_date"],
+                            byte_to_bool(searched_user["active"]),
+                            searched_user["total"],
+                            searched_user["used"]
+                        ),
+                        configuration=RecognitionConfiguration(
+                            searched_user["recognition_id"],
+                            searched_user["encoding"],
+                            searched_user["rate"],
+                            searched_user["interval_length"],
+                            searched_user["predictions"],
+                            searched_user["prediction_criteria"]
+                        )
+                    )
+                }
+            else:
+                return {
+                    "success": False,
+                    "data": None
+                }
+
+    if request.method == "PUT":
+        if uuid is not None and uuid != '':
+            searched_user = db.load_user_by_uuid(uuid)
+            if searched_user is not None:
+                tariff = request.json["tariff"]
+                configuration = request.json["configuration"]
+                user_obj = request.json
+                user_obj["tariff_id"] = tariff["id"]
+                user_obj["recognition_id"] = configuration["id"]
+                user_obj["password"] = searched_user["password"]
+                db.update_user(tariff, configuration, user_obj)
+                return {
+                    "success": True,
+                    "data": "Ok"
+                }
+            else:
+                return {
+                    "success": False,
+                    "data": "Not valid request body. Invalid user id."
+                }
+        else:
+            return {
+                "success": False,
+                "data": "Not valid request body. Invalid user id."
+            }
+
+    if request.method == "POST":
+        if uuid is not None and uuid != '':
+            searched_user = db.load_user_by_username(request.json["username"], request.json["email"])
+            if searched_user is None:
+                tariff = request.json["tariff"]
+                configuration = request.json["configuration"]
+                user_obj = request.json
+                user_obj["password"] = generate_password_hash(request.json["password"])
+                user_obj["uuid"] = uuid
+                u_id = db.insert_user(tariff, configuration, user_obj)
+                return {
+                    "success": True,
+                    "data": u_id
+                }
+            else:
+                return {
+                    "success": False,
+                    "data": "User with username or email already exists."
+                }
+        else:
+            return {
+                "success": False,
+                "data": "Not valid request body. Invalid user uuid."
+            }
 
 
 """
@@ -468,7 +541,6 @@ def to_user_obj(request, user):
         "email": request.form.get("email"),
         "phone": request.form.get("phone"),
         "api_key": request.form.get("api_key"),
-        "voiptime_api_key": request.form.get("voiptime_api_key"),
         "audience": request.form.get("audience"),
         "tariff_id": request.form.get("tariff_id"),
         "recognition_id": request.form.get("recognition_id"),

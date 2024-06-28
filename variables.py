@@ -28,6 +28,7 @@ class Variables:
         "LOGGER_DIR",
         "/stor/data/logs/interface"
     )
+    # Directory for storing server logs
 
     secret_key: str = os.getenv(
         "SECRET_KEY",
@@ -40,3 +41,10 @@ class Variables:
     database_host: str = os.getenv("DATABASE_HOST", "127.0.0.1")
     database_port: int = int(os.getenv("DATABASE_PORT", 3306))
     database_name: str = os.getenv("DATABASE_NAME", "amd")
+
+    # License server
+
+    license_server_access_token: str = os.getenv(
+        "LICENSE_SERVER_ACCESS_TOKEN",
+        "TOKEN"
+    )

@@ -290,14 +290,14 @@
                                         <div class="ml-15">Голос</div>
                                     </div>
                                 </div>
-                                <div class="integration-tab-header tab ml-40" onclick="changeRecognitionTab(this, 'integration')">
-                                    <div class="flex flex-direction-row flex-align-center mb-10">
-                                        <div class="icon is-small">
-                                            {% include 'header/icons/icon-integration.html' %}
-                                        </div>
-                                        <div class="ml-15">Інтеграція</div>
-                                    </div>
-                                </div>
+<!--                                <div class="integration-tab-header tab ml-40" onclick="changeRecognitionTab(this, 'integration')">-->
+<!--                                    <div class="flex flex-direction-row flex-align-center mb-10">-->
+<!--                                        <div class="icon is-small">-->
+<!--                                            {% include 'header/icons/icon-integration.html' %}-->
+<!--                                        </div>-->
+<!--                                        <div class="ml-15">Інтеграція</div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
                             </div>
                             <div class="card-border"></div>
                             <div class="p-20">
@@ -383,20 +383,20 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="integration-tab is-hidden">
-                                <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger" for="voiptime_api_key">API ключ VoIPTime CC</label>
-                                    <div class="w-100">
-                                        <input
-                                                class="input"
-                                                type="text"
-                                                id="voiptime_api_key"
-                                                name="voiptime_api_key"
-                                                value="{{ user.voiptime_api_key }}"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
+<!--                            <div class="integration-tab is-hidden">-->
+<!--                                <div class="flex flex-direction-row flex-align-center mb-20">-->
+<!--                                    <label class="label label-required_danger" for="voiptime_api_key">API ключ VoIPTime CC</label>-->
+<!--                                    <div class="w-100">-->
+<!--                                        <input-->
+<!--                                                class="input"-->
+<!--                                                type="text"-->
+<!--                                                id="voiptime_api_key"-->
+<!--                                                name="voiptime_api_key"-->
+<!--                                                value="{{ user.voiptime_api_key }}"-->
+<!--                                        />-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
                         </div>
                         </div>
                     </div>
@@ -486,21 +486,21 @@
         el.classList.add("is-active");
         if (tab === 'interim') {
             document.querySelector(".voice-tab-header").classList.remove("is-active");
-            document.querySelector(".integration-tab-header").classList.remove("is-active");
+            // document.querySelector(".integration-tab-header").classList.remove("is-active");
             document.querySelector(".interim-tab").classList.remove("is-hidden");
-            document.querySelector(".integration-tab").classList.add("is-hidden");
+            // document.querySelector(".integration-tab").classList.add("is-hidden");
             document.querySelector(".voice-tab").classList.add("is-hidden");
         }
         if (tab === 'voice') {
             document.querySelector(".interim-tab").classList.add("is-hidden");
-            document.querySelector(".integration-tab-header").classList.remove("is-active");
+            // document.querySelector(".integration-tab-header").classList.remove("is-active");
             document.querySelector(".voice-tab").classList.remove("is-hidden");
-            document.querySelector(".integration-tab").classList.add("is-hidden");
+            // document.querySelector(".integration-tab").classList.add("is-hidden");
             document.querySelector(".interim-tab-header").classList.remove("is-active");
         }
         if (tab === 'integration') {
             document.querySelector(".interim-tab").classList.add("is-hidden");
-            document.querySelector(".integration-tab").classList.remove("is-hidden");
+            // document.querySelector(".integration-tab").classList.remove("is-hidden");
             document.querySelector(".interim-tab-header").classList.remove("is-active");
             document.querySelector(".voice-tab").classList.add("is-hidden");
             document.querySelector(".voice-tab-header").classList.remove("is-active");

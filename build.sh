@@ -15,5 +15,6 @@ docker run -d --restart always --net=host -v /stor:/stor -v /etc/localtime:/etc/
         -e DATABASE_PASSWORD='root' \
         -e DATABASE_NAME='amd' \
         -e DATABASE_PORT=3306 \
+        -e LICENSE_SERVER_ACCESS_TOKEN='272C8DCC83zBxxBDBB7y@DCyBzyCB7Bx' \
         -e PYTHONUNBUFFERED=0 \
         --name ai-interface vk/ai-interface

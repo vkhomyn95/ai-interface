@@ -266,7 +266,7 @@ def api_user(uuid: str):
                             searched_user["rate"],
                             searched_user["interval_length"],
                             searched_user["predictions"],
-                            searched_user["prediction_criteria"]
+                            json.loads(searched_user["prediction_criteria"])
                         )
                     )
                 }
@@ -282,6 +282,7 @@ def api_user(uuid: str):
             if searched_user is not None:
                 tariff = request.json["tariff"]
                 configuration = request.json["configuration"]
+                configuration["prediction_criteria"] = json.dumps(configuration["prediction_criteria"])
                 user_obj = request.json
                 user_obj["tariff_id"] = tariff["id"]
                 user_obj["recognition_id"] = configuration["id"]
@@ -308,6 +309,7 @@ def api_user(uuid: str):
             if searched_user is None:
                 tariff = request.json["tariff"]
                 configuration = request.json["configuration"]
+                configuration["prediction_criteria"] = json.dumps(configuration["prediction_criteria"])
                 user_obj = request.json
                 user_obj["password"] = generate_password_hash(request.json["password"])
                 user_obj["uuid"] = uuid

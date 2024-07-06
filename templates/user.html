@@ -230,7 +230,7 @@
                                 <div class="flex flex-direction-row flex-align-center mb-20">
                                     <label class="label label-required_danger" for="total">Загалом</label>
                                     <div class="w-100">
-                                        {% if role=='admin' %}
+                                        {% if current_user.role.name=='admin' %}
                                         <input
                                                 class="input"
                                                 type="number"
@@ -242,7 +242,7 @@
                                         />
                                         {% else %}
                                         <div>
-                                            {{ user.total }}
+                                            {{ user.tariff.total }}
                                         </div>
                                         {% endif %}
                                     </div>
@@ -367,7 +367,7 @@
 
         <div class="footer">
             <div class="footer-wrapper">
-                {% if is_profile and role=='admin' or role=='guest'%}
+                {% if is_profile and current_user.role.name=='admin' or current_user.role.name=='guest'%}
                     <button onclick="window.location.href = '/dashboard'" class="button button-secondary is-link">
                         Скасувати
                     </button>

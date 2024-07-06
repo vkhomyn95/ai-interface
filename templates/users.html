@@ -37,7 +37,7 @@
                     <div class="content-wrapper-head-actions">
                         <button class="button button-main">
                             {% include 'header/icons/icon-add.html' %}
-                            <a href="{{ url_for('create_user') }}" style="text-decoration: none">
+                            <a href="{{ url_for('bases.bases_blp.create_user') }}" style="text-decoration: none">
                                 <span style="margin-left: 10px; color: #ffffff;">Додати користувача</span>
                             </a>
                         </button>
@@ -53,13 +53,12 @@
                     {'name': 'Домен'},
                     {'name': 'Активний'},
                     {'name': 'Кількість'},
-                    {'name': 'Використано'},
                     {'name': 'Дії', 'actions': True},
                 ] %}
 
                 <div class="table-header">
                     {% for heading in headings %}
-                    <div style="width: {% if not heading.actions %}10.5%{% else %}60px{% endif %};">
+                    <div style="width: {% if not heading.actions %}11.5%{% else %}60px{% endif %};">
                         {{ heading.name }}
                     </div>
                     {% endfor %}
@@ -69,18 +68,17 @@
                     <div class="table-content">
                         {% for user in users %}
                         <div class="table-row">
-                            <div style="width: 11%">{{ user.id }}</div>
-                            <div style="width: 11%">{{ user.created_date }}</div>
-                            <div style="width: 11%">{{ user.last_name }}</div>
-                            <div style="width: 11%">{{ user.first_name }}</div>
-                            <div style="width: 11%">{{ user.phone }}</div>
-                            <div style="width: 11%">{{ user.audience }}</div>
-                            <div style="width: 11%">{{ user.active|byte_to_bool }}</div>
-                            <div style="width: 11%">{{ user.total }}</div>
-                            <div style="width: 11%">{{ user.used }}</div>
-                            <div style="width: 60px">
+                            <div style="width: 12%">{{ user.id }}</div>
+                            <div style="width: 12%">{{ user.created_date }}</div>
+                            <div style="width: 12%">{{ user.last_name }}</div>
+                            <div style="width: 12%">{{ user.first_name }}</div>
+                            <div style="width: 12%">{{ user.phone }}</div>
+                            <div style="width: 12%">{{ user.audience }}</div>
+                            <div style="width: 12%">{{ user.tariff.active }}</div>
+                            <div style="width: 12%">{{ user.tariff.total }}</div>
+                            <div style="width: 12px">
                                 <div class="is-flex-direction-row is-align-content-center">
-                                    <a href="{{ url_for('user', user_id=user.id) }}" style="color: #00475A">
+                                    <a href="{{ url_for('bases.bases_blp.user', user_id=user.id) }}" style="color: #00475A">
                                       {% include 'header/icons/icon-edit.html' %}
                                     </a>
                                 </div>
@@ -91,7 +89,7 @@
                 </div>
             </div>
         </div>
-        {% with page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, template='users' %}
+        {% with page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, template='bases.bases_blp.users' %}
             {% include "pagination.html" %}
         {% endwith %}
     </div>

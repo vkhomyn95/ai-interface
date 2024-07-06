@@ -3,6 +3,8 @@ import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
 
+from app.config import variables
+
 
 class Logger:
     """
@@ -28,7 +30,7 @@ class Logger:
 
         return Logger._logger_instance
 
-    def __init__(self, _logger_dir: str) -> None:
+    def __init__(self) -> None:
         """
         Default constructor.
         """
@@ -39,7 +41,7 @@ class Logger:
                 format="%(asctime)s [%(levelname)s] %(message)s",
                 handlers=[
                     TimedRotatingFileHandler(
-                        os.path.join(_logger_dir, str(datetime.datetime.now().date()) + '-log.txt'),
+                        os.path.join(variables.logger_dir, str(datetime.datetime.now().date()) + '-log.txt'),
                         when='midnight',
                         interval=1
                     ),
@@ -49,3 +51,6 @@ class Logger:
             Logger._logger_instance = self
         else:
             raise Exception("{}: Cannot construct, an instance is already running.".format(__file__))
+
+
+logger = Logger()

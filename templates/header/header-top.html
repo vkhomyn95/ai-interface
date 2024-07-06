@@ -12,14 +12,14 @@
             <div class="top-panel-user-menu absolute flex flex-direction-column flex-content-around" style="display: none">
 
               <div class="mb-10">
-                <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('profile') }}">
+                <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('bases.bases_blp.profile') }}">
                     {% include 'header/icons/icon-me.html' %}
-                  <span class="top-panel-user-menu-li-title">{{ username }}</span>
+                  <span class="top-panel-user-menu-li-title">{{ current_user.first_name }} {{ current_user.last_name }}</span>
                 </a>
               </div>
 
               <div>
-                <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('logout') }}">
+                <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('bases.bases_blp.logout') }}">
                     {% include 'header/icons/icon-logout.html' %}
                   <span class="top-panel-user-menu-li-title">Вихід з системи</span>
                 </a>

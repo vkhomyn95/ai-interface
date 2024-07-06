@@ -1,4 +1,7 @@
-mariadb==1.1.8
 PyJWT
 Pillow
 Flask
+flask-sqlalchemy
+flask-marshmallow
+pymysql
+mysqlclient

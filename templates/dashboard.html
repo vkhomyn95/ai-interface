@@ -24,9 +24,9 @@
         </div>
 
         <div class="content">
-            {% if role == 'admin' %}
+            {% if current_user.role.name == 'admin' %}
             <form
-                    action="{{ url_for('dashboard') }}"
+                    action="{{ url_for('bases.bases_blp.dashboard') }}"
                     class="flex flex-direction-row flex-align-end mb-20"
             >
                 <div class="flex flex-direction-column">

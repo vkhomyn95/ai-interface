@@ -22,11 +22,11 @@
     <div class="container-main">
         <div class="breadcrumb">
             {% if is_profile %}
-                <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('dashboard') }}">
+                <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('bases.bases_blp.dashboard') }}">
                  {% include 'header/icons/icon-breadcrumb.html' %}
                 </a>
             {% else %}
-                <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('users') }}">
+                <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('bases.bases_blp.users') }}">
                     {% include 'header/icons/icon-breadcrumb.html' %}
                 </a>
             {% endif %}
@@ -46,7 +46,7 @@
                     method="POST"
                     id="userForm"
                     class="mange-wrapper"
-                    action="{% if not user.id %}{{ url_for('create_user') }}{% else %}{{ url_for('user', user_id=user.id) }}{% endif %}">
+                    action="{% if not user.id %}{{ url_for('bases.bases_blp.create_user') }}{% else %}{{ url_for('bases.bases_blp.user', user_id=user.id) }}{% endif %}">
 
                 <div class="card">
                     <div class="p-20">
@@ -59,11 +59,6 @@
                         <div class="card-body-wrapper p-20">
 
                             <input class="input is-success" type="hidden" id="user_id" name="id" value="{{ user.id }}">
-                            <input class="input is-success" type="hidden" name="tariff_id" value="{{ user.tariff_id }}">
-                            <input class="input is-success" type="hidden" name="recognition_id"
-                                   value="{{ user.recognition_id }}">
-
-
                             <div class="flex flex-direction-row flex-align-center mb-20">
                                 <label class="label label-required_danger" for="username">Логін</label>
                                 <div class="w-100">
@@ -73,9 +68,13 @@
                                             id="username"
                                             name="username"
                                             placeholder="Логін"
-                                            value="{{ user.username }}"
+                                            value="{{ user.username if user and user.username else '' }}"
                                             oninput="validateField(this)"
-                                            {% if "id" in user and user.id > 0 %}readonly{% endif %}
+                                            {% if user.id is not none %}
+                                                {% if user.id > 0 %}
+                                                    readonly
+                                                {% endif %}
+                                            {% endif %}
                                     />
                                 </div>
                             </div>
@@ -89,7 +88,7 @@
                                             id="last_name"
                                             name="last_name"
                                             placeholder="Прізвище"
-                                            value="{{ user.last_name }}"
+                                            value="{{ user.last_name if user and user.last_name else ''  }}"
                                             oninput="validateField(this)"
                                     />
                                 </div>
@@ -104,7 +103,7 @@
                                             id="first_name"
                                             name="first_name"
                                             placeholder="Ім'я"
-                                            value="{{ user.first_name }}"
+                                            value="{{ user.first_name if user and user.first_name else '' }}"
                                             oninput="validateField(this)"
                                     />
                                 </div>
@@ -119,9 +118,13 @@
                                             id="email"
                                             name="email"
                                             placeholder="Email"
-                                            value="{{ user.email }}"
+                                            value="{{ user.email if user and user.email else '' }}"
                                             oninput="validateField(this)"
-                                            {% if "id" in user and user.id > 0 %}readonly{% endif %}
+                                            {% if user.id is not none %}
+                                                {% if user.id > 0 %}
+                                                    readonly
+                                                {% endif %}
+                                            {% endif %}
 
                                     />
                                 </div>
@@ -136,7 +139,7 @@
                                             id="phone"
                                             name="phone"
                                             placeholder="Телефон"
-                                            value="{{ user.phone }}"
+                                            value="{{ user.phone if user and user.phone else '' }}"
                                             oninput="validateField(this)"
                                     />
                                 </div>
@@ -152,7 +155,7 @@
                                                 id="api_key"
                                                 name="api_key"
                                                 placeholder="Api key"
-                                                value="{{ user.api_key }}"
+                                                value="{{ user.api_key if user and user.api_key else ''  }}"
                                                 oninput="validateField(this)"
                                         />
                                     </div>
@@ -185,7 +188,7 @@
                                             type="text"
                                             id="audience"
                                             name="audience"
-                                            value="{{ user.audience }}"
+                                            value="{{ user.audience if user and user.audience else '' }}"
                                             placeholder="voiptime.net"
                                             oninput="validateField(this)"
                                     />
@@ -209,7 +212,7 @@
                                     <label class="label label-required_danger">Активна</label>
                                     <div class="w-100">
                                 <span id="toggleActive">
-                                    {% if user.active|byte_to_bool %}
+                                    {% if user.tariff.active %}
                                         <span onclick="toggleUserActive(true)">
                                             {% include 'header/icons/icon-square-checked.html' %}
                                             <input type="hidden" id="activeChecked" name="active" value="True">
@@ -233,34 +236,13 @@
                                                 type="number"
                                                 id="total"
                                                 name="total"
-                                                value="{{ user.total }}"
+                                                value="{{ user.tariff.total }}"
                                                 placeholder="1000"
                                                 oninput="validateFieldLength(this, 1)"
                                         />
                                         {% else %}
                                         <div>
                                             {{ user.total }}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-direction-row flex-align-center">
-                                    <label class="label label-required_danger" for="used">Використано</label>
-                                    <div class="w-100">
-                                        {% if role=='admin' %}
-                                        <input
-                                                class="input"
-                                                type="number"
-                                                id="used"
-                                                name="used"
-                                                value="{{ user.used }}"
-                                                placeholder="1000"
-                                                oninput="validateFieldLength(this, 1)"
-                                        />
-                                        {% else %}
-                                        <div>
-                                            {{ user.used }}
                                         </div>
                                         {% endif %}
                                     </div>
@@ -290,14 +272,6 @@
                                         <div class="ml-15">Голос</div>
                                     </div>
                                 </div>
-<!--                                <div class="integration-tab-header tab ml-40" onclick="changeRecognitionTab(this, 'integration')">-->
-<!--                                    <div class="flex flex-direction-row flex-align-center mb-10">-->
-<!--                                        <div class="icon is-small">-->
-<!--                                            {% include 'header/icons/icon-integration.html' %}-->
-<!--                                        </div>-->
-<!--                                        <div class="ml-15">Інтеграція</div>-->
-<!--                                    </div>-->
-<!--                                </div>-->
                             </div>
                             <div class="card-border"></div>
                             <div class="p-20">
@@ -310,7 +284,7 @@
                                                 type="number"
                                                 id="interval_length"
                                                 name="interval_length"
-                                                value="{{ user.interval_length }}"
+                                                value="{{ user.recognition.interval_length if user and user.recognition.interval_length else 2 }}"
                                                 min="1"
                                                 max="5"
                                                 placeholder="2"
@@ -331,7 +305,7 @@
                                                 min="1"
                                                 max="5"
                                                 onKeyUp="if(this.value>5){this.value='5';}else if(this.value<0){this.value='1';}"
-                                                value="{{ user.predictions }}"
+                                                value="{{ user.recognition.predictions if user and user.recognition.predictions else 2  }}"
                                         />
                                     </div>
                                 </div>
@@ -364,7 +338,7 @@
                                                 type="number"
                                                 id="rate"
                                                 name="rate"
-                                                value="{{ user.rate }}"
+                                                value="{{ user.recognition.rate if user and user.recognition.rate else 8000 }}"
                                                 placeholder="8000"
                                         />
                                     </div>
@@ -377,26 +351,13 @@
                                                 type="text"
                                                 id="encoding"
                                                 name="encoding"
-                                                value="{{ user.encoding }}"
+                                                value="{{ user.recognition.encoding if user and user.recognition.encoding else 'slin' }}"
                                                 placeholder="slin"
                                         />
                                     </div>
                                 </div>
                             </div>
-<!--                            <div class="integration-tab is-hidden">-->
-<!--                                <div class="flex flex-direction-row flex-align-center mb-20">-->
-<!--                                    <label class="label label-required_danger" for="voiptime_api_key">API ключ VoIPTime CC</label>-->
-<!--                                    <div class="w-100">-->
-<!--                                        <input-->
-<!--                                                class="input"-->
-<!--                                                type="text"-->
-<!--                                                id="voiptime_api_key"-->
-<!--                                                name="voiptime_api_key"-->
-<!--                                                value="{{ user.voiptime_api_key }}"-->
-<!--                                        />-->
-<!--                                    </div>-->
-<!--                                </div>-->
-<!--                            </div>-->
+
                         </div>
                         </div>
                     </div>
@@ -404,64 +365,6 @@
             </form>
         </div>
 
-
-<!--        <div class="tile is-ancestor">-->
-            <!--            <div class="tile is-parent">-->
-            <!--                <article class="tile is-child box">-->
-            <!--                    <p class="subtitle is-3">License</p>-->
-            <!--                    <div class="field">-->
-            <!--                        <label class="label">Active</label>-->
-            <!--                        <div class="control py-2">-->
-            <!--                            <label class="radio">-->
-            <!--                                <input type="radio" name="active" value="True"-->
-            <!--                                       {% if user.active|byte_to_bool %}checked{% endif %}-->
-            <!--                                       {% if role=='guest' %}disabled{% endif %}-->
-            <!--                                >-->
-            <!--                                <span class="pl-2">Yes</span>-->
-            <!--                            </label>-->
-            <!--                            <label class="radio pl-2">-->
-            <!--                                <input type="radio" name="active" value="False"-->
-            <!--                                       {% if not user.active|byte_to_bool %}checked{% endif %}-->
-            <!--                                       {% if role=='guest' %}disabled{% endif %}-->
-            <!--                                >-->
-            <!--                                <span class="pl-2">No</span>-->
-            <!--                            </label>-->
-            <!--                        </div>-->
-            <!--                    </div>-->
-            <!--                    <div class="field">-->
-            <!--                        <label class="label">Total</label>-->
-            <!--                        <div class="control">-->
-            <!--                            {% if role=='guest' %}-->
-            <!--                            <h4 class="subtitle is-4">{{ user.total }}</h4>-->
-            <!--                            {% endif %}-->
-            <!--                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"-->
-            <!--                                   name="total" placeholder="100"-->
-            <!--                                   value="{{ user.total }}"-->
-            <!--                                   {% if role=='guest' %}disabled{% endif %}-->
-            <!--                            />-->
-            <!--                        </div>-->
-            <!--                    </div>-->
-            <!--                    <div class="field">-->
-            <!--                        <label class="label">Used</label>-->
-            <!--                        <div class="control">-->
-            <!--                            {% if role=='guest' %}-->
-            <!--                            <h4 class="subtitle is-4"><span-->
-            <!--                                    class="tag is-warning is-light is-medium">{{ user.used }}</span>-->
-            <!--                                / <span class="tag is-danger is-light is-medium">{{ user.total }}</span></h4>-->
-            <!--                            {% endif %}-->
-            <!--                            <input class="input" type="{% if role=='guest' %}hidden{% else%}number{% endif %}"-->
-            <!--                                   name="used" placeholder="100"-->
-            <!--                                   value="{{ user.used }}"-->
-            <!--                                   {% if role=='guest' %}disabled{% endif %}-->
-            <!--                            />-->
-            <!--                        </div>-->
-            <!--                    </div>-->
-            <!--                </article>-->
-            <!--            </div>-->
-
-<!--        </div>-->
-
-<!--        </form>-->
         <div class="footer">
             <div class="footer-wrapper">
                 {% if is_profile and role=='admin' or role=='guest'%}
@@ -774,6 +677,7 @@
     }
 
     function parseRows(criteria) {
+        console.log(criteria)
         criteria = criteria.replaceAll('&#34;', '"');
         let data = JSON.parse(criteria);
         let intervals = {};
@@ -877,7 +781,7 @@
         document.getElementById(key).remove()
     }
 
-    const criteria = "{{ user.prediction_criteria|string }}"
+    const criteria = "{{ user.recognition.prediction_criteria|string }}"
     parseRows(criteria)
 
     function saveForm() {

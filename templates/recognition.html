@@ -46,7 +46,7 @@
                             <div class="w-50">
                                 <audio controls>
                                     <source
-                                            src="{{ url_for('serve_audio', filename=recognition.request_uuid|obj_to_str) }}"
+                                            src="{{ url_for('bases.bases_blp.serve_audio', filename=recognition.request_uuid) }}"
                                             type="audio/wav"
                                     >
                                     Your browser does not support the audio element.
@@ -128,11 +128,11 @@
                     <div class="content-wrapper-info" id="table-related">
                         <div class="table-content">
                             {% for r in related_recognitions %}
-                            {% if not r.final|byte_to_bool%}
+                            {% if not r.final %}
                             <div class="table-row">
                                 <div style="width: 8%">{{ r.id }}</div>
                                 <div style="width: 25%">{{ r.created_date }}</div>
-                                <div style="width: 10%">{{ r.final|byte_to_bool }}</div>
+                                <div style="width: 10%">{{ r.final }}</div>
                                 <div style="width: 32%">
                                     <audio controls style="width: 250px">
                                         <source

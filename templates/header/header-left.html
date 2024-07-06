@@ -3,20 +3,20 @@
 <header class="left-panel">
     <aside class="left-panel-wrapper">
         <div class="left-panel-wrapper-link{% if not open %} left-panel-wrapper-link-selected{% endif %}">
-          <a class="left-panel-wrapper-navigation" href="{{ url_for('dashboard') }}">
+          <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.dashboard') }}">
             {% include 'header/icons/icon-dashboard.html' %}
             <div class="left-panel-wrapper-navigation-content">Звіти та статистика</div>
             <div class="left-panel-wrapper-divider"></div>
           </a>
 
-          <a class="left-panel-wrapper-navigation" href="{{ url_for('recognitions') }}">
+          <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.recognitions') }}">
             {% include 'header/icons/icon-recognitions.html' %}
             <div class="left-panel-wrapper-navigation-content">Запити розпізнавання</div>
             <div class="left-panel-wrapper-divider"></div>
           </a>
 
-            {% if role == 'admin' %}
-              <a class="left-panel-wrapper-navigation" href="{{ url_for('users') }}">
+            {% if current_user.role.name == 'admin' %}
+              <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.users') }}">
                 {% include 'header/icons/icon-users.html' %}
                 <div class="left-panel-wrapper-navigation-content">Користувачі</div>
                 <div class="left-panel-wrapper-divider"></div>

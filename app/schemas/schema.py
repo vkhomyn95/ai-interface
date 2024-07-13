@@ -1,6 +1,7 @@
+from marshmallow import fields
+
 from app.extensions import ma, db
-from app.models import Tariff, UserRole, RecognitionConfiguration, Recognition, User
-from marshmallow import fields, EXCLUDE, post_load
+from app.models import Tariff, UserRole, RecognitionConfiguration, User
 
 
 class TariffSchema(ma.SQLAlchemyAutoSchema):

@@ -25,7 +25,7 @@ class Variables:
 
     APP_HOST: str = os.getenv(
         "APP_HOST",
-        "127.0.0.1"
+        "0.0.0.0"
     )
 
     APP_PORT: str = os.getenv(

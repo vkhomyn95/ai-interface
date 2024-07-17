@@ -194,6 +194,22 @@
                                     />
                                 </div>
                             </div>
+                            {% if current_user.role.name=='admin' %}
+                                <div class="flex flex-direction-row flex-align-center mb-20">
+                                    <label class="label label-required_danger" for="uuid">Ідентифікатор</label>
+                                    <div class="w-100">
+                                        <input
+                                                class="input"
+                                                type="text"
+                                                id="uuid"
+                                                name="uuid"
+                                                value="{{ user.uuid if user and user.uuid else '' }}"
+                                                placeholder="uuid-uuid-uuid"
+                                                readonly
+                                        />
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

@@ -198,14 +198,14 @@ def user(user_id: int):
     """
     session_user = session.get("user")
 
-    if not is_admin():
-        return redirect(url_for("bases.bases_blp.profile"))
-
     if not session_user:
         return redirect(url_for("bases.bases_blp.login"))
 
     searched_user = storage.load_user_by_id(int(user_id))
     if request.method == "GET":
+        if not is_admin():
+            return redirect(url_for("bases.bases_blp.profile"))
+
         searched_user.password = ""
         return render_template(
             'user.html',
@@ -213,9 +213,15 @@ def user(user_id: int):
             current_user=session_user
         )
     else:
-        update_user(request, searched_user)
-        storage.update_user(searched_user)
-        return redirect(url_for('bases.bases_blp.users'))
+        if is_admin() or searched_user.id == session_user["id"]:
+            update_user(request, searched_user)
+            storage.update_user(searched_user)
+            if is_admin():
+                return redirect(url_for('bases.bases_blp.users'))
+            else:
+                return redirect(url_for("bases.bases_blp.dashboard"))
+        else:
+            return redirect(url_for("bases.bases_blp.profile"))
 
 
 @bases.route('/create-user', methods=['POST', 'GET'])

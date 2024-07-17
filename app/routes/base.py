@@ -198,6 +198,9 @@ def user(user_id: int):
     """
     session_user = session.get("user")
 
+    if not is_admin():
+        return redirect(url_for("bases.bases_blp.profile"))
+
     if not session_user:
         return redirect(url_for("bases.bases_blp.login"))
 

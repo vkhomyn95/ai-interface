@@ -1,4 +1,7 @@
+import uuid
+
 from flask import Blueprint, request
+from marshmallow import EXCLUDE
 from werkzeug.security import generate_password_hash
 
 from app.config import variables
@@ -53,9 +56,13 @@ def create_user():
     if user is not None:
         return {"success": False, "data": "User already exists with defined email or username"}
 
-    user_schema = UserAPISchema(exclude=("id", "tariff", "role", "recognition")).load(request.json)
+    user_schema = UserAPISchema(
+        exclude=("id", "tariff", "role", "recognition", "api_key"),
+        unknown=EXCLUDE
+    ).load(request.json)
     user_schema.role_id = 2
     user_schema.password = generate_password_hash(request.json["password"])
+    user_schema.api_key = uuid.uuid4()
     user_schema.tariff = Tariff()
     user_schema.recognition = RecognitionConfiguration(
         rate=variables.audio_sample_rate,
@@ -94,3 +101,31 @@ def increment_user_license(uuid: str):
     storage.increment_user_tariff(user.tariff.id, int(license_count))
 
     return {"success": True, "data": "Successfully incremented user tariff"}
+
+
+@apis.post("/<uuid>/license-status")
+def activate_deactivate_user_license(uuid: str):
+    access_token = request.args.get('access_token')
+    if not access_token or access_token == "":
+        return {"success": False, "data": "Invalid access token"}
+
+    if not uuid or uuid == "":
+        return {"success": False, "data": "Invalid UUID"}
+
+    if access_token != variables.license_server_access_token:
+        return {"success": False, "data": "Invalid access token"}
+
+    license_active = request.args.get('active')
+
+    if not license_active or license_active not in ["0", "1"]:
+        return {"success": False, "data": "Invalid license active status, should be 0 or 1"}
+
+    user = storage.load_user_by_uuid(uuid)
+
+    if not user:
+        return {"success": False, "data": "User does not exist with requested uuid"}
+
+    storage.activate_deactivate_user_tariff(user.tariff.id, int(license_active))
+
+    return {"success": True, "data": "Successfully update user tariff status"}
+

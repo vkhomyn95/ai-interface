@@ -366,5 +366,17 @@ class Database:
             db.session.rollback()
             return {"success": False, "data": str(e)}
 
+    @staticmethod
+    def activate_deactivate_user_tariff(tariff_id: int, active: int):
+        try:
+            tariff = db.session.query(Tariff).filter_by(id=tariff_id).one()
+            tariff.active = active
+            db.session.commit()
+
+        except Exception as e:
+            logging.error(f'  >> Error: {e}')
+            db.session.rollback()
+            return {"success": False, "data": str(e)}
+
 
 storage = Database()

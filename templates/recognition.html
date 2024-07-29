@@ -133,19 +133,21 @@
                                 <div style="width: 8%">{{ r.id }}</div>
                                 <div style="width: 25%">{{ r.created_date }}</div>
                                 <div style="width: 10%">{{ r.final }}</div>
+                                {% if r.audio_uuid %}
                                 <div style="width: 32%">
                                     <audio controls style="width: 250px">
                                         <source
-                                                src="{{ url_for('serve_audio', filename=r.audio_uuid|obj_to_str) }}"
+                                                src="{{ url_for('serve_audio', filename=r.audio_uuid) }}"
                                                 type="audio/wav"
                                         >
                                         Your browser does not support the audio element.
                                     </audio>
                                 </div>
+                                {% endif %}
                                 <div style="width: 12%">{{ r.confidence }} %</div>
                                 <div style="width: 12%">{{ r.prediction }}</div>
                             </div>
-                            {%endif%}
+                            {% endif %}
                             {% endfor %}
                         </div>
                     </div>

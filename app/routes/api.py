@@ -3,8 +3,7 @@ from werkzeug.security import generate_password_hash
 
 from app.config import variables
 from app.extensions import storage
-from app.models import User, Tariff, RecognitionConfiguration
-from app.schemas import UserSchema
+from app.models import Tariff, RecognitionConfiguration
 from app.schemas.schema import UserAPISchema
 
 apis = Blueprint("apis_blp", __name__, url_prefix="/user")

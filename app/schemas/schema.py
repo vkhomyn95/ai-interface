@@ -74,6 +74,20 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     role = fields.Nested(UserRoleSchema)
 
 
+class TariffAPISchema(ma.SQLAlchemyAutoSchema):
+
+    class Meta:
+        model = Tariff
+        load_instance = True
+        sqla_session = db.session
+
+    id = fields.Int(allow_none=True)
+    created_date = fields.Str()
+    updated_date = fields.Str()
+    active = fields.Bool()
+    total = fields.Int()
+
+
 class UserAPISchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
@@ -82,6 +96,6 @@ class UserAPISchema(ma.SQLAlchemyAutoSchema):
         include_relationships = True
         sqla_session = db.session
 
-    tariff = fields.Nested(TariffSchema)
+    tariff = fields.Nested(TariffAPISchema)
     recognition = fields.Nested(RecognitionConfigurationSchema)
     role = fields.Nested(UserRoleSchema)

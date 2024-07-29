@@ -541,10 +541,10 @@
         let max = tbody.children.length + 1;
         for (let i = 0; i < tbody.children.length; i++) {
             const child = tbody.children[i];
-            const number = +child.id.split("_");
-            if (number[2] === columnSize) {
-                if (number[1] > max) {
-                    max = number[1] + 1;
+            const number = child.id.split("_");
+            if (+number[2] === columnSize) {
+                if (+number[0] > max) {
+                    max = +number[0];
                 }
             }
         }

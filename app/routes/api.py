@@ -42,7 +42,7 @@ def create_user():
     user = storage.load_user_by_uuid(request.json["uuid"])
 
     if user is not None:
-        return {"success": False, "data": "User already exists"}
+        return {"success": False, "data": "User with uuid already exists"}
 
     if "password" not in request.json:
         return {"success": False, "data": "Missing password"}

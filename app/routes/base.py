@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -477,3 +478,10 @@ def is_admin():
     """Returns True if the current session user is an admin."""
     user_data = get_user()
     return user_data["role"]["name"] == 'admin'
+
+
+@bases.app_template_filter("utc_to_local")
+def utc_to_local(utc_dt):
+    utc_offset_hours = 2
+    local_dt = utc_dt + timedelta(hours=utc_offset_hours)
+    return local_dt.strftime('%Y-%m-%d %H:%M:%S')

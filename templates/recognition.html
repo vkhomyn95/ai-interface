@@ -35,7 +35,7 @@
                     <div class="card-body-wrapper pt-20 pb-20">
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Дата запиту</div>
-                            <div class="w-50">{{ recognition.created_date }}</div>
+                            <div class="w-50">{{ recognition.created_date|utc_to_local }}</div>
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Ідентифікатор запиту</div>
@@ -131,7 +131,7 @@
                             {% if not r.final %}
                             <div class="table-row">
                                 <div style="width: 8%">{{ r.id }}</div>
-                                <div style="width: 25%">{{ r.created_date }}</div>
+                                <div style="width: 25%">{{ r.created_date|utc_to_local }}</div>
                                 <div style="width: 10%">{{ r.final }}</div>
                                 {% if r.audio_uuid %}
                                 <div style="width: 32%">

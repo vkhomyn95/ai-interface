@@ -131,7 +131,7 @@
                     <div class="table-content">
                         {% for recognition in recognitions %}
                         <div class="table-row">
-                            <div style="width: 12%">{{ recognition.created_date }}</div>
+                            <div style="width: 12%">{{ recognition.created_date|utc_to_local }}</div>
                             <div style="width: 20%">{{ recognition.request_uuid }}</div>
                             <div style="width: 20%">{{ recognition.audio_uuid }}</div>
                             <div style="width: 10%">{{ recognition.final }}</div>

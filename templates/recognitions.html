@@ -190,12 +190,15 @@
         startDate: moment().startOf('hour'),
         endDate: moment().startOf('hour').add(32, 'hour'),
         timePicker24Hour: true,
-        minDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()),
+        autoUpdateInput: false,
         maxDate: currentDate,
         locale: {
-          format: 'YYYY-MM-DD hh:mm:ss'
+          format: 'YYYY-MM-DD HH:mm:ss'
         }
       });
+    });
+    $('input[name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
+      $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm:ss') + ' - ' + picker.endDate.format('YYYY-MM-DD HH:mm:ss'));
     });
 </script>
 </body>

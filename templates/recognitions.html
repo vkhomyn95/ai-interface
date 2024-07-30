@@ -36,11 +36,11 @@
                     </div>
                     <div class="content-wrapper-head-actions">
                         <form id="filterForm" action="{{ url_for('bases.bases_blp.recognitions') }}" class="flex flex-direction-row flex-align-end">
-                            {% if role == 'admin' %}
+                            {% if current_user.role.name == 'admin' %}
                                 <div class="flex flex-direction-column ml-15">
                                     <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
                                     <div class="w-100">
-                                        <select name="user_id" id="user_id" style="width: 250px">
+                                        <select name="user_id" id="user_id" style="width: 200px">
                                             <option value="">Оберіть користувача</option>
                                             {% for user in users %}
                                             <option value="{{user.id}}" {% if filter.user_id and filter.user_id|str_to_int == user.id %}selected{% endif %}>{{ user.username }}</option>
@@ -49,12 +49,26 @@
                                     </div>
                                 </div>
                             {% endif %}
+                            <div class="flex flex-direction-column ml-15">
+                                <label class="label label-required_danger mb-5" for="datetime" style="white-space: nowrap">Дата</label>
+                                <div class="w-100">
+                                    <input
+                                            style="width: 200px"
+                                            class="input"
+                                            type="text"
+                                            id="datetime"
+                                            name="datetime"
+                                            value="{{ filter.datetime }}"
+                                            autocomplete="off"
+                                    />
+                                </div>
+                            </div>
 
                             <div class="flex flex-direction-column ml-15">
                                 <label class="label label-required_danger mb-5" for="campaign_id" style="white-space: nowrap">Телемаркетинг</label>
                                 <div class="w-100">
                                     <input
-                                            style="width: 250px"
+                                            style="width: 200px"
                                             class="input"
                                             type="number"
                                             id="campaign_id"
@@ -69,7 +83,7 @@
                                 <label class="label label-required_danger mb-5" for="request_uuid" style="white-space: nowrap">Ідентифікатор запиту</label>
                                 <div class="w-100">
                                     <input
-                                            style="width: 250px"
+                                            style="width: 200px"
                                             class="input"
                                             type="text"
                                             id="request_uuid"
@@ -84,7 +98,7 @@
                                 <label class="label label-required_danger mb-5" for="extension">Телефон</label>
                                 <div class="w-100">
                                     <input
-                                            style="width: 250px"
+                                            style="width: 200px"
                                             class="input"
                                             type="text"
                                             id="extension"
@@ -163,11 +177,26 @@
         document.getElementById('request_uuid').value = "";
         document.getElementById('extension').value = "";
         document.getElementById('campaign_id').value = "";
+        document.getElementById('datetime').value = "";
         const uId = document.getElementById('user_id');
         if (uId !== null)
             uId.value = "";
         document.getElementById('filterForm').submit();
     }
+    const currentDate = new Date();
+    $(function() {
+      $('input[name="datetime"]').daterangepicker({
+        timePicker: true,
+        startDate: moment().startOf('hour'),
+        endDate: moment().startOf('hour').add(32, 'hour'),
+        timePicker24Hour: true,
+        minDate: new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, currentDate.getDate()),
+        maxDate: currentDate,
+        locale: {
+          format: 'YYYY-MM-DD hh:mm:ss'
+        }
+      });
+    });
 </script>
 </body>
 </html>

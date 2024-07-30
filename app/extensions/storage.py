@@ -249,8 +249,22 @@ class Database:
             return None
 
     @staticmethod
+    def parse_date_time(query, date_time: str):
+        if date_time and date_time != '':
+            date_f = date_time.split(" - ")
+            if len(date_f) == 2:
+                return query.filter(
+                    Recognition.created_date >= datetime.strptime(date_f[0], '%Y-%m-%d %H:%M:%S') + timedelta(
+                        hours=-variables.server_timezone),
+                    Recognition.created_date <= datetime.strptime(date_f[1], '%Y-%m-%d %H:%M:%S') + timedelta(
+                        hours=-variables.server_timezone)
+                )
+        return query
+
     def load_recognitions(
+            self,
             user_id: int,
+            date_time: str,
             campaign_id: int,
             request_uuid: str,
             extension: str,
@@ -262,6 +276,9 @@ class Database:
 
             if user_id:
                 query = query.filter(Recognition.user_id == user_id)
+
+            query = self.parse_date_time(query, date_time)
+
             if campaign_id:
                 query = query.filter(Recognition.campaign_id == campaign_id)
             if request_uuid:
@@ -276,9 +293,10 @@ class Database:
             db.session.rollback()
             return None
 
-    @staticmethod
     def load_recognitions_related_to_user(
+            self,
             user_id: int,
+            date_time: str,
             campaign_id: int,
             request_uuid: str,
             extension: str,
@@ -287,6 +305,8 @@ class Database:
     ):
         try:
             query = db.session.query(Recognition).filter(Recognition.user_id == user_id, Recognition.final == True)
+
+            query = self.parse_date_time(query, date_time)
 
             if campaign_id:
                 query = query.filter(Recognition.campaign_id == campaign_id)
@@ -334,13 +354,15 @@ class Database:
             db.session.rollback()
             return None
 
-    @staticmethod
-    def count_recognitions(user_id: int, campaign_id: int, request_uuid: str, extension: str):
+    def count_recognitions(self, user_id: int, date_time: str, campaign_id: int, request_uuid: str, extension: str):
         try:
             query = db.session.query(func.count(Recognition.id)).filter(Recognition.final == True)
 
             if user_id:
                 query = query.filter(Recognition.user_id == user_id)
+
+            query = self.parse_date_time(query, date_time)
+
             if campaign_id:
                 query = query.filter(Recognition.campaign_id == campaign_id)
             if request_uuid:

@@ -321,6 +321,7 @@ def recognitions():
     limit = request.args.get('limit', 10, type=int)
     offset = (page - 1) * limit
 
+    datetime = request.args.get('datetime', '', type=str).strip()
     campaign_id = request.args.get('campaign_id', '', type=str).strip()
     request_uuid = request.args.get('request_uuid', '', type=str).strip()
     extension = request.args.get('extension', '', type=str).strip()
@@ -328,12 +329,12 @@ def recognitions():
     if is_admin():
         user_id = request.args.get('user_id', '', type=str).strip()
         searched_recognitions = storage.load_recognitions(
-            user_id, campaign_id, request_uuid, extension, limit, offset)
+            user_id, datetime, campaign_id, request_uuid, extension, limit, offset)
     else:
         user_id = session_user["id"]
         searched_recognitions = storage.load_recognitions_related_to_user(
-            user_id, campaign_id, request_uuid, extension, limit, offset)
-    recognitions_count = storage.count_recognitions(user_id, campaign_id, request_uuid, extension)
+            user_id, datetime, campaign_id, request_uuid, extension, limit, offset)
+    recognitions_count = storage.count_recognitions(user_id, datetime, campaign_id, request_uuid, extension)
 
     total_pages = 1 if recognitions_count <= limit else (recognitions_count + (limit - 1)) // limit
 
@@ -350,6 +351,7 @@ def recognitions():
             "campaign_id": campaign_id,
             "request_uuid": request_uuid,
             "extension": extension,
+            "datetime": datetime,
         },
         current_user=session_user
     )

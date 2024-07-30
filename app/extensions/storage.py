@@ -287,6 +287,7 @@ class Database:
                 query = query.filter(Recognition.extension == extension)
 
             recognitions = query.order_by(Recognition.id.desc()).limit(limit).offset(offset).all()
+
             return recognitions
         except Exception as e:
             logging.error(f'  >> Error: {e}')
@@ -325,8 +326,7 @@ class Database:
     @staticmethod
     def load_related_recognitions(request_uuid: str):
         try:
-            recognitions = db.session.query(Recognition).filter(Recognition.request_uuid == request_uuid).all()
-            return recognitions
+            return db.session.query(Recognition).filter(Recognition.request_uuid == request_uuid).all()
         except Exception as e:
             logging.error(f'  >> Error: {e}')
             db.session.rollback()
@@ -335,7 +335,7 @@ class Database:
     @staticmethod
     def load_recognition_by_id(recognition_id: int):
         try:
-            return db.session.query(Recognition).filter(Recognition.id == recognition_id).first()
+            return db.session.query(Recognition).join(User, Recognition.user_id == User.id).filter(Recognition.id == recognition_id).first()
         except Exception as e:
             logging.error(f'  >> Error during query: {e}')
             db.session.rollback()
@@ -344,7 +344,7 @@ class Database:
     @staticmethod
     def load_recognition_by_id_related_to_user(recognition_id: int, user_id: int):
         try:
-            recognition = db.session.query(Recognition).join(User, Recognition.user_id == User.id).filter(
+            recognition = db.session.query(Recognition).filter(
                 Recognition.id == recognition_id,
                 Recognition.user_id == user_id
             ).first()

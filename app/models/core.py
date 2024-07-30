@@ -55,7 +55,9 @@ class Recognition(db.Model):
     company_id = db.Column(db.Integer, nullable=True)
     campaign_id = db.Column(db.Integer, nullable=True)
     application_id = db.Column(db.Integer, nullable=True)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', uselist=False, lazy=True)
 
 
 class User(db.Model):

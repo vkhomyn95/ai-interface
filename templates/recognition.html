@@ -65,7 +65,7 @@
                             <div class="w-50">Номер</div>
                             <div class="w-50">{{ recognition.extension }}</div>
                         </div>
-                        {% if role == 'admin' %}
+                        {% if current_user.role.name == 'admin' %}
                         <div class="p-20">
                             <span class="card-title">
                                 Користувач
@@ -78,23 +78,23 @@
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Last name</div>
-                            <div class="w-50">{{ recognition.last_name }}</div>
+                            <div class="w-50">{{ recognition.user.last_name }}</div>
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">First name</div>
-                            <div class="w-50">{{ recognition.first_name }}</div>
+                            <div class="w-50">{{ recognition.user.first_name }}</div>
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Email</div>
-                            <div class="w-50">{{ recognition.email }}</div>
+                            <div class="w-50">{{ recognition.user.email }}</div>
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Phone</div>
-                            <div class="w-50">{{ recognition.phone }}</div>
+                            <div class="w-50">{{ recognition.user.phone }}</div>
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Audience</div>
-                            <div class="w-50">{{ recognition.audience }}</div>
+                            <div class="w-50">{{ recognition.user.audience }}</div>
                         </div>
                         {% endif %}
                     </div>

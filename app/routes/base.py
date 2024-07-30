@@ -482,6 +482,6 @@ def is_admin():
 
 @bases.app_template_filter("utc_to_local")
 def utc_to_local(utc_dt):
-    utc_offset_hours = 2
+    utc_offset_hours = variables.server_timezone
     local_dt = utc_dt + timedelta(hours=utc_offset_hours)
     return local_dt.strftime('%Y-%m-%d %H:%M:%S')

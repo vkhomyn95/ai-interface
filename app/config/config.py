@@ -33,6 +33,11 @@ class Variables:
         "5000"
     )
 
+    server_timezone: str = os.getenv(
+        "SERVER_TIMEZONE",
+        3
+    )
+
     license_server_access_token: str = os.getenv(
         "LICENSE_SERVER_ACCESS_TOKEN",
         "TOKEN"

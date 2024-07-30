@@ -13,5 +13,6 @@ docker run -d --restart always --net=host -v /stor:/stor -v /etc/localtime:/etc/
         -e SQLALCHEMY_DATABASE_URI='mysql://root:root@127.0.0.1/amd' \
         -e USER_DEFAULT_PASSWORD='Erhf]yf12' \
         -e LICENSE_SERVER_ACCESS_TOKEN='272C8DCC83zBxxBDBB7y@DCyBzyCB7Bx' \
+        -e SERVER_TIMEZONE=3 \
         -e PYTHONUNBUFFERED=0 \
         --name ai-interface vk/ai-interface

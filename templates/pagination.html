@@ -4,8 +4,8 @@
     <ul class="pagination-wrapper">
         {% if page != 1 and total_pages > 3 and (page - 1) != 1  and (page - 2) != 1 %}
             <li class="pagination-wrapper-option">
-                {% if template=='recognitions' %}
-                    <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=1, request_uuid=filter.request_uuid, extension=filter.extension, campaign_id=filter.campaign_id) }}" aria-label="Goto page 1">1</a>
+                {% if template=='bases.bases_blp.recognitions' %}
+                    <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=1, datetime=filter.datetime, request_uuid=filter.request_uuid, extension=filter.extension, campaign_id=filter.campaign_id) }}" aria-label="Goto page 1">1</a>
                 {% else %}
                     <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=1) }}" aria-label="Goto page 1">1</a>
                 {% endif %}
@@ -19,8 +19,8 @@
 
         {% for p in range(start_page, end_page + 1) %}
             <li class="pagination-wrapper-option ml-20">
-                {% if template=='recognitions' %}
-                    <a class="pagination-wrapper-option-button {% if p == page %}pagination-wrapper-option-button-active{% endif %}" href="{{ url_for(template, page=p, request_uuid=filter.request_uuid, extension=filter.extension, campaign_id=filter.campaign_id) }}" aria-label="Page {{ p }}" aria-current="{% if p == page %}page{% endif %}">{{ p }}</a>
+                {% if template=='bases.bases_blp.recognitions' %}
+                    <a class="pagination-wrapper-option-button {% if p == page %}pagination-wrapper-option-button-active{% endif %}" href="{{ url_for(template, page=p, datetime=filter.datetime, request_uuid=filter.request_uuid, extension=filter.extension, campaign_id=filter.campaign_id) }}" aria-label="Page {{ p }}" aria-current="{% if p == page %}page{% endif %}">{{ p }}</a>
                 {% else %}
                     <a class="pagination-wrapper-option-button {% if p == page %}pagination-wrapper-option-button-active{% endif %}" href="{{ url_for(template, page=p) }}" aria-label="Goto page {{ p }}">{{ p }}</a>
                 {% endif %}
@@ -34,8 +34,8 @@
                 </li>
             {% endif %}
             <li class="pagination-wrapper-option ml-20">
-                {% if template=='recognitions' %}
-                    <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=total_pages, request_uuid=filter.request_uuid, extension=filter.extension, campaign_id=filter.campaign_id) }}" aria-label="Goto page {{ total_pages }}">{{ total_pages }}</a>
+                {% if template=='bases.bases_blp.recognitions' %}
+                    <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=total_pages, datetime=filter.datetime, request_uuid=filter.request_uuid, extension=filter.extension, campaign_id=filter.campaign_id) }}" aria-label="Goto page {{ total_pages }}">{{ total_pages }}</a>
                 {% else %}
                     <a class="pagination-wrapper-option-button" href="{{ url_for(template, page=total_pages) }}" aria-label="Goto page {{ total_pages }}">{{ total_pages }}</a>
                 {% endif %}

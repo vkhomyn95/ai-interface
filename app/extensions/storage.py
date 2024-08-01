@@ -172,12 +172,21 @@ class Database:
                 func.sum(
                     case(
                         (func.date(Recognition.created_date) == today, case(
-                            (Recognition.prediction != 'voicemail', 1),
+                            (Recognition.prediction == 'human', 1),
                             else_=0
                         )),
                         else_=0
                     )
                 ).label('today_human'),
+                func.sum(
+                    case(
+                        (func.date(Recognition.created_date) == today, case(
+                            (Recognition.prediction == 'not_predicted', 1),
+                            else_=0
+                        )),
+                        else_=0
+                    )
+                ).label('today_not_predicted'),
                 func.sum(
                     case(
                         (Recognition.created_date >= last_week, 1),
@@ -196,12 +205,21 @@ class Database:
                 func.sum(
                     case(
                         (Recognition.created_date >= last_week, case(
-                            (Recognition.prediction != 'voicemail', 1),
+                            (Recognition.prediction == 'human', 1),
                             else_=0
                         )),
                         else_=0
                     )
                 ).label('week_human'),
+                func.sum(
+                    case(
+                        (Recognition.created_date >= last_week, case(
+                            (Recognition.prediction == 'not_predicted', 1),
+                            else_=0
+                        )),
+                        else_=0
+                    )
+                ).label('week_not_predicted'),
                 func.sum(
                     case(
                         (Recognition.created_date >= first_day_of_month, 1),
@@ -220,12 +238,21 @@ class Database:
                 func.sum(
                     case(
                         (Recognition.created_date >= first_day_of_month, case(
-                            (Recognition.prediction != 'voicemail', 1),
+                            (Recognition.prediction == 'human', 1),
                             else_=0
                         )),
                         else_=0
                     )
-                ).label('month_human')
+                ).label('month_human'),
+                func.sum(
+                    case(
+                        (Recognition.created_date >= first_day_of_month, case(
+                            (Recognition.prediction == 'not_predicted', 1),
+                            else_=0
+                        )),
+                        else_=0
+                    )
+                ).label('month_not_predicted')
             ).filter(
                 Recognition.created_date >= first_day_of_month,
                 Recognition.final == True,
@@ -236,12 +263,15 @@ class Database:
                 'today_total': query.today_total,
                 'today_voicemail': query.today_voicemail,
                 'today_human': query.today_human,
+                'today_not_predicted': query.today_not_predicted,
                 'week_total': query.week_total,
                 'week_voicemail': query.week_voicemail,
                 'week_human': query.week_human,
+                'week_not_predicted': query.week_not_predicted,
                 'month_total': query.month_total,
                 'month_voicemail': query.month_voicemail,
-                'month_human': query.month_human
+                'month_human': query.month_human,
+                'month_not_predicted': query.month_not_predicted
             }
         except Exception as e:
             logging.error(f'  >> Error during query dashboard: {e}')

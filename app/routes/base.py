@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -423,8 +424,8 @@ def recognition(recognition_id: int):
     )
 
 
-@bases.route('/audio/<path:filename>')
-def serve_audio(filename):
+@bases.route('/audio/<path:created_date>/<path:filename>')
+def serve_audio(created_date, filename):
     """
     Serve audio files to the user.
 
@@ -438,14 +439,20 @@ def serve_audio(filename):
         - The audio file if the user is authenticated and the filename is valid.
         - An empty string if the filename is 'None'.
         - A redirect to the 'login' page if the user is not authenticated.
+        :param filename:
+        :param created_date:
     """
     current_user = session.get("user")
 
     if current_user:
         if filename != 'None':
+            save_dir = None
             if not filename.endswith('.wav'):
                 filename = filename + '.wav'
-            return send_from_directory(variables.audio_dir, filename)
+                year, month, day = created_date.split(' ')[0].split("-")
+                save_dir = os.path.join(variables.audio_dir, year, month, day)
+
+            return send_from_directory(save_dir, filename)
         return ''
     else:
         return redirect(url_for('bases.bases_blp.login'))

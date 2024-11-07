@@ -35,7 +35,7 @@
                     <div class="card-body-wrapper pt-20 pb-20">
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Дата запиту</div>
-                            <div class="w-50">{{ recognition.created_date|utc_to_local }}</div>
+                            <div class="w-50 created-date">{{ recognition.created_date }}</div>
                         </div>
                         <div class="flex flex-direction-row flex-align-center py-20 mb-20">
                             <div class="w-50">Ідентифікатор запиту</div>
@@ -131,7 +131,7 @@
                             {% if not r.final %}
                             <div class="table-row">
                                 <div style="width: 8%">{{ r.id }}</div>
-                                <div style="width: 25%">{{ r.created_date|utc_to_local }}</div>
+                                <div style="width: 25%" class="created-date">{{ r.created_date }}</div>
                                 <div style="width: 10%">{{ r.final }}</div>
                                 {% if r.audio_uuid %}
                                 <div style="width: 32%">
@@ -168,5 +168,42 @@
             window.location.href = document.referrer;
         }
     }
+    function convertUTCToLocal(utcDateString) {
+      // Parse the UTC date string to a Date object
+      if (utcDateString.endsWith("Z")) {
+            utcDateString = utcDateString.replaceAll("Z", "");
+        }
+        const utcDate = new Date(utcDateString + 'Z')
+
+      // Format the Date object to the desired format in the local timezone
+      const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-CA', options);
+      const formattedDateParts = formatter.formatToParts(utcDate);
+
+      // Extract parts and assemble into desired format
+      const year = formattedDateParts.find(part => part.type === 'year').value;
+      const month = formattedDateParts.find(part => part.type === 'month').value;
+      const day = formattedDateParts.find(part => part.type === 'day').value;
+      const hour = formattedDateParts.find(part => part.type === 'hour').value;
+      const minute = formattedDateParts.find(part => part.type === 'minute').value;
+      const second = formattedDateParts.find(part => part.type === 'second').value;
+
+      // Return the formatted date string
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
+    document.querySelectorAll('.created-date').forEach(element => {
+      const utcDate = element.textContent.trim();
+      element.textContent = convertUTCToLocal(utcDate);
+    });
 </script>
 </html>

@@ -1,12 +1,11 @@
 import json
-from datetime import datetime, timedelta
 
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.config import variables
-from app.extensions import storage, db
-from app.models import User, Tariff, RecognitionConfiguration, UserRole
+from app.extensions import storage
+from app.models import User, Tariff, RecognitionConfiguration
 from app.schemas import UserSchema
 
 bases = Blueprint("bases_blp", __name__, url_prefix="/")
@@ -480,10 +479,3 @@ def is_admin():
     """Returns True if the current session user is an admin."""
     user_data = get_user()
     return user_data["role"]["name"] == 'admin'
-
-
-@bases.app_template_filter("utc_to_local")
-def utc_to_local(utc_dt):
-    utc_offset_hours = variables.server_timezone
-    local_dt = utc_dt + timedelta(hours=utc_offset_hours)
-    return local_dt.strftime('%Y-%m-%d %H:%M:%S')

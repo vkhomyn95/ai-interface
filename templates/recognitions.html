@@ -54,7 +54,7 @@
                                 <div class="w-100">
                                     <input
                                             style="width: 200px"
-                                            class="input"
+                                            class="input created-date-input"
                                             type="text"
                                             id="datetime"
                                             name="datetime"
@@ -114,7 +114,7 @@
                                 {% include 'header/icons/icon-filter-clear.html' %}
                                 <span style="margin-left: 10px">Скинути</span>
                             </button>
-                            <button type="submit" class="button button-primary ml-15">
+                            <button type="submit" class="button button-primary ml-15" onclick="filter()">
                                 {% include 'header/icons/icon-filter.html' %}
                                 <span style="margin-left: 10px">Фільтрувати</span>
                             </button>
@@ -145,7 +145,7 @@
                     <div class="table-content">
                         {% for recognition in recognitions %}
                         <div class="table-row">
-                            <div style="width: 12%">{{ recognition.created_date|utc_to_local }}</div>
+                            <div style="width: 12%" class="created-date">{{ recognition.created_date }}</div>
                             <div style="width: 20%">{{ recognition.request_uuid }}</div>
                             <div style="width: 20%">{{ recognition.audio_uuid }}</div>
                             <div style="width: 10%">{{ recognition.final }}</div>
@@ -183,6 +183,15 @@
             uId.value = "";
         document.getElementById('filterForm').submit();
     }
+    let fromDate = null;
+    let toDate = null;
+    function filter() {
+        event.preventDefault();
+        if (document.getElementById('datetime').value !== null) {
+            document.getElementById('datetime').value = fromDate + " - " + toDate;
+            document.getElementById('filterForm').submit();
+        }
+    }
 
     const currentDate = new Date();
     $(function() {
@@ -199,7 +208,56 @@
       });
     });
     $('input[name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
-      $(this).val(picker.startDate.format('YYYY-MM-DD HH:mm:ss') + ' - ' + picker.endDate.format('YYYY-MM-DD HH:mm:ss'));
+        const currentStart = picker.startDate;
+        const currentEnd = picker.endDate;
+
+        fromDate = currentStart.utc().format('YYYY-MM-DD HH:mm:ss');
+        toDate = currentEnd.utc().format('YYYY-MM-DD HH:mm:ss');
+      $(this).val(convertUTCToLocal(fromDate) + ' - ' + convertUTCToLocal(toDate));
+    });
+    function convertUTCToLocal(utcDateString) {
+      // Parse the UTC date string to a Date object
+      if (utcDateString.endsWith("Z")) {
+            utcDateString = utcDateString.replaceAll("Z", "");
+        }
+        const utcDate = new Date(utcDateString + 'Z')
+
+      // Format the Date object to the desired format in the local timezone
+      const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // Ensures local timezone
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-CA', options);
+      const formattedDateParts = formatter.formatToParts(utcDate);
+
+      // Extract parts and assemble into desired format
+      const year = formattedDateParts.find(part => part.type === 'year').value;
+      const month = formattedDateParts.find(part => part.type === 'month').value;
+      const day = formattedDateParts.find(part => part.type === 'day').value;
+      const hour = formattedDateParts.find(part => part.type === 'hour').value;
+      const minute = formattedDateParts.find(part => part.type === 'minute').value;
+      const second = formattedDateParts.find(part => part.type === 'second').value;
+
+      // Return the formatted date string
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
+    document.querySelectorAll('.created-date').forEach(element => {
+      const utcDate = element.textContent.trim();
+      element.textContent = convertUTCToLocal(utcDate);
+    });
+    document.querySelectorAll('.created-date-input').forEach(element => {
+      const utcDate = element.value.trim().split(" - ");
+      let [from, to] = utcDate;
+      from = convertUTCToLocal(from);
+      to = convertUTCToLocal(to);
+      element.value = from + " - " + to;
     });
 </script>
 </body>

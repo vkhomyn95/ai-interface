@@ -284,10 +284,8 @@ class Database:
             date_f = date_time.split(" - ")
             if len(date_f) == 2:
                 return query.filter(
-                    Recognition.created_date >= datetime.strptime(date_f[0], '%Y-%m-%d %H:%M:%S') + timedelta(
-                        hours=-variables.server_timezone),
-                    Recognition.created_date <= datetime.strptime(date_f[1], '%Y-%m-%d %H:%M:%S') + timedelta(
-                        hours=-variables.server_timezone)
+                    Recognition.created_date >= datetime.strptime(date_f[0], '%Y-%m-%d %H:%M:%S'),
+                    Recognition.created_date <= datetime.strptime(date_f[1], '%Y-%m-%d %H:%M:%S')
                 )
         return query
 

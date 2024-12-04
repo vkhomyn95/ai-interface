@@ -443,7 +443,6 @@ def serve_audio(created_date, filename):
         :param created_date:
     """
     current_user = session.get("user")
-
     if current_user:
         if filename != 'None':
             save_dir = None
@@ -451,7 +450,9 @@ def serve_audio(created_date, filename):
                 filename = filename + '.wav'
                 year, month, day = created_date.split(' ')[0].split("-")
                 save_dir = os.path.join(variables.audio_dir, year, month, day)
-
+            else:
+                year, month, day = created_date.split(' ')[0].split('-')
+                save_dir = os.path.join(variables.audio_dir, year, month, day)
             return send_from_directory(save_dir, filename)
         return ''
     else:

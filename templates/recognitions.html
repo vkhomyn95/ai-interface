@@ -188,7 +188,11 @@
     function filter() {
         event.preventDefault();
         if (document.getElementById('datetime').value !== null) {
-            document.getElementById('datetime').value = fromDate + " - " + toDate;
+            if (fromDate === null || toDate === null) {
+                document.getElementById('datetime').value = "";
+            } else {
+                document.getElementById('datetime').value = fromDate + " - " + toDate;
+            }
             document.getElementById('filterForm').submit();
         }
     }
@@ -257,7 +261,11 @@
       let [from, to] = utcDate;
       from = convertUTCToLocal(from);
       to = convertUTCToLocal(to);
-      element.value = from + " - " + to;
+      if (from === null || to === null) {
+          element.value = "";
+      } else {
+          element.value = from + " - " + to;
+      }
     });
 </script>
 </body>

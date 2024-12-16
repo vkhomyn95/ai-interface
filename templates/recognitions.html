@@ -43,7 +43,7 @@
                                         <select name="user_id" id="user_id" style="width: 200px">
                                             <option value="">Оберіть користувача</option>
                                             {% for user in users %}
-                                            <option value="{{user.id}}" {% if filter.user_id and filter.user_id|str_to_int == user.id %}selected{% endif %}>{{ user.username }}</option>
+                                            <option value="{{user.id}}" {% if filter.user_id and filter.user_id == user.id %}selected{% endif %}>{{ user.username }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -70,6 +70,7 @@
                                     <input
                                             style="width: 200px"
                                             class="input"
+                                            min="0"
                                             type="number"
                                             id="campaign_id"
                                             name="campaign_id"
@@ -179,8 +180,10 @@
         document.getElementById('campaign_id').value = "";
         document.getElementById('datetime').value = "";
         const uId = document.getElementById('user_id');
-        if (uId !== null)
+        if (uId !== null) {
             uId.value = "";
+        }
+        $('input[name="datetime"]').value = "";
         document.getElementById('filterForm').submit();
     }
     let fromDate = null;
@@ -191,7 +194,7 @@
             if (fromDate === null || toDate === null) {
                 document.getElementById('datetime').value = "";
             } else {
-                document.getElementById('datetime').value = fromDate + " - " + toDate;
+                document.getElementById('datetime').value = convertLocalToUTC(fromDate) + " - " + convertLocalToUTC(toDate);
             }
             document.getElementById('filterForm').submit();
         }
@@ -215,10 +218,26 @@
         const currentStart = picker.startDate;
         const currentEnd = picker.endDate;
 
-        fromDate = currentStart.utc().format('YYYY-MM-DD HH:mm:ss');
-        toDate = currentEnd.utc().format('YYYY-MM-DD HH:mm:ss');
-      $(this).val(convertUTCToLocal(fromDate) + ' - ' + convertUTCToLocal(toDate));
+        fromDate = currentStart.format('YYYY-MM-DD HH:mm:ss');
+        toDate = currentEnd.format('YYYY-MM-DD HH:mm:ss');
+      $(this).val(fromDate + ' - ' + toDate);
     });
+
+    function convertLocalToUTC(localDateString) {
+        // Parse the local date string to a Date object
+        const localDate = new Date(localDateString);
+
+        // Ensure correct UTC formatting using the Date object's UTC methods
+        const year = localDate.getUTCFullYear();
+        const month = String(localDate.getUTCMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        const day = String(localDate.getUTCDate()).padStart(2, '0');
+        const hour = String(localDate.getUTCHours()).padStart(2, '0');
+        const minute = String(localDate.getUTCMinutes()).padStart(2, '0');
+        const second = String(localDate.getUTCSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
+
     function convertUTCToLocal(utcDateString) {
       // Parse the UTC date string to a Date object
       if (utcDateString.endsWith("Z")) {
@@ -259,12 +278,10 @@
     document.querySelectorAll('.created-date-input').forEach(element => {
       const utcDate = element.value.trim().split(" - ");
       let [from, to] = utcDate;
-      from = convertUTCToLocal(from);
-      to = convertUTCToLocal(to);
-      if (from === null || to === null) {
+      if (from === "") {
           element.value = "";
       } else {
-          element.value = from + " - " + to;
+          element.value = convertUTCToLocal(from) + " - " + convertUTCToLocal(to);
       }
     });
 </script>

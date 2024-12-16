@@ -50,9 +50,9 @@
                     {'name': 'Прізвище'},
                     {'name': "Ім'я"},
                     {'name': 'Телефон'},
-                    {'name': 'Домен'},
+                    {'name': 'Email'},
                     {'name': 'Активний'},
-                    {'name': 'Кількість'},
+                    {'name': 'Кількість запитів'},
                     {'name': 'Дії', 'actions': True},
                 ] %}
 
@@ -73,7 +73,7 @@
                             <div style="width: 12%">{{ user.last_name }}</div>
                             <div style="width: 12%">{{ user.first_name }}</div>
                             <div style="width: 12%">{{ user.phone }}</div>
-                            <div style="width: 12%">{{ user.audience }}</div>
+                            <div style="width: 12%">{{ user.email }}</div>
                             <div style="width: 12%">{{ user.tariff.active }}</div>
                             <div style="width: 12%">{{ user.tariff.total }}</div>
                             <div style="width: 12px">

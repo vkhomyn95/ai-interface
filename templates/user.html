@@ -244,7 +244,7 @@
                                 </div>
 
                                 <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger">Загалом</label>
+                                    <label class="label label-required_danger">Кількість запитів</label>
                                     <div class="w-100">
                                         <div>
                                             {{ user.tariff.total }}
@@ -281,7 +281,7 @@
                             <div class="p-20">
                             <div class="interim-tab">
                                 <div class="flex flex-direction-row flex-align-center mb-20">
-                                    <label class="label label-required_danger" for="interval_length">Максимальна тривалість інтервалу</label>
+                                    <label class="label label-required_danger" for="interval_length">Максимальна тривалість інтервалу (сек)</label>
                                     <div class="w-100">
                                         <input
                                                 class="input"
@@ -584,7 +584,7 @@
                     tag.classList.add("tag")
                     tag.classList.add(((i + 1) !== columnSize) ? 'is-success' : 'is-warning')
                     tag.classList.add("mb-1")
-                    tag.textContent = (i + 1) !== columnSize ? 'Interval ' + (i + 1) : 'Result';
+                    tag.textContent = (i + 1) !== columnSize ? 'Інтервал ' + (i + 1) : 'Результат';
                     childRadioDiv.appendChild(tag);
                 } else {
                     var radioInput = document.createElement('input');

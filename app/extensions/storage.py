@@ -2,7 +2,7 @@ import logging
 from datetime import datetime, timedelta
 
 from marshmallow import ValidationError
-from sqlalchemy import func, case, update
+from sqlalchemy import func, case, update, and_
 from werkzeug.security import generate_password_hash
 
 from app.config import variables
@@ -146,132 +146,57 @@ class Database:
             db.session.rollback()
             return None
 
-    @staticmethod
-    def load_user_dashboard(user_id):
+    def load_user_dashboard(self, user_id, date_time):
         try:
-            today = datetime.utcnow().date()
-            last_week = today - timedelta(days=6)
-            first_day_of_month = (today.replace(day=1) - timedelta(days=1)).replace(day=1)
+            now = datetime.utcnow()
+            last_24_hours = now - timedelta(days=1)
+            filter_condition = Recognition.created_date >= last_24_hours
+
+            if date_time and date_time != '':
+                date_f = date_time.split(" - ")
+                if len(date_f) == 2:
+                    start_date = datetime.strptime(date_f[0], '%Y-%m-%d %H:%M:%S')
+                    end_date = datetime.strptime(date_f[1], '%Y-%m-%d %H:%M:%S')
+                    filter_condition = and_(Recognition.created_date >= start_date, Recognition.created_date <= end_date)
 
             query = db.session.query(
                 func.sum(
                     case(
-                        (func.date(Recognition.created_date) == today, 1),
+                        (filter_condition, 1),
                         else_=0
                     )
-                ).label('today_total'),
+                ).label('total'),
                 func.sum(
                     case(
-                        (func.date(Recognition.created_date) == today, case(
-                            (Recognition.prediction == 'voicemail', 1),
-                            else_=0
-                        )),
+                        (and_(filter_condition, Recognition.prediction == 'voicemail'), 1),
                         else_=0
                     )
-                ).label('today_voicemail'),
+                ).label('voicemail'),
                 func.sum(
                     case(
-                        (func.date(Recognition.created_date) == today, case(
-                            (Recognition.prediction == 'human', 1),
-                            else_=0
-                        )),
+                        (and_(filter_condition, Recognition.prediction == 'human'), 1),
                         else_=0
                     )
-                ).label('today_human'),
+                ).label('human'),
                 func.sum(
                     case(
-                        (func.date(Recognition.created_date) == today, case(
-                            (Recognition.prediction == 'not_predicted', 1),
-                            else_=0
-                        )),
+                        (and_(filter_condition, Recognition.prediction == 'not_predicted'), 1),
                         else_=0
                     )
-                ).label('today_not_predicted'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= last_week, 1),
-                        else_=0
-                    )
-                ).label('week_total'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= last_week, case(
-                            (Recognition.prediction == 'voicemail', 1),
-                            else_=0
-                        )),
-                        else_=0
-                    )
-                ).label('week_voicemail'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= last_week, case(
-                            (Recognition.prediction == 'human', 1),
-                            else_=0
-                        )),
-                        else_=0
-                    )
-                ).label('week_human'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= last_week, case(
-                            (Recognition.prediction == 'not_predicted', 1),
-                            else_=0
-                        )),
-                        else_=0
-                    )
-                ).label('week_not_predicted'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= first_day_of_month, 1),
-                        else_=0
-                    )
-                ).label('month_total'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= first_day_of_month, case(
-                            (Recognition.prediction == 'voicemail', 1),
-                            else_=0
-                        )),
-                        else_=0
-                    )
-                ).label('month_voicemail'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= first_day_of_month, case(
-                            (Recognition.prediction == 'human', 1),
-                            else_=0
-                        )),
-                        else_=0
-                    )
-                ).label('month_human'),
-                func.sum(
-                    case(
-                        (Recognition.created_date >= first_day_of_month, case(
-                            (Recognition.prediction == 'not_predicted', 1),
-                            else_=0
-                        )),
-                        else_=0
-                    )
-                ).label('month_not_predicted')
+                ).label('not_predicted'),
             ).filter(
-                Recognition.created_date >= first_day_of_month,
+                filter_condition,
                 Recognition.final == True,
                 Recognition.user_id == user_id
-            ).first()
+            )
+
+            query = query.first()
 
             return {
-                'today_total': query.today_total,
-                'today_voicemail': query.today_voicemail,
-                'today_human': query.today_human,
-                'today_not_predicted': query.today_not_predicted,
-                'week_total': query.week_total,
-                'week_voicemail': query.week_voicemail,
-                'week_human': query.week_human,
-                'week_not_predicted': query.week_not_predicted,
-                'month_total': query.month_total,
-                'month_voicemail': query.month_voicemail,
-                'month_human': query.month_human,
-                'month_not_predicted': query.month_not_predicted
+                'total': query.total or 0,
+                'voicemail': query.voicemail or 0,
+                'human': query.human or 0,
+                'not_predicted': query.not_predicted or 0,
             }
         except Exception as e:
             logging.error(f'  >> Error during query dashboard: {e}')

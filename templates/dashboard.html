@@ -25,17 +25,14 @@
 
         <div class="content">
             {% if current_user.role.name == 'admin' %}
-            <form
-                    action="{{ url_for('bases.bases_blp.dashboard') }}"
-                    class="flex flex-direction-row flex-align-end mb-20"
-            >
+            <form action="{{ url_for('bases.bases_blp.dashboard') }}" class="flex flex-direction-row flex-align-end mb-20" id="filterForm">
                 <div class="flex flex-direction-column">
                     <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
                     <div class="w-100">
                         <select name="user_id" id="user_id" style="width: 300px">
                             <option value="">Оберіть користувача</option>
                             {% for user in users %}
-                            {% if filter == user.id %}
+                            {% if filter.user_id == user.id %}
                                 <option value="{{user.id}}" selected>{{ user.username }}</option>
                             {% else %}
                                 <option value="{{user.id}}">{{ user.username }}</option>
@@ -45,19 +42,38 @@
                     </div>
                 </div>
 
-                <button type="submit" class="button button-primary ml-15">
+                <div class="flex flex-direction-column ml-15">
+                    <label class="label label-required_danger mb-5" for="datetime" style="white-space: nowrap">Дата</label>
+                    <div class="w-100">
+                        <input
+                                style="width: 320px"
+                                class="input created-date-input"
+                                type="text"
+                                id="datetime"
+                                name="datetime"
+                                value="{{ filter.datetime }}"
+                                autocomplete="off"
+                        />
+                    </div>
+                </div>
+
+                <button type="submit" class="button button-primary ml-15" onclick="filter()">
                     {% include 'header/icons/icon-filter.html' %}
                     <span style="margin-left: 10px">Фільтрувати</span>
+                </button>
+                <button class="button button-secondary ml-15" onclick="resetForm()">
+                    {% include 'header/icons/icon-filter-clear.html' %}
+                    <span style="margin-left: 10px">Скинути</span>
                 </button>
             </form>
             {% endif %}
 
             <div class="flex flex-direction-row flex-content-between">
 
-                <div class="card" style="width: 33%">
+                <div class="card" style="width: 30%">
                     <div class="p-20">
                         <span class="card-title">
-                            Сьогодні
+                            Моніторинг
                         </span>
                     </div>
                     <div class="card-border"></div>
@@ -67,38 +83,9 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="card ml-15" style="width: 33%">
-                    <div class="p-20">
-                        <span class="card-title">
-                            Тиждень
-                        </span>
-                    </div>
-                    <div class="card-border"></div>
-                    <div class="p-20">
-                        <div id="week-chart">
-                            <div id="week-chart-content"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card ml-15" style="width: 33%">
-                    <div class="p-20">
-                        <span class="card-title">
-                            Місяць
-                        </span>
-                    </div>
-                    <div class="card-border"></div>
-                    <div class="p-20">
-                        <div id="month-chart">
-                            <div id="month-chart-content"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
-
-
+     </div>
 </div>
 
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -131,19 +118,19 @@
         series: [
             {
                 name: "Total",
-                data: [dashboard["today_total"]]
+                data: [dashboard["total"]]
             },
             {
                 name: "Voicemail",
-                data: [dashboard["today_voicemail"]]
+                data: [dashboard["voicemail"]]
             },
             {
                 name: "Human",
-                data: [dashboard["today_human"]]
+                data: [dashboard["human"]]
             },
             {
                 name: "Not predicted",
-                data: [dashboard["today_not_predicted"]]
+                data: [dashboard["not_predicted"]]
             },
         ],
         xaxis: {
@@ -184,57 +171,136 @@
     options.series = [
         {
             name: "Total",
-            data: [dashboard["week_total"]]
+            data: [dashboard["total"]]
         },
         {
             name: "Voicemail",
-            data: [dashboard["week_voicemail"]]
+            data: [dashboard["voicemail"]]
         },
         {
             name: "Human",
-            data: [dashboard["week_human"]]
+            data: [dashboard["human"]]
         },
         {
             name: "Not predicted",
-            data: [dashboard["week_not_predicted"]]
+            data: [dashboard["not_predicted"]]
         },
     ]
 
 
     chart.render();
 
-    let weekChart = new ApexCharts(
-        document.querySelector("#week-chart-content"),
-        options
-    );
+    function resetForm() {
+        event.preventDefault();
+        document.getElementById('datetime').value = "";
+        const uId = document.getElementById('user_id');
+        if (uId !== null) {
+            uId.value = "";
+        }
+        $('input[name="datetime"]').value = "";
+        document.getElementById('filterForm').submit();
+    }
+    let fromDate = null;
+    let toDate = null;
 
-    weekChart.render();
+    function filter() {
+        event.preventDefault();
+        if (document.getElementById('datetime').value !== null) {
+            console.log(fromDate, toDate, document.getElementById('datetime').value !== null)
+            if (fromDate === null || toDate === null) {
+                document.getElementById('datetime').value = "";
+            } else {
+                document.getElementById('datetime').value = convertLocalToUTC(fromDate) + " - " + convertLocalToUTC(toDate);
+            }
+            console.log(document.getElementById('datetime').value)
+            document.getElementById('filterForm').submit();
+        }
+    }
 
-    options.series = [
-        {
-            name: "Total",
-            data: [dashboard["month_total"]]
+    const currentDate = new Date();
+    $(function() {
+      $('input[name="datetime"]').daterangepicker({
+        timePicker: true,
+        startDate: moment().startOf('hour'),
+        timePicker24Hour: true,
+        autoUpdateInput: false,
+        maxSpan: {
+            days: 31
         },
-        {
-            name: "Voicemail",
-            data: [dashboard["month_voicemail"]]
-        },
-        {
-            name: "Human",
-            data: [dashboard["month_human"]]
-        },
-        {
-            name: "Not predicted",
-            data: [dashboard["month_not_predicted"]]
-        },
-    ]
+        maxDate: currentDate,
+        locale: {
+          format: 'YYYY-MM-DD HH:mm:ss'
+        }
+      });
+    });
+    $('input[name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
+        const currentStart = picker.startDate;
+        const currentEnd = picker.endDate;
 
-    let monthChart = new ApexCharts(
-        document.querySelector("#month-chart-content"),
-        options
-    );
+        fromDate = currentStart.format('YYYY-MM-DD HH:mm:ss');
+        toDate = currentEnd.format('YYYY-MM-DD HH:mm:ss');
+      $(this).val(fromDate + ' - ' + toDate);
+    });
 
-    monthChart.render();
+    function convertLocalToUTC(localDateString) {
+        const localDate = new Date(localDateString);
+
+        const year = localDate.getUTCFullYear();
+        const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(localDate.getUTCDate()).padStart(2, '0');
+        const hour = String(localDate.getUTCHours()).padStart(2, '0');
+        const minute = String(localDate.getUTCMinutes()).padStart(2, '0');
+        const second = String(localDate.getUTCSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
+
+    function convertUTCToLocal(utcDateString) {
+      // Parse the UTC date string to a Date object
+      if (utcDateString.endsWith("Z")) {
+            utcDateString = utcDateString.replaceAll("Z", "");
+        }
+        const utcDate = new Date(utcDateString + 'Z')
+
+      // Format the Date object to the desired format in the local timezone
+      const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // Ensures local timezone
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-CA', options);
+      const formattedDateParts = formatter.formatToParts(utcDate);
+
+      // Extract parts and assemble into desired format
+      const year = formattedDateParts.find(part => part.type === 'year').value;
+      const month = formattedDateParts.find(part => part.type === 'month').value;
+      const day = formattedDateParts.find(part => part.type === 'day').value;
+      const hour = formattedDateParts.find(part => part.type === 'hour').value;
+      const minute = formattedDateParts.find(part => part.type === 'minute').value;
+      const second = formattedDateParts.find(part => part.type === 'second').value;
+
+      // Return the formatted date string
+      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    }
+    document.querySelectorAll('.created-date').forEach(element => {
+      const utcDate = element.textContent.trim();
+      element.textContent = convertUTCToLocal(utcDate);
+    });
+    document.querySelectorAll('.created-date-input').forEach(element => {
+      const utcDate = element.value.trim().split(" - ");
+      let [from, to] = utcDate;
+      if (from === "") {
+          element.value = "";
+      } else {
+          element.value = convertUTCToLocal(from) + " - " + convertUTCToLocal(to);
+      }
+    });
 </script>
 </body>
 </html>

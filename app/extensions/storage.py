@@ -221,6 +221,7 @@ class Database:
             campaign_id: int,
             request_uuid: str,
             extension: str,
+            prediction: str,
             limit: int,
             offset: int
     ):
@@ -238,6 +239,8 @@ class Database:
                 query = query.filter(Recognition.request_uuid == request_uuid)
             if extension:
                 query = query.filter(Recognition.extension == extension)
+            if prediction:
+                query = query.filter(Recognition.prediction == prediction)
 
             recognitions = query.order_by(Recognition.id.desc()).limit(limit).offset(offset).all()
 
@@ -254,6 +257,7 @@ class Database:
             campaign_id: int,
             request_uuid: str,
             extension: str,
+            prediction: str,
             limit: int,
             offset: int
     ):
@@ -268,6 +272,8 @@ class Database:
                 query = query.filter(Recognition.request_uuid == request_uuid)
             if extension:
                 query = query.filter(Recognition.extension == extension)
+            if prediction:
+                query = query.filter(Recognition.prediction == prediction)
 
             recognitions = query.order_by(Recognition.id.desc()).limit(limit).offset(offset).all()
             return recognitions
@@ -307,7 +313,7 @@ class Database:
             db.session.rollback()
             return None
 
-    def count_recognitions(self, user_id: int, date_time: str, campaign_id: int, request_uuid: str, extension: str):
+    def count_recognitions(self, user_id: int, date_time: str, campaign_id: int, request_uuid: str, extension: str, prediction: str):
         try:
             query = db.session.query(func.count(Recognition.id)).filter(Recognition.final == True)
 
@@ -322,6 +328,8 @@ class Database:
                 query = query.filter(Recognition.request_uuid == request_uuid)
             if extension:
                 query = query.filter(Recognition.extension == extension)
+            if prediction:
+                query = query.filter(Recognition.prediction == prediction)
 
             return query.scalar()
         except Exception as e:

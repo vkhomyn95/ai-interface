@@ -1,7 +1,13 @@
 import json
+import logging
 import os
+from datetime import datetime
+from io import BytesIO
 
-from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory
+import pandas as pd
+
+from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file
+from sqlalchemy.orm import class_mapper
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.config import variables
@@ -99,7 +105,8 @@ def dashboard():
     return render_template(
         'dashboard.html',
         users=storage.load_simple_users() if is_admin() else [],
-        dashboard={} if board is None else {key: int(value) if value is not None else 0 for key, value in board.items()},
+        dashboard={} if board is None else {key: int(value) if value is not None else 0 for key, value in
+                                            board.items()},
         filter=session["dashboard_filter"],
         current_user=session_user
     )
@@ -272,10 +279,10 @@ def create_user():
                 request.form["username"], request.form["email"])
             )
             new_user = User(
-                    role_id=2,
-                    tariff=Tariff(),
-                    recognition=RecognitionConfiguration()
-                )
+                role_id=2,
+                tariff=Tariff(),
+                recognition=RecognitionConfiguration()
+            )
             update_user(request, new_user)
             return render_template(
                 'user.html',
@@ -327,16 +334,17 @@ def recognitions():
     campaign_id = request.args.get('campaign_id', '', type=str).strip()
     request_uuid = request.args.get('request_uuid', '', type=str).strip()
     extension = request.args.get('extension', '', type=str).strip()
+    prediction = request.args.get('prediction', '', type=str).strip()
 
     if is_admin():
         user_id = request.args.get('user_id', '', type=str).strip()
         searched_recognitions = storage.load_recognitions(
-            user_id, datetime, campaign_id, request_uuid, extension, limit, offset)
+            user_id, datetime, campaign_id, request_uuid, extension, prediction, limit, offset)
     else:
         user_id = session_user["id"]
         searched_recognitions = storage.load_recognitions_related_to_user(
-            user_id, datetime, campaign_id, request_uuid, extension, limit, offset)
-    recognitions_count = storage.count_recognitions(user_id, datetime, campaign_id, request_uuid, extension)
+            user_id, datetime, campaign_id, request_uuid, extension, prediction, limit, offset)
+    recognitions_count = storage.count_recognitions(user_id, datetime, campaign_id, request_uuid, extension, prediction)
 
     total_pages = 1 if recognitions_count <= limit else (recognitions_count + (limit - 1)) // limit
 
@@ -354,8 +362,84 @@ def recognitions():
             "request_uuid": request_uuid,
             "extension": extension,
             "datetime": datetime,
+            "prediction": prediction,
         },
         current_user=session_user
+    )
+
+
+@bases.route('/recognitions-export')
+def recognitions_export():
+    """
+    Handle the recognitions export.
+
+    - Retrieves the recognition by ID.
+    - For admins, retrieves related recognitions and calculates average confidence.
+    - For regular users, retrieves only the recognitions related to the user.
+    - Renders the 'recognition.html' template with the recognition and related data.
+
+    Returns:
+        - A rendered template with the recognition data.
+        - A redirect to the 'login' page if the user is not authenticated.
+    """
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    # Get query parameters
+    datetime = request.args.get('datetime', '', type=str).strip()
+    campaign_id = request.args.get('campaign_id', '', type=str).strip()
+    request_uuid = request.args.get('request_uuid', '', type=str).strip()
+    extension = request.args.get('extension', '', type=str).strip()
+    prediction = request.args.get('prediction', '', type=str).strip()
+
+    if is_admin():
+        user_id = request.args.get('user_id', '', type=str).strip()
+        recognitions = storage.load_recognitions(
+            user_id, datetime, campaign_id, request_uuid, extension, prediction, None, None
+        )
+    else:
+        user_id = session_user["id"]
+        recognitions = storage.load_recognitions_related_to_user(
+            user_id, datetime, campaign_id, request_uuid, extension, prediction, None, None
+        )
+
+    if not recognitions:
+        flash("Recognitions does not found")
+        return redirect(url_for("bases.bases_blp.recognitions"))
+
+    data = [
+        {
+            "ID": rec.id,
+            "Created Date": rec.created_date.strftime('%Y-%m-%d %H:%M:%S') if rec.created_date else "",
+            "Final": rec.final,
+            "Request UUID": rec.request_uuid,
+            "Audio UUID": rec.audio_uuid,
+            "Confidence": rec.confidence,
+            "Prediction": rec.prediction,
+            "Extension": rec.extension,
+            "Company ID": rec.company_id,
+            "Campaign ID": rec.campaign_id,
+            "Application ID": rec.application_id,
+            "User ID": rec.user_id,
+        }
+        for rec in recognitions
+    ]
+
+    df = pd.DataFrame(data)
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False, sheet_name="Recognitions")
+
+    output.seek(0)
+
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="recognitions.xlsx"
     )
 
 
@@ -462,13 +546,13 @@ def serve_audio(created_date, filename):
 
 
 def update_user(r, u: User):
+    history_change = {"before": object_to_dict(u)}
     u.first_name = r.form.get("first_name", u.first_name)
     u.last_name = r.form.get("last_name", u.last_name)
     u.email = r.form.get("email", u.email)
     u.phone = r.form.get("phone", u.phone)
     u.username = r.form.get("username", u.username)
-    if r.form.get("password") != "":
-        u.password = generate_password_hash(r.form.get("password"))
+    u.password = generate_password_hash(r.form.get("password")) if r.form.get("password") != "" else u.password
     u.api_key = r.form.get("api_key", u.api_key)
     u.audience = r.form.get("audience", u.audience)
     u.tariff.active = True if r.form.get("active", u.tariff.active) == "True" else False
@@ -476,8 +560,29 @@ def update_user(r, u: User):
     u.recognition.rate = r.form.get("rate", u.recognition.rate)
     u.recognition.interval_length = r.form.get("interval_length", u.recognition.interval_length)
     u.recognition.predictions = r.form.get("predictions", u.recognition.predictions)
-    u.recognition.prediction_criteria = (
-        json.dumps({key: r.form.get(key) for key in r.form.keys() if '_interval_' in key or 'result' in key}))
+    u.recognition.prediction_criteria = (json.dumps({key: r.form.get(key) for key in r.form.keys() if '_interval_' in key or 'result' in key}))
+    history_change["after"] = object_to_dict(u)
+    logging.info(f'== Request update client by user {get_user()["id"]} history: {history_change}')
+
+
+def object_to_dict(obj, found=None):
+    if found is None:
+        found = set()
+    mapper = class_mapper(obj.__class__)
+    columns = [column.key for column in mapper.columns]
+    get_key_value = lambda c: (c, getattr(obj, c).isoformat()) if isinstance(getattr(obj, c), datetime) else (
+    c, getattr(obj, c))
+    out = dict(map(get_key_value, columns))
+    for name, relation in mapper.relationships.items():
+        if relation not in found:
+            found.add(relation)
+            related_obj = getattr(obj, name)
+            if related_obj is not None:
+                if relation.uselist:
+                    out[name] = [object_to_dict(child, found) for child in related_obj]
+                else:
+                    out[name] = object_to_dict(related_obj, found)
+    return out
 
 
 def get_user() -> dict:

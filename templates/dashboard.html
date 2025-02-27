@@ -24,8 +24,8 @@
         </div>
 
         <div class="content">
-            {% if current_user.role.name == 'admin' %}
             <form action="{{ url_for('bases.bases_blp.dashboard') }}" class="flex flex-direction-row flex-align-end mb-20" id="filterForm">
+                {% if current_user.role.name == 'admin' %}
                 <div class="flex flex-direction-column">
                     <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
                     <div class="w-100">
@@ -41,7 +41,7 @@
                         </select>
                     </div>
                 </div>
-
+                {% endif %}
                 <div class="flex flex-direction-column ml-15">
                     <label class="label label-required_danger mb-5" for="datetime" style="white-space: nowrap">Дата</label>
                     <div class="w-100">
@@ -66,7 +66,6 @@
                     <span style="margin-left: 10px">Скинути</span>
                 </button>
             </form>
-            {% endif %}
 
             <div class="flex flex-direction-row flex-content-between">
 

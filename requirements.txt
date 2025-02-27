@@ -7,3 +7,5 @@ pymysql
 mysqlclient
 marshmallow
 marshmallow-sqlalchemy
+pandas
+openpyxl

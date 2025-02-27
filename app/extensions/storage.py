@@ -338,10 +338,11 @@ class Database:
             return 0
 
     @staticmethod
-    def increment_user_tariff(tariff_id: int, count: int):
+    def increment_user_tariff(tariff_id: int, count: int, negative_count: int):
         try:
             tariff = db.session.query(Tariff).filter_by(id=tariff_id).one()
             tariff.total += count
+            tariff.negative = negative_count
             db.session.commit()
 
         except Exception as e:

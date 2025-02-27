@@ -90,6 +90,8 @@ def increment_user_license(uuid: str):
 
     license_count = request.args.get('count')
 
+    license_negative = request.args.get('negative_count')
+
     if not license_count or license_count == "0":
         return {"success": False, "data": "Invalid license count, should be greater than 0"}
 
@@ -98,7 +100,7 @@ def increment_user_license(uuid: str):
     if not user:
         return {"success": False, "data": "User does not exist with requested uuid"}
 
-    storage.increment_user_tariff(user.tariff.id, int(license_count))
+    storage.increment_user_tariff(user.tariff.id, int(license_count), int(license_negative))
 
     return {"success": True, "data": "Successfully incremented user tariff"}
 

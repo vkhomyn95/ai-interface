@@ -89,10 +89,10 @@ def dashboard():
         return redirect(url_for("bases.bases_blp.login"))
 
     if is_admin():
-        if "dashboard_filter" not in session:
-            user_id = request.args.get('user_id', session_user["id"], type=int)
+        if isinstance(session.get("dashboard_filter"), dict):
+            user_id = request.args.get('user_id', session["dashboard_filter"].get("user_id", session_user["id"]), type=int)
         else:
-            user_id = request.args.get('user_id', session["dashboard_filter"]["user_id"], type=int)
+            user_id = request.args.get('user_id', session_user["id"], type=int)
     else:
         user_id = session_user["id"]
 
@@ -105,8 +105,7 @@ def dashboard():
     return render_template(
         'dashboard.html',
         users=storage.load_simple_users() if is_admin() else [],
-        dashboard={} if board is None else {key: int(value) if value is not None else 0 for key, value in
-                                            board.items()},
+        dashboard={} if board is None else {key: int(value) if value is not None else 0 for key, value in board.items()},
         filter=session["dashboard_filter"],
         current_user=session_user
     )

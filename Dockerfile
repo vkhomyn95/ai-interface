@@ -18,6 +18,10 @@ RUN python -m pip install mysqlclient
 
 RUN python -m pip install marshmallow
 
+RUN python -m pip install pandas
+
+RUN python -m pip install openpyxl
+
 RUN python -m pip install marshmallow-sqlalchemy
 
 RUN venv/bin/pip3 install --no-cache-dir -r requirements.txt

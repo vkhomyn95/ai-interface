@@ -12,6 +12,7 @@ class Tariff(db.Model):
     updated_date = db.Column(db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow(), nullable=True)
     active = db.Column(db.Boolean, default=False)
     total = db.Column(db.Integer, default=0)
+    negative = db.Column(db.Integer, default=0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True)
 
     user = db.relationship("User", back_populates="tariff")

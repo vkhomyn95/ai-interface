@@ -19,6 +19,7 @@ class TariffSchema(ma.SQLAlchemyAutoSchema):
     updated_date = fields.Str()
     active = fields.Bool()
     total = fields.Int()
+    negative = fields.Int()
 
 
 class UserRoleSchema(ma.SQLAlchemyAutoSchema):
@@ -86,6 +87,7 @@ class TariffAPISchema(ma.SQLAlchemyAutoSchema):
     updated_date = fields.Str()
     active = fields.Bool()
     total = fields.Int()
+    negative = fields.Int()
 
 
 class UserAPISchema(ma.SQLAlchemyAutoSchema):

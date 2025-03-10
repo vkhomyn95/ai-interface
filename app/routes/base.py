@@ -5,7 +5,6 @@ from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
-
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file
 from sqlalchemy.orm import class_mapper
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -88,19 +87,25 @@ def dashboard():
     if not session_user:
         return redirect(url_for("bases.bases_blp.login"))
 
+    reset = bool(request.args.get('reset', 0, type=int))
+
     if is_admin():
         if isinstance(session.get("dashboard_filter"), dict):
-            user_id = request.args.get('user_id', session["dashboard_filter"].get("user_id", session_user["id"]), type=int)
+            user_id = request.args.get('user_id', session["dashboard_filter"].get("user_id", session_user["id"]) if not reset else '', type=int)
+            time = request.args.get('datetime', '')
+            date_time = session["dashboard_filter"].get("datetime", '') if not reset and not time else time
         else:
-            user_id = request.args.get('user_id', session_user["id"], type=int)
+            user_id = request.args.get('user_id', session_user["id"] if not reset else '', type=int)
+            date_time = request.args.get('datetime', '')
     else:
         user_id = session_user["id"]
 
-    datetime = request.args.get('datetime', '', type=str).strip()
+        time = request.args.get('datetime', '')
+        date_time = session["dashboard_filter"].get("datetime", '') if not reset and not time else time
 
-    session["dashboard_filter"] = {"user_id": user_id, "datetime": datetime}
+    session["dashboard_filter"] = {"user_id": user_id, "datetime": date_time}
 
-    board = storage.load_user_dashboard(user_id if is_admin() else session_user["id"], datetime)
+    board = storage.load_user_dashboard(user_id if is_admin() else session_user["id"], date_time)
 
     return render_template(
         'dashboard.html',
@@ -329,21 +334,50 @@ def recognitions():
     limit = request.args.get('limit', 10, type=int)
     offset = (page - 1) * limit
 
+    reset = bool(request.args.get('reset', 0, type=int))
+
     datetime = request.args.get('datetime', '', type=str).strip()
-    campaign_id = request.args.get('campaign_id', '', type=str).strip()
-    request_uuid = request.args.get('request_uuid', '', type=str).strip()
-    extension = request.args.get('extension', '', type=str).strip()
-    prediction = request.args.get('prediction', '', type=str).strip()
+    campaign = request.args.get('campaign_id', '', type=str).strip()
+    uuid = request.args.get('request_uuid', '', type=str).strip()
+    request_extension = request.args.get('extension', '', type=str).strip()
+    request_prediction = request.args.get('prediction', '', type=str).strip()
 
     if is_admin():
-        user_id = request.args.get('user_id', '', type=str).strip()
-        searched_recognitions = storage.load_recognitions(
-            user_id, datetime, campaign_id, request_uuid, extension, prediction, limit, offset)
+        if isinstance(session.get("recognition_filter"), dict):
+            user_id = request.args.get('user_id', session["recognition_filter"].get("user_id", session_user["id"]) if not reset else '', type=int)
+            campaign_id = session["recognition_filter"].get("campaign_id", '') if not reset and not campaign else campaign
+            date_time = session["recognition_filter"].get("datetime", '') if not reset and not datetime else datetime
+            request_uuid = session["recognition_filter"].get("request_uuid", '') if not reset and not uuid else uuid
+            extension = session["recognition_filter"].get("extension", '') if not reset and not request_extension else request_extension
+            prediction = session["recognition_filter"].get("prediction", '') if not reset and not request_prediction else request_prediction
+        else:
+            user_id = request.args.get('user_id', '', type=str).strip()
+            date_time = datetime
+            campaign_id = campaign
+            request_uuid = uuid
+            extension = request_extension
+            prediction = request_prediction
     else:
         user_id = session_user["id"]
-        searched_recognitions = storage.load_recognitions_related_to_user(
-            user_id, datetime, campaign_id, request_uuid, extension, prediction, limit, offset)
-    recognitions_count = storage.count_recognitions(user_id, datetime, campaign_id, request_uuid, extension, prediction)
+
+        date_time = session["recognition_filter"].get("datetime", '') if not reset and not datetime else datetime
+        campaign_id = session["recognition_filter"].get("campaign_id", '') if not reset and not campaign else campaign
+        request_uuid = session["recognition_filter"].get("request_uuid", '') if not reset and not uuid else uuid
+        extension = session["recognition_filter"].get("extension",'') if not reset and not request_extension else request_extension
+        prediction = session["recognition_filter"].get("prediction",'') if not reset and not request_prediction else request_prediction
+
+    session["recognition_filter"] = {
+        "user_id": user_id,
+        "campaign_id": campaign_id,
+        "request_uuid": request_uuid,
+        "extension": request_extension,
+        "datetime": date_time,
+        "prediction": prediction
+    }
+
+    searched_recognitions = storage.load_recognitions(user_id, date_time, campaign_id, request_uuid, extension, prediction, limit, offset)
+
+    recognitions_count = storage.count_recognitions(user_id, date_time, campaign_id, request_uuid, extension, prediction)
 
     total_pages = 1 if recognitions_count <= limit else (recognitions_count + (limit - 1)) // limit
 
@@ -355,14 +389,7 @@ def recognitions():
         start_page=max(1, page - 2),
         end_page=min(total_pages, page + 2),
         users=storage.load_simple_users() if is_admin() else [],
-        filter={
-            "user_id": user_id,
-            "campaign_id": campaign_id,
-            "request_uuid": request_uuid,
-            "extension": extension,
-            "datetime": datetime,
-            "prediction": prediction,
-        },
+        filter=session["recognition_filter"],
         current_user=session_user
     )
 

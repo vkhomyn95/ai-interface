@@ -44,7 +44,11 @@
                                         <select name="user_id" id="user_id" style="width: 180px">
                                             <option value="">Оберіть користувача</option>
                                             {% for user in users %}
-                                            <option value="{{user.id}}" {% if filter.user_id and filter.user_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+                                            {% if filter.user_id == user.id %}
+                                                <option value="{{user.id}}" selected>{{ user.username }}</option>
+                                            {% else %}
+                                                <option value="{{user.id}}">{{ user.username }}</option>
+                                            {% endif %}
                                             {% endfor %}
                                         </select>
                                     </div>
@@ -116,13 +120,23 @@
                                     <div class="w-100">
                                         <select name="prediction" id="prediction" style="width: 180px">
                                             <option value="">Оберіть результат</option>
-                                            <option value="human"  {% if filter.prediction and filter.prediction == human %}selected{% endif %}>human</option>
-                                            <option value="voicemail" {% if filter.prediction and filter.prediction == voicemail %}selected{% endif %}>voicemail</option>
-                                            <option value="not_predicted" {% if filter.prediction and filter.prediction == not_predicted %}selected{% endif %}>not_predicted</option>
+                                            <option value="human"  {% if filter.prediction and filter.prediction == 'human' %}selected{% endif %}>human</option>
+                                            <option value="voicemail" {% if filter.prediction and filter.prediction == 'voicemail' %}selected{% endif %}>voicemail</option>
+                                            <option value="not_predicted" {% if filter.prediction and filter.prediction == 'not_predicted' %}selected{% endif %}>not_predicted</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
+
+                            <input
+                                    class="input created-date-input"
+                                    type="hidden"
+                                    id="reset"
+                                    name="reset"
+                                    value="0"
+                                    autocomplete="off"
+                            />
+
                             <div class="flex flex-direction-row">
                                 <button class="button button-secondary ml-15" onclick="exportRecognitions()">
                                 {% include 'header/icons/icon-export.html' %}
@@ -193,6 +207,7 @@
 <script>
     function resetForm() {
         event.preventDefault();
+        document.getElementById('reset').value = 1;
         document.getElementById('request_uuid').value = "";
         document.getElementById('extension').value = "";
         document.getElementById('campaign_id').value = "";
@@ -253,6 +268,7 @@
 
     function filter() {
         event.preventDefault();
+        document.getElementById('reset').value = 0;
         if (document.getElementById('datetime').value !== null) {
             if (fromDate === null || toDate === null) {
                 document.getElementById('datetime').value = "";

@@ -57,6 +57,15 @@
                     </div>
                 </div>
 
+                <input
+                        class="input created-date-input"
+                        type="hidden"
+                        id="reset"
+                        name="reset"
+                        value="0"
+                        autocomplete="off"
+                />
+
                 <button type="submit" class="button button-primary ml-15" onclick="filter()">
                     {% include 'header/icons/icon-filter.html' %}
                     <span style="margin-left: 10px">Фільтрувати</span>
@@ -192,6 +201,7 @@
     function resetForm() {
         event.preventDefault();
         document.getElementById('datetime').value = "";
+        document.getElementById('reset').value = 1;
         const uId = document.getElementById('user_id');
         if (uId !== null) {
             uId.value = "";
@@ -204,6 +214,7 @@
 
     function filter() {
         event.preventDefault();
+        document.getElementById('reset').value = 0;
         if (document.getElementById('datetime').value !== null) {
             console.log(fromDate, toDate, document.getElementById('datetime').value !== null)
             if (fromDate === null || toDate === null) {
@@ -211,7 +222,6 @@
             } else {
                 document.getElementById('datetime').value = convertLocalToUTC(fromDate) + " - " + convertLocalToUTC(toDate);
             }
-            console.log(document.getElementById('datetime').value)
             document.getElementById('filterForm').submit();
         }
     }

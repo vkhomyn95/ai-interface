@@ -5,6 +5,7 @@ from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
+import pytz
 from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file
 from sqlalchemy.orm import class_mapper
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -419,6 +420,7 @@ def recognitions_export():
     request_uuid = request.args.get('request_uuid', '', type=str).strip()
     extension = request.args.get('extension', '', type=str).strip()
     prediction = request.args.get('prediction', '', type=str).strip()
+    client_timezone = request.args.get('client_timezone', 'UTC', type=str).strip()
 
     if is_admin():
         user_id = request.args.get('user_id', '', type=str).strip()
@@ -435,10 +437,16 @@ def recognitions_export():
         flash("Recognitions does not found")
         return redirect(url_for("bases.bases_blp.recognitions"))
 
+    def convert_to_client_timezone(utc_dt, client_timezone):
+        """Converts a UTC datetime object to a client's timezone."""
+        timezone = pytz.timezone(client_timezone)  # Create a timezone object
+        local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(timezone)
+        return local_dt.strftime('%Y-%m-%d %H:%M:%S')
+
     data = [
         {
             "ID": rec.id,
-            "Created Date": rec.created_date.strftime('%Y-%m-%d %H:%M:%S') if rec.created_date else "",
+            "Created Date": convert_to_client_timezone(rec.created_date, client_timezone) if rec.created_date else "",
             "Final": rec.final,
             "Request UUID": rec.request_uuid,
             "Audio UUID": rec.audio_uuid,

@@ -293,7 +293,7 @@
 
       const formatter = new Intl.DateTimeFormat('en-CA', options);
 
-      if (formatter && utcDate) {
+      if (formatter && utcDate instanceof Date && !isNaN(utcDate)) {
           const formattedDateParts = formatter.formatToParts(utcDate);
           const year = formattedDateParts.find(part => part.type === 'year').value;
           const month = formattedDateParts.find(part => part.type === 'month').value;

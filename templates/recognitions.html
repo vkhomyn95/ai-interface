@@ -232,6 +232,15 @@
         }
         let form = document.getElementById("filterForm");
         form.action = "/recognitions-export"
+
+        let clientTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        let timezoneInput = document.createElement("input");
+        timezoneInput.setAttribute("type", "hidden");
+        timezoneInput.setAttribute("name", "client_timezone");
+        timezoneInput.setAttribute("value", clientTimezone);
+        form.appendChild(timezoneInput);
+
         form.submit();
     }
 

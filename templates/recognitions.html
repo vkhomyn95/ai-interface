@@ -282,11 +282,18 @@
     }
 
     const currentDate = new Date();
+
+    let sfilter = "{{ filter|string }}"
+    sfilter = JSON.parse(sfilter.replaceAll('&#39;', '"'));
+
+    let sfilterStart = sfilter && sfilter.datetime ? sfilter.datetime.split(" - ")[0]: moment().startOf('day');
+    let sfiltereEnd = sfilter && sfilter.datetime ? sfilter.datetime.split(" - ")[1]: moment().startOf('hour').add(32, 'hour');
+
     $(function() {
       $('input[name="datetime"]').daterangepicker({
         timePicker: true,
-        startDate: moment().startOf('hour'),
-        endDate: moment().startOf('hour').add(32, 'hour'),
+        startDate: sfilterStart,
+        endDate: sfiltereEnd,
         timePicker24Hour: true,
         autoUpdateInput: false,
         maxDate: currentDate,
@@ -298,6 +305,7 @@
         }
       });
     });
+
     $('input[name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
         const currentStart = picker.startDate;
         const currentEnd = picker.endDate;
@@ -322,9 +330,9 @@
         return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     }
 
-    function convertUTCToLocal(utcDateString) {
+    function convertRecognitionUTCToLocal(utcDateString) {
       // Parse the UTC date string to a Date object
-      if (utcDateString.endsWith("Z")) {
+      if (utcDateString && utcDateString.endsWith("Z")) {
             utcDateString = utcDateString.replaceAll("Z", "");
         }
         const utcDate = new Date(utcDateString + 'Z')
@@ -338,34 +346,39 @@
         minute: '2-digit',
         second: '2-digit',
         hour12: false,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // Ensures local timezone
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
 
       const formatter = new Intl.DateTimeFormat('en-CA', options);
-      const formattedDateParts = formatter.formatToParts(utcDate);
 
-      // Extract parts and assemble into desired format
-      const year = formattedDateParts.find(part => part.type === 'year').value;
-      const month = formattedDateParts.find(part => part.type === 'month').value;
-      const day = formattedDateParts.find(part => part.type === 'day').value;
-      const hour = formattedDateParts.find(part => part.type === 'hour').value;
-      const minute = formattedDateParts.find(part => part.type === 'minute').value;
-      const second = formattedDateParts.find(part => part.type === 'second').value;
+      if (formatter && utcDate instanceof Date && !isNaN(utcDate)) {
+          const formattedDateParts = formatter.formatToParts(utcDate);
+          const year = formattedDateParts.find(part => part.type === 'year').value;
+          const month = formattedDateParts.find(part => part.type === 'month').value;
+          const day = formattedDateParts.find(part => part.type === 'day').value;
+          const hour = formattedDateParts.find(part => part.type === 'hour').value;
+          const minute = formattedDateParts.find(part => part.type === 'minute').value;
+          const second = formattedDateParts.find(part => part.type === 'second').value;
 
-      // Return the formatted date string
-      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+          // Return the formatted date string
+          return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+
+      }
+      return '';
     }
+
     document.querySelectorAll('.created-date').forEach(element => {
       const utcDate = element.textContent.trim();
-      element.textContent = convertUTCToLocal(utcDate);
+      element.textContent = convertRecognitionUTCToLocal(utcDate);
     });
+
     document.querySelectorAll('.created-date-input').forEach(element => {
       const utcDate = element.value.trim().split(" - ");
       let [from, to] = utcDate;
       if (from === "") {
           element.value = "";
       } else {
-          element.value = convertUTCToLocal(from) + " - " + convertUTCToLocal(to);
+          element.value = convertRecognitionUTCToLocal(from) + " - " + convertRecognitionUTCToLocal(to);
       }
     });
 </script>

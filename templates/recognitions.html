@@ -20,14 +20,31 @@
     {% include 'header/header-left.html' %}
 
     <div class="container-main">
-        <div class="breadcrumb">
-            <div class="breadcrumb-navigation flex flex-align-center">
-                {% include 'header/icons/icon-breadcrumb.html' %}
-            </div>
-            <div class="breadcrumb-heading flex flex-align-center">
-                <div class="breadcrumb-heading-previous ml-15">
-                    Розпізнавання
+        <div class="breadcrumb flex-content-between flex-align-center">
+            <div class="flex">
+                <div class="breadcrumb-navigation flex flex-align-center">
+                    {% include 'header/icons/icon-breadcrumb.html' %}
                 </div>
+                <div class="breadcrumb-heading flex flex-align-center">
+                    <div class="breadcrumb-heading-previous ml-15">
+                        Розпізнавання
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-direction-row">
+                <button class="button button-secondary ml-15" onclick="exportRecognitions()">
+                    {% include 'header/icons/icon-export.html' %}
+                    <span style="margin-left: 10px">Експорт</span>
+                </button>
+                <button class="button button-secondary ml-15" onclick="resetForm()">
+                    {% include 'header/icons/icon-filter-clear.html' %}
+                    <span style="margin-left: 10px">Скинути</span>
+                </button>
+                <button type="submit" class="button button-primary ml-10" onclick="filter()">
+                    {% include 'header/icons/icon-filter.html' %}
+                    <span style="margin-left: 10px">Фільтрувати</span>
+                </button>
             </div>
         </div>
 
@@ -136,21 +153,6 @@
                                     value="0"
                                     autocomplete="off"
                             />
-
-                            <div class="flex flex-direction-row">
-                                <button class="button button-secondary ml-15" onclick="exportRecognitions()">
-                                {% include 'header/icons/icon-export.html' %}
-                                <span style="margin-left: 10px">Експорт</span>
-                                </button>
-                                <button class="button button-secondary ml-15" onclick="resetForm()">
-                                {% include 'header/icons/icon-filter-clear.html' %}
-                                <span style="margin-left: 10px">Скинути</span>
-                                </button>
-                                <button type="submit" class="button button-primary ml-10" onclick="filter()">
-                                    {% include 'header/icons/icon-filter.html' %}
-                                    <span style="margin-left: 10px">Фільтрувати</span>
-                                </button>
-                            </div>
                         </form>
                     </div>
                 </div>

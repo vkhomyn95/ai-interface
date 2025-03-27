@@ -231,8 +231,8 @@
      let sfilter = "{{ filter|string }}"
     sfilter = JSON.parse(sfilter.replaceAll('&#39;', '"'));
 
-    let sfilterStart = sfilter && sfilter.datetime ? sfilter.datetime.split(" - ")[0]: moment().startOf('day');
-    let sfiltereEnd = sfilter && sfilter.datetime ? sfilter.datetime.split(" - ")[1]: moment().startOf('hour').add(32, 'hour');
+    let sfilterStart = sfilter && sfilter.datetime ? convertUTCToLocal(sfilter.datetime.split(" - ")[0]): moment().startOf('day');
+    let sfiltereEnd = sfilter && sfilter.datetime ? convertUTCToLocal(sfilter.datetime.split(" - ")[1]): moment().startOf('hour').add(32, 'hour');
 
     $(function() {
       $('input[name="datetime"]').daterangepicker({
@@ -250,6 +250,12 @@
         }
       });
     });
+
+    if (sfilter && sfilter.datetime) {
+        fromDate = convertUTCToLocal(sfilter.datetime.split(" - ")[0]);
+        toDate = convertUTCToLocal(sfilter.datetime.split(" - ")[1]);
+    }
+
     $('input[name="datetime"]').on('apply.daterangepicker', function(ev, picker) {
         const currentStart = picker.startDate;
         const currentEnd = picker.endDate;

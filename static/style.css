@@ -607,7 +607,7 @@ select {
     color: #333333;
     align-items: center;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 5px;
     outline: none;
     cursor: pointer;
     font-size: 14px;
@@ -619,7 +619,7 @@ select {
     color: #92929d;
     align-items: center;
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 5px;
     outline: none;
     cursor: pointer;
     font-size: 14px;

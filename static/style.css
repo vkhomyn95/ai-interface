@@ -625,3 +625,77 @@ select {
     font-size: 14px;
     white-space: nowrap;
 }
+
+
+/*MODAL===============================*/
+/* Основний фон модалки */
+.modal {
+    position: fixed;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 10, 10, 0.6);
+    display: none; /* Модалка спочатку прихована */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Модалка активна (при показі) */
+.modal.is-active {
+    display: flex;
+}
+
+/* Білий блок самої модалки */
+.modal-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    max-width: 100%;
+    width: 500px;
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Шапка модалки */
+.modal-card-head {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Тіло модалки */
+.modal-card-body {
+    padding: 20px;
+}
+
+/* Футер модалки */
+.modal-card-foot {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Анімація */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стиль кнопки закриття */
+.modal-card-head .delete {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}

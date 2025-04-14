@@ -10,13 +10,14 @@
             </div>
 
             <div class="top-panel-user-menu absolute flex flex-direction-column flex-content-around" style="display: none">
-
-              <div class="mb-10">
-                <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('bases.bases_blp.profile') }}">
-                    {% include 'header/icons/icon-me.html' %}
-                  <span class="top-panel-user-menu-li-title">{{ current_user.first_name }} {{ current_user.last_name }}</span>
-                </a>
-              </div>
+                {% if has_permission(PermissionTypes.TAB_PROFILE) %}
+                  <div class="mb-10">
+                    <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('bases.bases_blp.profile') }}">
+                        {% include 'header/icons/icon-me.html' %}
+                      <span class="top-panel-user-menu-li-title">{{ current_user.first_name }} {{ current_user.last_name }}</span>
+                    </a>
+                  </div>
+                {% endif %}
 
               <div>
                 <a class="top-panel-user-menu-li flex flex-align-center" href="{{ url_for('bases.bases_blp.logout') }}">

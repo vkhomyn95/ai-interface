@@ -1,7 +1,7 @@
 from marshmallow import fields
 
 from app.extensions import ma, db
-from app.models import Tariff, UserRole, RecognitionConfiguration, User
+from app.models import Tariff, UserRole, RecognitionConfiguration, User, Rights
 
 
 class TariffSchema(ma.SQLAlchemyAutoSchema):
@@ -62,6 +62,17 @@ class RecognitionSchema(ma.SQLAlchemyAutoSchema):
     application_id = fields.Int()
 
 
+class RightsSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Rights
+        load_instance = True
+        include_fk = True
+
+    id = fields.Int(allow_none=True)
+    name = fields.Str()
+    permissions = fields.List(fields.Raw())
+
+
 class UserSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
@@ -73,6 +84,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     tariff = fields.Nested(TariffSchema)
     recognition = fields.Nested(RecognitionConfigurationSchema)
     role = fields.Nested(UserRoleSchema)
+    rights = fields.Nested(RightsSchema)
 
 
 class TariffAPISchema(ma.SQLAlchemyAutoSchema):

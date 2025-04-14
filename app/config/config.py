@@ -15,7 +15,7 @@ class Variables:
 
     SQLALCHEMY_DATABASE_URI: str = os.getenv(
         "SQLALCHEMY_DATABASE_URI",
-        "mysql://root:root@127.0.0.1/amd"
+        "mysql://root:rootroot@127.0.0.1/amd"
     )
 
     USER_DEFAULT_PASSWORD: str = os.getenv(

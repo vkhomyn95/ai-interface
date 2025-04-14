@@ -6,16 +6,30 @@ from io import BytesIO
 
 import pandas as pd
 import pytz
-from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file
+from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file, g, abort
 from sqlalchemy.orm import class_mapper
 from werkzeug.security import check_password_hash, generate_password_hash
+from functools import wraps
 
 from app.config import variables
 from app.extensions import storage
-from app.models import User, Tariff, RecognitionConfiguration
+from app.models import User, Tariff, RecognitionConfiguration, Rights
 from app.schemas import UserSchema
+from app.extensions.permissions import PermissionTypes
 
 bases = Blueprint("bases_blp", __name__, url_prefix="/")
+
+def require_permission(permission_id):
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            user = get_user()
+            permissions = user.get('rights', {}).get('permissions', [])
+            if permission_id not in permissions:
+                abort(403)
+            return f(*args, **kwargs)
+        return wrapped
+    return decorator
 
 
 @bases.route("/", methods=["GET", "POST"])
@@ -76,6 +90,7 @@ def logout():
 
 
 @bases.route("/dashboard", methods=["GET"])
+@require_permission(PermissionTypes.TAB_DASHBOARD)
 def dashboard():
     """
     Renders the user dashboard.
@@ -118,6 +133,7 @@ def dashboard():
 
 
 @bases.route('/profile', methods=['GET'])
+@require_permission(PermissionTypes.TAB_PROFILE)
 def profile():
     """
     Handle the login page.
@@ -147,12 +163,14 @@ def profile():
     return render_template(
         'user.html',
         user=searched_user,
+        rights=storage.load_simple_rights(),
         current_user=session_user,
         is_profile=True
     )
 
 
 @bases.route('/users', methods=["GET"])
+@require_permission(PermissionTypes.TAB_USERS)
 def users():
     """
     Handles the user management page for administrators.
@@ -191,6 +209,7 @@ def users():
 
 
 @bases.route('/users/<user_id>', methods=['POST', 'GET'])
+@require_permission(PermissionTypes.USERS_EDIT)
 def user(user_id: int):
     """
     Handle the user's profile display and update.
@@ -225,6 +244,7 @@ def user(user_id: int):
         return render_template(
             'user.html',
             user=searched_user,
+            rights=storage.load_simple_rights(),
             current_user=session_user
         )
     else:
@@ -240,6 +260,7 @@ def user(user_id: int):
 
 
 @bases.route('/create-user', methods=['POST', 'GET'])
+@require_permission(PermissionTypes.USERS_CREATE)
 def create_user():
     """
     Handle the creation of a new user.
@@ -272,6 +293,7 @@ def create_user():
                     recognition=RecognitionConfiguration()
                 )
             ),
+            rights=storage.load_simple_rights(),
             current_user=session_user
         )
     else:
@@ -292,6 +314,7 @@ def create_user():
             return render_template(
                 'user.html',
                 user=new_user,
+                rights=storage.load_simple_rights(),
                 current_user=session_user
             )
         else:
@@ -306,8 +329,73 @@ def create_user():
     else:
         redirect(url_for('bases.bases_blp.user', user_id=session_user["id"]))
 
+@bases.route('/rights', methods=["GET"])
+@require_permission(PermissionTypes.TAB_USERS_RIGHTS)
+def rights():
+    """
+    Handles the user management page for administrators.
+
+    Returns:
+        str: The rendered HTML of the user management page if the user is an admin.
+             Redirects to the login page if no user is in session.
+             Redirects to the user's personal page if the user is not an admin.
+    """
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+    offset = (page - 1) * limit
+
+    searched_rights = storage.load_rights(limit, offset)
+    rights_count = storage.count_rights()
+    total_pages = 1 if rights_count <= limit else (rights_count + (limit - 1)) // limit
+
+    # Render the template with the data
+    return render_template(
+        'rights.html',
+        rights=searched_rights,
+        total_pages=total_pages,
+        page=page,
+        start_page=max(1, page - 2),
+        end_page=min(total_pages, page + 2),
+        current_user=session_user
+    )
+
+
+@bases.route('/update-rights/<right_id>', methods=['POST'])
+@require_permission(PermissionTypes.TAB_USERS_RIGHTS)
+def update_rights(right_id):
+    print(right_id)
+    permission = storage.load_right_by_id(right_id)
+
+    update_right(request, permission)
+    storage.update_right(permission)
+    return redirect(url_for('bases.bases_blp.rights'))
+
+
+@bases.route('/create-right', methods=['POST'])
+@require_permission(PermissionTypes.TAB_USERS_RIGHTS)
+def create_right():
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    if request.method == "POST":
+        new_right = storage.insert_new_right(request.form.get('name'))
+        logging.info(f'== Request create rights {new_right} by user {get_user()["id"]}')
+
+        return redirect(url_for('bases.bases_blp.rights'))
+    else:
+        return redirect(url_for('bases.bases_blp.rights'))
+
+
 
 @bases.route('/recognitions')
+@require_permission(PermissionTypes.TAB_RECOGNITIONS)
 def recognitions():
     """
     Handle the display of recognitions.
@@ -396,6 +484,7 @@ def recognitions():
 
 
 @bases.route('/recognitions-export')
+@require_permission(PermissionTypes.RECOGNITIONS_EXPORT)
 def recognitions_export():
     """
     Handle the recognitions export.
@@ -589,6 +678,7 @@ def update_user(r, u: User):
     u.password = generate_password_hash(r.form.get("password")) if r.form.get("password") != "" else u.password
     u.api_key = r.form.get("api_key", u.api_key)
     u.audience = r.form.get("audience", u.audience)
+    u.right_id = r.form.get("right_id", u.right_id)
     u.tariff.active = True if r.form.get("active", u.tariff.active) == "True" else False
     u.recognition.encoding = r.form.get("encoding", u.recognition.encoding)
     u.recognition.rate = r.form.get("rate", u.recognition.rate)
@@ -598,6 +688,14 @@ def update_user(r, u: User):
     history_change["after"] = object_to_dict(u)
     logging.info(f'== Request update client by user {get_user()["id"]} history: {history_change}')
 
+
+def update_right(r, permission: Rights):
+    history_change = {"before": object_to_dict(permission)}
+    permission.name = r.form.get("name", permission.name)
+    if(r.form.getlist("permissions")):
+        permission.permissions = [int(pid) for pid in r.form.getlist("permissions")]
+    history_change["after"] = object_to_dict(permission)
+    logging.info(f'== Request update rights by user {get_user()["id"]} history: {history_change}')
 
 def object_to_dict(obj, found=None):
     if found is None:

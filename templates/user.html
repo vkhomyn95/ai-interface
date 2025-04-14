@@ -145,6 +145,20 @@
                                 </div>
                             </div>
 
+                              <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label label-required_danger" for="right_id">Права доступу</label>
+                                <div class="w-100">
+                                     <select name="right_id" id="right_id" class="input">
+                                        <option value="">Оберіть права</option>
+                                        {% for right in rights %}
+                                            <option value="{{ right.id }}" {% if right.id == user.right_id %}selected{% endif %}>
+                                                {{ right.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="flex flex-direction-row flex-align-center mb-20">
                                 <label class="label label-required_danger" for="phone">API ключ</label>
                                 <div class="flex flex-direction-row  w-100">

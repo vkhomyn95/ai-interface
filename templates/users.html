@@ -34,14 +34,16 @@
                             Гостьові акаунти
                         </div>
                     </div>
-                    <div class="content-wrapper-head-actions">
-                        <button class="button button-main">
-                            {% include 'header/icons/icon-add.html' %}
-                            <a href="{{ url_for('bases.bases_blp.create_user') }}" style="text-decoration: none">
-                                <span style="margin-left: 10px; color: #ffffff;">Додати користувача</span>
-                            </a>
-                        </button>
-                    </div>
+                    {% if has_permission(PermissionTypes.USERS_CREATE) %}
+                        <div class="content-wrapper-head-actions">
+                            <button class="button button-main">
+                                {% include 'header/icons/icon-add.html' %}
+                                <a href="{{ url_for('bases.bases_blp.create_user') }}" style="text-decoration: none">
+                                    <span style="margin-left: 10px; color: #ffffff;">Додати користувача</span>
+                                </a>
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
 
                 {% set headings = [
@@ -53,8 +55,10 @@
                     {'name': 'Email'},
                     {'name': 'Активний'},
                     {'name': 'Кількість запитів'},
-                    {'name': 'Дії', 'actions': True},
                 ] %}
+                {% if has_permission(PermissionTypes.USERS_EDIT) %}
+                    {% set headings = headings + [{'name': 'Дії', 'actions': True}] %}
+                {% endif %}
 
                 <div class="table-header">
                     {% for heading in headings %}
@@ -76,13 +80,15 @@
                             <div style="width: 12%">{{ user.email }}</div>
                             <div style="width: 12%">{{ user.tariff.active }}</div>
                             <div style="width: 12%">{{ user.tariff.total }}</div>
-                            <div style="width: 12px">
-                                <div class="is-flex-direction-row is-align-content-center">
-                                    <a href="{{ url_for('bases.bases_blp.user', user_id=user.id) }}" style="color: #00475A">
-                                      {% include 'header/icons/icon-edit.html' %}
-                                    </a>
+                            {% if has_permission(PermissionTypes.USERS_EDIT) %}
+                                <div style="width: 12px">
+                                    <div class="is-flex-direction-row is-align-content-center">
+                                        <a href="{{ url_for('bases.bases_blp.user', user_id=user.id) }}" style="color: #00475A">
+                                          {% include 'header/icons/icon-edit.html' %}
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>

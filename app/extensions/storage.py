@@ -7,8 +7,9 @@ from werkzeug.security import generate_password_hash
 
 from app.config import variables
 from app.extensions import db
-from app.models import User, RecognitionConfiguration, Tariff, Recognition, UserRole
+from app.models import User, RecognitionConfiguration, Tariff, Recognition, UserRole, Rights
 from app.schemas.schema import UserSchema
+from app.extensions.permissions import PermissionTypes
 
 
 class Database:
@@ -32,6 +33,24 @@ class Database:
             print(f">>>Error inserting default roles: {e}")
 
     @staticmethod
+    def insert_default_rights() -> None:
+        try:
+            admin_right = db.session.query(Rights).filter(Rights.id == 1).first()
+
+            if admin_right:
+                admin_right.permissions = PermissionTypes.all_ids()
+                print(f">>> Updated admin rights")
+            else:
+                new_admin_right = Rights(id=1, name="admin", permissions=PermissionTypes.all_ids())
+                db.session.add(new_admin_right)
+                print(f">>> Inserted new admin rights")
+            db.session.commit()
+
+        except Exception as e:
+            db.session.rollback()
+            print(f">>> Error inserting or updating default rights: {e}")
+
+    @staticmethod
     def insert_default_user() -> dict:
         try:
             if not db.session.query(User).filter(User.username == "admin").first():
@@ -42,6 +61,7 @@ class Database:
                     last_name="VoIPTime",
                     email="support@voiptime.net",
                     role_id=1,
+                    right_id=1,
                     tariff=Tariff(),
                     recognition=RecognitionConfiguration()
                 )
@@ -362,5 +382,68 @@ class Database:
             db.session.rollback()
             return {"success": False, "data": str(e)}
 
+    @staticmethod
+    def load_simple_rights():
+        try:
+            return db.session.query(Rights).all()
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def load_rights(limit: int, offset: int):
+        try:
+            return db.session.query(Rights).filter(Rights.id != 1).limit(limit).offset(offset).all()
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def count_rights():
+        try:
+            return db.session.query(Rights).count()
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def update_right(rights: Rights):
+        try:
+            db.session.add(rights)
+            db.session.commit()
+
+            return user
+        except ValidationError as ve:
+            print(f">>>Validation error update_user: {ve.messages}")
+            db.session.rollback()
+            return None
+        except Exception as e:
+            db.session.rollback()
+            print(f">>>Error update_user: {e}")
+            return None
+
+    @staticmethod
+    def load_right_by_id(right_id: int):
+        try:
+            return db.session.query(Rights).filter(Rights.id == right_id).first()
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def insert_new_right(name: str = ''):
+        try:
+            new_admin_right = Rights(name=name, permissions=PermissionTypes.all_ids())
+            db.session.add(new_admin_right)
+            db.session.commit()
+            return new_admin_right.id
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
 
 storage = Database()

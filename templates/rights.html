@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+<body>
+
+{% include 'header/header-top.html' %}
+{% include 'right.html' %}
+
+<div class="container">
+
+    {% include 'header/header-left.html' %}
+
+    <div class="container-main">
+        <div class="breadcrumb">
+            <div class="breadcrumb-navigation flex flex-align-center">
+                {% include 'header/icons/icon-breadcrumb.html' %}
+            </div>
+            <div class="breadcrumb-heading flex flex-align-center">
+                <div class="breadcrumb-heading-previous ml-15">
+                    Права доступу
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="content-wrapper">
+                <div class="content-wrapper-head">
+                    <div class="content-head-heading">
+                        <div class="content-wrapper-head-header-heading">
+                            Права доступу
+                        </div>
+                        <div class="content-wrapper-head-header-description">
+                            Налаштування прав доступу
+                        </div>
+                    </div>
+                        <div class="content-wrapper-head-actions">
+                            <button class="button button-main" onclick="openRightModal()">
+                                {% include 'header/icons/icon-add.html' %}
+                                    <span style="margin-left: 10px; color: #ffffff;">Додати право</span>
+                            </button>
+                        </div>
+                </div>
+
+
+              <div class="table-header">
+                <div style="width: 12%">User/Role</div>
+                    {% for key, value in PermissionTypes.MAP.items() %}
+                    <div style="width: 160px">
+                        {{ PermissionTypes.MAP_LABELS[key] }}
+                    </div>
+                     {% endfor %}
+              </div>
+
+                <div
+                      class="content-wrapper-info"
+                      >
+                        <div class="table-content">
+                            {% for right in rights %}
+                                <form
+                                    class="table-row permission-form"
+                                    action="{{ url_for('bases.bases_blp.update_rights', right_id=right.id, user_id=current_user.id) }}"
+                                    method="POST"
+                                >
+                                    <div style="width: 12%">
+                                         <div class="is-flex-direction-row is-align-content-center">
+                                            <a href="#" onclick="openRightModal('{{ right.name }}', '{{ right.id }}')" style="color: #00475A">                                              {{ right.name }}
+                                              {% include 'header/icons/icon-edit.html' %}
+                                            </a>
+                                         </div>
+                                    </div>
+                                    {% for key, value in PermissionTypes.MAP.items() %}
+                                    <div style="width: 160px; text-align: center;">
+                                        <input
+                                            type="checkbox"
+                                            name="permissions"
+                                            value="{{ key }}"
+                                            class="permission-checkbox"
+                                            {% if key in right.permissions %} checked {% endif %}
+                                        >
+                                    </div>
+                                    {% endfor %}
+                                </form>
+                             {% endfor %}
+                        </div>
+                    <button type="submit" style="display: none"></button>
+                </div>
+            </div>
+        </div>
+        {% with page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, template='bases.bases_blp.users' %}
+            {% include "pagination.html" %}
+        {% endwith %}
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const forms = document.querySelectorAll('.permission-form');
+
+    forms.forEach(function (form) {
+        const checkboxes = form.querySelectorAll('.permission-checkbox');
+
+        checkboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                // Submit after short delay (to avoid double clicks)
+                setTimeout(() => {
+                    form.submit();
+                }, 300);
+            });
+        });
+    });
+});
+
+function openRightModal(name = '', rightId = null) {
+    const modal = document.getElementById('rightModal');
+    const form = document.getElementById('rightForm');
+    const nameInput = document.getElementById('right-name');
+    const modalTitle = document.getElementById('modal-title');
+
+    modal.classList.add('is-active');  // Додаємо клас, щоб показати модалку
+
+    if (rightId) {
+        form.action = `/update-rights/${rightId}`;
+        modalTitle.textContent = 'Редагування права';
+        nameInput.value = name;
+    } else {
+        form.action = `/create-right`;
+        modalTitle.textContent = 'Нове право';
+        nameInput.value = '';
+    }
+}
+
+function closeRightModal() {
+    const modal = document.getElementById('rightModal');
+    modal.classList.remove('is-active');  // Видаляємо клас, щоб приховати модалку
+}
+
+</script>
+</body>
+</html>

@@ -33,10 +33,12 @@
             </div>
 
             <div class="flex flex-direction-row">
-                <button class="button button-secondary ml-15" onclick="exportRecognitions()">
-                    {% include 'header/icons/icon-export.html' %}
-                    <span style="margin-left: 10px">Експорт</span>
-                </button>
+                {% if has_permission(PermissionTypes.RECOGNITIONS_EXPORT) %}
+                    <button class="button button-secondary ml-15" onclick="exportRecognitions()">
+                        {% include 'header/icons/icon-export.html' %}
+                        <span style="margin-left: 10px">Експорт</span>
+                    </button>
+                {% endif %}
                 <button class="button button-secondary ml-15" onclick="resetForm()">
                     {% include 'header/icons/icon-filter-clear.html' %}
                     <span style="margin-left: 10px">Скинути</span>

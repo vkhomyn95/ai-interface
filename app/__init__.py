@@ -1,4 +1,5 @@
 from flask import Flask
+from app.extensions.permissions import PermissionTypes
 
 
 def create_app():
@@ -24,10 +25,13 @@ def create_app():
     from app.routes import apis_bp, bases_bp
     app.register_blueprint(apis_bp)
     app.register_blueprint(bases_bp)
+    app.jinja_env.globals['PermissionTypes'] = PermissionTypes
+    app.jinja_env.globals['has_permission'] = PermissionTypes.has_permission
 
     with app.app_context():
         db.create_all()
         storage.insert_default_roles()
+        storage.insert_default_rights()
         storage.insert_default_user()
 
     return app

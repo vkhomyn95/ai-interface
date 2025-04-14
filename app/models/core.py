@@ -61,6 +61,14 @@ class Recognition(db.Model):
     user = db.relationship('User', uselist=False, lazy=True)
 
 
+class Rights(db.Model):
+    __tablename__ = "rights"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), nullable=True)
+    permissions = db.Column(db.JSON, default=[], nullable=False)
+
+
 class User(db.Model):
     __tablename__ = "user"
 
@@ -77,8 +85,18 @@ class User(db.Model):
     uuid = db.Column(db.String(255), nullable=True)
     audience = db.Column(db.String(255), nullable=True)
     role_id = db.Column(db.Integer, db.ForeignKey('user_role.id'))
+    right_id = db.Column(db.Integer, db.ForeignKey('rights.id'))
 
     tariff = db.relationship('Tariff', uselist=False, back_populates="user")
     recognition = db.relationship('RecognitionConfiguration', uselist=False, back_populates="user")
     role = db.relationship('UserRole', back_populates='users')
 
+    rights = db.relationship('Rights')
+
+    @property
+    def permissions(self):
+        return self.rights.permissions if self.rights else []
+
+
+# ALTER TABLE user ADD COLUMN right_id INTEGER;
+# ALTER TABLE user ADD CONSTRAINT fk_user_rights FOREIGN KEY (right_id) REFERENCES rights(id);

@@ -1,1 +1,1 @@
-from .core import Tariff, UserRole, RecognitionConfiguration, Recognition, User
+from .core import Tariff, UserRole, RecognitionConfiguration, Recognition, User, Rights

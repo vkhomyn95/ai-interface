@@ -2,13 +2,11 @@
 <header class="left-panel">
     <aside class="left-panel-wrapper">
         <div class="left-panel-wrapper-link{% if not open %} left-panel-wrapper-link-selected{% endif %}">
-         {% if has_permission(PermissionTypes.TAB_DASHBOARD) %}
               <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.dashboard') }}">
                 {% include 'header/icons/icon-dashboard.html' %}
                 <div class="left-panel-wrapper-navigation-content">Звіти та статистика</div>
                 <div class="left-panel-wrapper-divider"></div>
               </a>
-         {% endif %}
 
          {% if has_permission(PermissionTypes.TAB_RECOGNITIONS) %}
               <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.recognitions') }}">

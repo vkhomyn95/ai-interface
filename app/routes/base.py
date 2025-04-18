@@ -90,7 +90,6 @@ def logout():
 
 
 @bases.route("/dashboard", methods=["GET"])
-@require_permission(PermissionTypes.TAB_DASHBOARD)
 def dashboard():
     """
     Renders the user dashboard.
@@ -104,20 +103,20 @@ def dashboard():
         return redirect(url_for("bases.bases_blp.login"))
 
     reset = bool(request.args.get('reset', 0, type=int))
-
+    dashboard_filter = session.get("dashboard_filter", {})
+    
     if is_admin():
-        if isinstance(session.get("dashboard_filter"), dict):
-            user_id = request.args.get('user_id', session["dashboard_filter"].get("user_id", session_user["id"]) if not reset else '', type=int)
-            time = request.args.get('datetime', '')
-            date_time = session["dashboard_filter"].get("datetime", '') if not reset and not time else time
-        else:
-            user_id = request.args.get('user_id', session_user["id"] if not reset else '', type=int)
-            date_time = request.args.get('datetime', '')
+        user_id = request.args.get(
+            'user_id',
+            dashboard_filter.get("user_id", session_user["id"]) if not reset else '',
+            type=int
+        )
+        time = request.args.get('datetime', '')
+        date_time = dashboard_filter.get("datetime", '') if not reset and not time else time
     else:
         user_id = session_user["id"]
-
         time = request.args.get('datetime', '')
-        date_time = session["dashboard_filter"].get("datetime", '') if not reset and not time else time
+        date_time = dashboard_filter.get("datetime", '') if not reset and not time else time
 
     session["dashboard_filter"] = {"user_id": user_id, "datetime": date_time}
 
@@ -185,27 +184,24 @@ def users():
     if not session_user:
         return redirect(url_for("bases.bases_blp.login"))
 
-    if is_admin():
-        page = request.args.get('page', 1, type=int)
-        limit = request.args.get('limit', 10, type=int)
-        offset = (page - 1) * limit
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+    offset = (page - 1) * limit
 
-        searched_users = storage.load_users(limit, offset, session_user["id"])
-        users_count = storage.count_users()
-        total_pages = 1 if users_count <= limit else (users_count + (limit - 1)) // limit
+    searched_users = storage.load_users(limit, offset, session_user["id"])
+    users_count = storage.count_users()
+    total_pages = 1 if users_count <= limit else (users_count + (limit - 1)) // limit
 
-        # Render the template with the data
-        return render_template(
-            'users.html',
-            users=searched_users,
-            total_pages=total_pages,
-            page=page,
-            start_page=max(1, page - 2),
-            end_page=min(total_pages, page + 2),
-            current_user=session_user
-        )
-    else:
-        return redirect(url_for("bases.bases_blp.user", user_id=session_user["id"]))
+    # Render the template with the data
+    return render_template(
+        'users.html',
+        users=searched_users,
+        total_pages=total_pages,
+        page=page,
+        start_page=max(1, page - 2),
+        end_page=min(total_pages, page + 2),
+        current_user=session_user
+    )
 
 
 @bases.route('/users/<user_id>', methods=['POST', 'GET'])
@@ -283,7 +279,7 @@ def create_user():
     if not session_user:
         return redirect(url_for("bases.bases_blp.login"))
 
-    if request.method == "GET" and is_admin():
+    if request.method == "GET":
         return render_template(
             'user.html',
             user=UserSchema().dump(
@@ -296,10 +292,8 @@ def create_user():
             rights=storage.load_simple_rights(),
             current_user=session_user
         )
-    else:
-        redirect(url_for('bases.bases_blp.user', user_id=session_user["id"]))
 
-    if request.method == "POST" and is_admin():
+    if request.method == "POST":
         searched_user = storage.load_user_by_username(request.form.get("username"), request.form.get("email"))
         if searched_user:
             flash("User with username {} or email {} already exists".format(
@@ -368,7 +362,6 @@ def rights():
 @bases.route('/update-rights/<right_id>', methods=['POST'])
 @require_permission(PermissionTypes.TAB_USERS_RIGHTS)
 def update_rights(right_id):
-    print(right_id)
     permission = storage.load_right_by_id(right_id)
 
     update_right(request, permission)

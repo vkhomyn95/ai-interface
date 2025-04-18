@@ -5,7 +5,6 @@ class PermissionTypes:
     TAB_USERS_RIGHTS = 2
     USERS_EDIT = 3
     USERS_CREATE = 4
-    TAB_DASHBOARD = 5
     TAB_RECOGNITIONS = 6
     RECOGNITIONS_EXPORT = 7
     TAB_PROFILE = 8
@@ -15,7 +14,6 @@ class PermissionTypes:
         TAB_USERS_RIGHTS: "TAB_USERS_RIGHTS",
         USERS_EDIT: "USERS_EDIT",
         USERS_CREATE: "USERS_CREATE",
-        TAB_DASHBOARD: "TAB_DASHBOARD",
         TAB_RECOGNITIONS: "TAB_RECOGNITIONS",
         RECOGNITIONS_EXPORT: "RECOGNITIONS_EXPORT",
         TAB_PROFILE: "TAB_PROFILE",
@@ -26,7 +24,6 @@ class PermissionTypes:
         TAB_USERS_RIGHTS: "Права доступу",
         USERS_EDIT: "Редагування користувачів",
         USERS_CREATE: "Створення користувачів",
-        TAB_DASHBOARD: "Панель керування",
         TAB_RECOGNITIONS: "Розпізнавання",
         RECOGNITIONS_EXPORT: "Експорт розпізнавань",
         TAB_PROFILE: "Профіль",

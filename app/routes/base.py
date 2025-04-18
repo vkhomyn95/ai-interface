@@ -104,7 +104,6 @@ def dashboard():
 
     reset = bool(request.args.get('reset', 0, type=int))
     dashboard_filter = session.get("dashboard_filter", {})
-    
     if is_admin():
         user_id = request.args.get(
             'user_id',

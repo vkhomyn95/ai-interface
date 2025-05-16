@@ -125,7 +125,7 @@ def dashboard():
         'dashboard.html',
         users=storage.load_simple_users() if is_admin() else [],
         dashboard={} if board is None else {key: int(value) if value is not None else 0 for key, value in board.items()},
-        filter=session["dashboard_filter"],
+        filter=session.get("dashboard_filter", {}),
         current_user=session_user
     )
 
@@ -423,29 +423,24 @@ def recognitions():
     request_extension = request.args.get('extension', '', type=str).strip()
     request_prediction = request.args.get('prediction', '', type=str).strip()
 
+    recognition_filter = session.get("recognition_filter", {})
+    if not isinstance(recognition_filter, dict):
+        recognition_filter = {}
+
     if is_admin():
-        if isinstance(session.get("recognition_filter"), dict):
-            user_id = request.args.get('user_id', session["recognition_filter"].get("user_id", session_user["id"]) if not reset else '', type=int)
-            campaign_id = session["recognition_filter"].get("campaign_id", '') if not reset and not campaign else campaign
-            date_time = session["recognition_filter"].get("datetime", '') if not reset and not datetime else datetime
-            request_uuid = session["recognition_filter"].get("request_uuid", '') if not reset and not uuid else uuid
-            extension = session["recognition_filter"].get("extension", '') if not reset and not request_extension else request_extension
-            prediction = session["recognition_filter"].get("prediction", '') if not reset and not request_prediction else request_prediction
-        else:
-            user_id = request.args.get('user_id', '', type=str).strip()
-            date_time = datetime
-            campaign_id = campaign
-            request_uuid = uuid
-            extension = request_extension
-            prediction = request_prediction
+        user_id = request.args.get(
+            'user_id',
+            recognition_filter.get("user_id", session_user["id"]) if not reset else '',
+            type=int
+        )
     else:
         user_id = session_user["id"]
 
-        date_time = session["recognition_filter"].get("datetime", '') if not reset and not datetime else datetime
-        campaign_id = session["recognition_filter"].get("campaign_id", '') if not reset and not campaign else campaign
-        request_uuid = session["recognition_filter"].get("request_uuid", '') if not reset and not uuid else uuid
-        extension = session["recognition_filter"].get("extension",'') if not reset and not request_extension else request_extension
-        prediction = session["recognition_filter"].get("prediction",'') if not reset and not request_prediction else request_prediction
+    campaign_id = campaign if campaign or reset else recognition_filter.get("campaign_id", '')
+    date_time = datetime if datetime or reset else recognition_filter.get("datetime", '')
+    request_uuid = uuid if uuid or reset else recognition_filter.get("request_uuid", '')
+    extension = request_extension if request_extension or reset else recognition_filter.get("extension", '')
+    prediction = request_prediction if request_prediction or reset else recognition_filter.get("prediction", '')
 
     session["recognition_filter"] = {
         "user_id": user_id,
@@ -470,7 +465,7 @@ def recognitions():
         start_page=max(1, page - 2),
         end_page=min(total_pages, page + 2),
         users=storage.load_simple_users() if is_admin() else [],
-        filter=session["recognition_filter"],
+        filter=session.get("recognition_filter", {}),
         current_user=session_user
     )
 

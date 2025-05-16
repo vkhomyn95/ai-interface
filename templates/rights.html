@@ -35,12 +35,14 @@
                             Налаштування прав доступу
                         </div>
                     </div>
+                        {% if current_user.role.name != 'supervisor' %}
                         <div class="content-wrapper-head-actions">
                             <button class="button button-main" onclick="openRightModal()">
                                 {% include 'header/icons/icon-add.html' %}
                                     <span style="margin-left: 10px; color: #ffffff;">Додати право</span>
                             </button>
                         </div>
+                       {% endif %}
                 </div>
 
 

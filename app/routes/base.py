@@ -104,7 +104,7 @@ def dashboard():
 
     reset = bool(request.args.get('reset', 0, type=int))
     dashboard_filter = session.get("dashboard_filter", {})
-    if is_admin():
+    if is_admin() or is_supervisor():
         user_id = request.args.get(
             'user_id',
             dashboard_filter.get("user_id", session_user["id"]) if not reset else '',
@@ -118,11 +118,11 @@ def dashboard():
         date_time = dashboard_filter.get("datetime", '') if not reset and not time else time
 
     session["dashboard_filter"] = {"user_id": user_id, "datetime": date_time}
-    board = storage.load_user_dashboard(user_id if is_admin() else session_user["id"], date_time)
+    board = storage.load_user_dashboard(user_id if is_admin() or is_supervisor() else session_user["id"], date_time)
 
     return render_template(
         'dashboard.html',
-        users=storage.load_simple_users() if is_admin() else [],
+        users=storage.load_simple_users() if is_admin() or is_supervisor() else [],
         dashboard={} if board is None else {key: int(value) if value is not None else 0 for key, value in board.items()},
         filter=session.get("dashboard_filter", {}),
         current_user=session_user
@@ -231,7 +231,7 @@ def user(user_id: int):
 
     searched_user = storage.load_user_by_id(int(user_id))
     if request.method == "GET":
-        if not is_admin():
+        if not is_admin() or is_supervisor():
             return redirect(url_for("bases.bases_blp.profile"))
 
         searched_user.password = ""
@@ -242,6 +242,8 @@ def user(user_id: int):
             current_user=session_user
         )
     else:
+        if is_supervisor():
+            return redirect(url_for('bases.bases_blp.users'))
         if is_admin() or searched_user.id == session_user["id"]:
             update_user(request, searched_user)
             storage.update_user(searched_user)
@@ -292,6 +294,9 @@ def create_user():
         )
 
     if request.method == "POST":
+        if is_supervisor():
+            return redirect(url_for('bases.bases_blp.users'))
+
         searched_user = storage.load_user_by_username(request.form.get("username"), request.form.get("email"))
         if searched_user:
             flash("User with username {} or email {} already exists".format(
@@ -360,8 +365,10 @@ def rights():
 @bases.route('/update-rights/<right_id>', methods=['POST'])
 @require_permission(PermissionTypes.TAB_USERS_RIGHTS)
 def update_rights(right_id):
-    permission = storage.load_right_by_id(right_id)
+    if is_supervisor():
+        return redirect(url_for('bases.bases_blp.rights'))
 
+    permission = storage.load_right_by_id(right_id)
     update_right(request, permission)
     storage.update_right(permission)
     return redirect(url_for('bases.bases_blp.rights'))
@@ -374,6 +381,9 @@ def create_right():
 
     if not session_user:
         return redirect(url_for("bases.bases_blp.login"))
+
+    if is_supervisor():
+        return redirect(url_for('bases.bases_blp.rights'))
 
     if request.method == "POST":
         new_right = storage.insert_new_right(request.form.get('name'))
@@ -426,7 +436,7 @@ def recognitions():
     if not isinstance(recognition_filter, dict):
         recognition_filter = {}
 
-    if is_admin():
+    if is_admin() or is_supervisor():
         user_id = request.args.get(
             'user_id',
             recognition_filter.get("user_id", session_user["id"]) if not reset else '',
@@ -463,7 +473,7 @@ def recognitions():
         page=page,
         start_page=max(1, page - 2),
         end_page=min(total_pages, page + 2),
-        users=storage.load_simple_users() if is_admin() else [],
+        users=storage.load_simple_users() if is_admin() or is_supervisor() else [],
         filter=session.get("recognition_filter", {}),
         current_user=session_user
     )
@@ -497,7 +507,7 @@ def recognitions_export():
     prediction = request.args.get('prediction', '', type=str).strip()
     client_timezone = request.args.get('client_timezone', 'UTC', type=str).strip()
 
-    if is_admin():
+    if is_admin() or is_supervisor():
         user_id = request.args.get('user_id', '', type=str).strip()
         recognitions = storage.load_recognitions(
             user_id, datetime, campaign_id, request_uuid, extension, prediction, None, None
@@ -576,7 +586,7 @@ def recognition(recognition_id: int):
 
     related_recognitions = []
 
-    if is_admin():
+    if is_admin() or is_supervisor():
         searched_recognition = storage.load_recognition_by_id(recognition_id)
         if searched_recognition is not None:
             related_recognitions = storage.load_related_recognitions(searched_recognition.request_uuid)
@@ -712,3 +722,8 @@ def is_admin():
     """Returns True if the current session user is an admin."""
     user_data = get_user()
     return user_data["role"]["name"] == 'admin'
+
+def is_supervisor():
+    """Returns True if the current session user is an supervisor."""
+    user_data = get_user()
+    return user_data["role"]["name"] == 'supervisor'

@@ -34,7 +34,7 @@
                             Гостьові акаунти
                         </div>
                     </div>
-                    {% if has_permission(PermissionTypes.USERS_CREATE) %}
+                    {% if has_permission(PermissionTypes.USERS_CREATE) and current_user.role.name != 'supervisor' %}
                         <div class="content-wrapper-head-actions">
                             <button class="button button-main">
                                 {% include 'header/icons/icon-add.html' %}
@@ -56,7 +56,7 @@
                     {'name': 'Активний'},
                     {'name': 'Кількість запитів'},
                 ] %}
-                {% if has_permission(PermissionTypes.USERS_EDIT) %}
+                {% if has_permission(PermissionTypes.USERS_EDIT) and current_user.role.name != 'supervisor' %}
                     {% set headings = headings + [{'name': 'Дії', 'actions': True}] %}
                 {% endif %}
 
@@ -80,7 +80,7 @@
                             <div style="width: 12%">{{ user.email }}</div>
                             <div style="width: 12%">{{ user.tariff.active }}</div>
                             <div style="width: 12%">{{ user.tariff.total }}</div>
-                            {% if has_permission(PermissionTypes.USERS_EDIT) %}
+                            {% if has_permission(PermissionTypes.USERS_EDIT) and current_user.role.name != 'supervisor' %}
                                 <div style="width: 12px">
                                     <div class="is-flex-direction-row is-align-content-center">
                                         <a href="{{ url_for('bases.bases_blp.user', user_id=user.id) }}" style="color: #00475A">

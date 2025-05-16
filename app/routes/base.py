@@ -118,7 +118,6 @@ def dashboard():
         date_time = dashboard_filter.get("datetime", '') if not reset and not time else time
 
     session["dashboard_filter"] = {"user_id": user_id, "datetime": date_time}
-
     board = storage.load_user_dashboard(user_id if is_admin() else session_user["id"], date_time)
 
     return render_template(

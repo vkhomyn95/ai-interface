@@ -383,6 +383,7 @@
             </form>
         </div>
 
+        {% if has_permission(PermissionTypes.USERS_EDIT) %}
         <div class="footer">
             <div class="footer-wrapper">
                 {% if is_profile and current_user.role.name=='admin' or current_user.role.name=='guest'%}
@@ -400,6 +401,7 @@
                 </button>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 <script>

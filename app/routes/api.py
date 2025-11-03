@@ -60,6 +60,7 @@ def create_user():
         exclude=("id", "tariff", "role", "rights", "recognition", "api_key"),
         unknown=EXCLUDE
     ).load(request.json)
+
     user_schema.role_id = 2
     user_schema.right_id = 3
     user_schema.password = generate_password_hash(request.json["password"])

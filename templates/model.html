@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+<body>
+
+{% include 'header/header-top.html' %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+{% include 'toast.html' %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="container">
+
+    {% include 'header/header-left.html' %}
+
+    <div class="container-main">
+        <div class="breadcrumb">
+            <a class="breadcrumb-navigation flex flex-align-center" href="{{ url_for('bases.bases_blp.models') }}">
+                {% include 'header/icons/icon-breadcrumb.html' %}
+            </a>
+            <div class="breadcrumb-heading flex flex-align-center">
+                <div class="breadcrumb-heading-previous ml-15">
+                    ML моделі
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <form
+                    method="POST"
+                    id="modelForm"
+                    class="mange-wrapper"
+                    action="{% if not model.id %}{{ url_for('bases.bases_blp.create_ml_model') }}{% else %}{{ url_for('bases.bases_blp.edit_ml_model', model_id=model.id) }}{% endif %}">
+
+                <div class="card">
+                    <div class="p-20">
+                        <span class="card-title">
+                            {% if model.id %}Редагувати ML модель{% else %}Створити ML модель{% endif %}
+                        </span>
+                    </div>
+                    <div class="card-border"></div>
+                    <div class="card-body">
+                        <div class="card-body-wrapper p-20">
+
+                            <input type="hidden" id="model_id" name="id" value="{{ model.id if model.id else '' }}">
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label">Активна</label>
+                                <div class="w-100">
+                                    <div class="flex flex-direction-row flex-align-center">
+                                        <span id="toggleActive">
+                                            {% if model and model.is_active %}
+                                            <span onclick="toggleModelActive(false)">
+                                                {% include 'header/icons/icon-square-checked.html' %}
+                                                <input type="hidden" id="activeChecked" name="is_active" value="True">
+                                            </span>
+                                            {% else %}
+                                            <span onclick="toggleModelActive(true)">
+                                                {% include 'header/icons/icon-square.html' %}
+                                                <input type="hidden" id="activeNotChecked" name="is_active"
+                                                       value="False">
+                                            </span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label label-required_danger" for="name">Назва</label>
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            id="name"
+                                            name="name"
+                                            placeholder="Назва моделі"
+                                            value="{{ model.name if model and model.name else '' }}"
+                                            oninput="validateField(this)"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label" for="description">Опис</label>
+                                <div class="w-100">
+                                    <textarea
+                                            class="input"
+                                            id="description"
+                                            name="description"
+                                            placeholder="Опис моделі"
+                                            rows="3"
+                                    >{{ model.description if model and model.description else '' }}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="mb-20">
+                                <label class="label">Завантажити модель (.pth)</label>
+                                <input type="file" id="upload_model_file" accept=".pth">
+                                <button type="button" onclick="uploadModelFile()" class="button button-primary mt-10">
+                                    Завантажити .pth
+                                </button>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label label-required_danger" for="model_path">Шлях до моделі
+                                    (.pth)</label>
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            id="model_path"
+                                            name="model_path"
+                                            placeholder="model.pth"
+                                            value="{{ model.model_path if model and model.model_path else '' }}"
+                                            oninput="validateField(this)"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="mb-20">
+                                <label class="label">Завантажити індексатор (.json)</label>
+                                <input type="file" id="upload_indexer_file" accept=".json">
+                                <button type="button" onclick="uploadIndexerFile()" class="button button-primary mt-10">
+                                    Завантажити .json
+                                </button>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label label-required_danger" for="indexer_path">Шлях до індексатора
+                                    (.json)</label>
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            id="indexer_path"
+                                            name="indexer_path"
+                                            placeholder="indexer.json"
+                                            value="{{ model.indexer_path if model and model.indexer_path else '' }}"
+                                            oninput="validateField(this)"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label label-required_danger" for="num_classes">Кількість класів</label>
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="number"
+                                            id="num_classes"
+                                            name="num_classes"
+                                            placeholder="2"
+                                            min="1"
+                                            value="{{ model.num_classes if model and model.num_classes else '2' }}"
+                                            oninput="validateNumberField(this)"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label" for="input_shape">Форма входу (JSON)</label>
+                                <div class="w-100">
+                                    <textarea
+                                            class="input"
+                                            id="input_shape"
+                                            name="input_shape"
+                                            placeholder='{"channels": 1, "height": 128, "width": 431}'
+                                            rows="3"
+                                            oninput="validateJsonField(this)"
+                                    >{{ model.input_shape|tojson if model and model.input_shape else '{}' }}</textarea>
+                                    <small class="help-text">Формат: {"channels": 1, "height": 128, "width":
+                                        431}</small>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label" for="version">Версія</label>
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            id="version"
+                                            name="version"
+                                            placeholder="1.0.0"
+                                            value="{{ model.version if model and model.version else '' }}"
+                                    />
+                                </div>
+                            </div>
+
+                            {% if model.id %}
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label" for="created_date">Дата створення</label>
+                                <div class="w-100">
+                                    <input
+                                            class="input"
+                                            type="text"
+                                            id="created_date"
+                                            name="created_date"
+                                            value="{{ model.created_date }}"
+                                            readonly
+                                    />
+                                </div>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="footer">
+            <div class="footer-wrapper">
+                <button onclick="window.location.href = '{{ url_for('bases.bases_blp.models') }}'"
+                        class="button button-secondary is-link">
+                    Скасувати
+                </button>
+                <button onclick="saveForm()" class="button button-primary ml-10">
+                    <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+                         class="button-svg">
+                        <path d="M17.1522 7.25833L13.1272 3.23333C12.6588 2.76436 12.0233 2.50058 11.3605 2.5H5.3855C4.72246 2.5 4.08657 2.76339 3.61773 3.23223C3.14889 3.70107 2.8855 4.33696 2.8855 5V15C2.8855 15.663 3.14889 16.2989 3.61773 16.7678C4.08657 17.2366 4.72246 17.5 5.3855 17.5H15.3855C16.0485 17.5 16.6844 17.2366 17.1533 16.7678C17.6221 16.2989 17.8855 15.663 17.8855 15V9.025C17.8849 8.36218 17.6211 7.72672 17.1522 7.25833ZM8.71883 15.8333V14.1667H12.0522V15.8333H8.71883ZM16.2188 15C16.2188 15.221 16.131 15.433 15.9748 15.5893C15.8185 15.7455 15.6065 15.8333 15.3855 15.8333H13.7188V13.3333C13.7188 13.1123 13.631 12.9004 13.4748 12.7441C13.3185 12.5878 13.1065 12.5 12.8855 12.5H7.8855C7.66448 12.5 7.45252 12.5878 7.29624 12.7441C7.13996 12.9004 7.05216 13.1123 7.05216 13.3333V15.8333H5.3855C5.16448 15.8333 4.95252 15.7455 4.79624 15.5893C4.63996 15.433 4.55216 15.221 4.55216 15V5C4.55216 4.77899 4.63996 4.56702 4.79624 4.41074C4.95252 4.25446 5.16448 4.16667 5.3855 4.16667H7.05216V8.33333C7.05216 8.55435 7.13996 8.76631 7.29624 8.92259C7.45252 9.07887 7.66448 9.16667 7.8855 9.16667H11.2188C11.4398 9.16667 11.6518 9.07887 11.8081 8.92259C11.9644 8.76631 12.0522 8.55435 12.0522 8.33333C12.0522 8.11232 11.9644 7.90036 11.8081 7.74408C11.6518 7.5878 11.4398 7.5 11.2188 7.5H8.71883V4.16667H11.3605C11.5811 4.16974 11.7925 4.25606 11.9522 4.40833L15.9772 8.43333C16.0544 8.5112 16.1155 8.60355 16.157 8.70508C16.1984 8.80661 16.2195 8.91533 16.2188 9.025V15Z"
+                              fill="#252525"></path>
+                    </svg>
+                    <span class="ml-10">Зберегти</span>
+                </button>
+                {% if model.id and has_permission(PermissionTypes.ML_MODEL_DELETE) %}
+                <button onclick="deleteModel()" class="button ml-10" style="color: #d32f2f; border-color: #d32f2f">
+                    <span class="ml-10">Видалити</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateField(field) {
+        if (field.value.length >= 5) {
+            if (field.classList.contains("is-danger")) {
+                field.classList.replace("is-danger", "is-success");
+                return true;
+            } else {
+                field.classList.add("is-success");
+                return true;
+            }
+        } else {
+            if (field.classList.contains("is-success")) {
+                field.classList.replace("is-success", "is-danger");
+                return false;
+            } else {
+                field.classList.add("is-danger");
+                return false;
+            }
+        }
+    }
+
+    function validateNumberField(field) {
+        const value = parseInt(field.value);
+        if (value >= 1) {
+            if (field.classList.contains("is-danger")) {
+                field.classList.replace("is-danger", "is-success");
+                return true;
+            } else {
+                field.classList.add("is-success");
+                return true;
+            }
+        } else {
+            if (field.classList.contains("is-success")) {
+                field.classList.replace("is-success", "is-danger");
+                return false;
+            } else {
+                field.classList.add("is-danger");
+                return false;
+            }
+        }
+    }
+
+    function validateJsonField(field) {
+        try {
+            JSON.parse(field.value);
+            if (field.classList.contains("is-danger")) {
+                field.classList.replace("is-danger", "is-success");
+                return true;
+            } else {
+                field.classList.add("is-success");
+                return true;
+            }
+        } catch (e) {
+            if (field.classList.contains("is-success")) {
+                field.classList.replace("is-success", "is-danger");
+                return false;
+            } else {
+                field.classList.add("is-danger");
+                return false;
+            }
+        }
+    }
+
+    function validateModelForm() {
+        let isValid = true;
+
+        let name = document.getElementById("name");
+        isValid = validateField(name);
+        if (!isValid) return false;
+
+        let modelPath = document.getElementById("model_path");
+        isValid = validateField(modelPath);
+        if (!isValid) return false;
+
+        let indexerPath = document.getElementById("indexer_path");
+        isValid = validateField(indexerPath);
+        if (!isValid) return false;
+
+        let numClasses = document.getElementById("num_classes");
+        isValid = validateNumberField(numClasses);
+        if (!isValid) return false;
+
+        let inputShape = document.getElementById("input_shape");
+        if (inputShape.value.trim() !== '') {
+            isValid = validateJsonField(inputShape);
+            if (!isValid) return false;
+        }
+
+        return isValid;
+    }
+
+    function saveForm() {
+        event.preventDefault();
+        if (validateModelForm()) {
+            document.getElementById("modelForm").submit();
+        }
+    }
+
+    function toggleModelActive(newValue) {
+        const activeSpan = document.getElementById('toggleActive');
+        if (newValue) {
+            activeSpan.innerHTML = `
+                <span onclick="toggleModelActive(false)">
+                    {% include 'header/icons/icon-square-checked.html' %}
+                    <input type="hidden" id="activeChecked" name="is_active" value="True">
+                </span>`;
+        } else {
+            activeSpan.innerHTML = `
+                <span onclick="toggleModelActive(true)">
+                    {% include 'header/icons/icon-square.html' %}
+                    <input type="hidden" id="activeNotChecked" name="is_active" value="False">
+                </span>`;
+        }
+    }
+
+    function deleteModel() {
+        if (confirm('Ви впевнені, що хочете видалити цю ML модель? Цю дію неможливо скасувати.')) {
+            const modelId = document.getElementById("model_id").value;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/models/${modelId}/delete`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // Convert UTC date to local timezone
+    function convertUTCToLocal(utcDateString) {
+        if (!utcDateString) return '';
+
+        if (utcDateString.endsWith("Z")) {
+            utcDateString = utcDateString.replaceAll("Z", "");
+        }
+        const utcDate = new Date(utcDateString + 'Z');
+
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        const formatter = new Intl.DateTimeFormat('en-CA', options);
+        if (formatter && utcDate) {
+            const formattedDateParts = formatter.formatToParts(utcDate);
+
+            const year = formattedDateParts.find(part => part.type === 'year').value;
+            const month = formattedDateParts.find(part => part.type === 'month').value;
+            const day = formattedDateParts.find(part => part.type === 'day').value;
+            const hour = formattedDateParts.find(part => part.type === 'hour').value;
+            const minute = formattedDateParts.find(part => part.type === 'minute').value;
+            const second = formattedDateParts.find(part => part.type === 'second').value;
+
+            return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+        }
+        return '';
+    }
+
+    // Convert created date on page load
+    const createdDateField = document.getElementById('created_date');
+    if (createdDateField && createdDateField.value) {
+        createdDateField.value = convertUTCToLocal(createdDateField.value);
+    }
+
+    async function uploadModelFile() {
+    const fileInput = document.getElementById("upload_model_file");
+    if (!fileInput.files.length) {
+        alert("Оберіть файл");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const res = await fetch("/models/upload", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    document.getElementById("model_path").value = data.uuid;
+    document.getElementById("model_path").classList.add("is-success");
+
+    alert("Файл моделі завантажено");
+}
+
+async function uploadIndexerFile() {
+    const fileInput = document.getElementById("upload_indexer_file");
+    if (!fileInput.files.length) {
+        alert("Оберіть файл");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const res = await fetch("/models/upload", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    document.getElementById("indexer_path").value = data.uuid;
+    document.getElementById("indexer_path").classList.add("is-success");
+
+    alert("Файл індексатора завантажено");
+}
+</script>
+</body>
+</html>

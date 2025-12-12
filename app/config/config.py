@@ -15,7 +15,7 @@ class Variables:
 
     SQLALCHEMY_DATABASE_URI: str = os.getenv(
         "SQLALCHEMY_DATABASE_URI",
-        "mysql://root:rootroot@127.0.0.1/amd"
+        "mysql://root:root@127.0.0.1/amd"
     )
 
     USER_DEFAULT_PASSWORD: str = os.getenv(
@@ -47,6 +47,11 @@ class Variables:
     logger_dir: str = os.getenv(
         "LOGGER_DIR",
         "/stor/data/logs/interface"
+    )
+    # Directory for storing ml models
+    ml_models_dir: str = os.getenv(
+        "MODEL_DIR",
+        "/stor/data/ml-models/"
     )
     # Default audio recognition interval
     audio_interval: float = float(os.getenv(

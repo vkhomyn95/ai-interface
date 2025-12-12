@@ -223,6 +223,24 @@
                                         />
                                     </div>
                                 </div>
+
+                            <div class="flex flex-direction-row flex-align-center mb-20">
+                                <label class="label" for="ml_model_id">ML модель</label>
+                                <div class="w-100">
+                                    <select name="ml_model_id" id="ml_model_id" class="input">
+                                        <option value="">Оберіть ML модель (опціонально)</option>
+                                        {% for model in ml_models %}
+                                        <option value="{{ model.id }}"
+                                                {% if model.id == user.ml_model_id %}selected{% endif %}
+                                                {% if not model.is_active %}disabled{% endif %}>
+                                            {{ model.name }}
+                                            {% if model.version %}(v{{ model.version }}){% endif %}
+                                            {% if not model.is_active %}[Неактивна]{% endif %}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
                             {% endif %}
                         </div>
                     </div>

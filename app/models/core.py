@@ -69,6 +69,25 @@ class Rights(db.Model):
     permissions = db.Column(db.JSON, default=[], nullable=False)
 
 
+class MLModel(db.Model):
+    __tablename__ = 'ml_models'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text)
+    model_path = db.Column(db.String(512), nullable=False)  # шлях до .pth файлу
+    indexer_path = db.Column(db.String(512), nullable=False)  # шлях до .pkl файлу
+    num_classes = db.Column(db.Integer, default=3)
+    input_shape = db.Column(db.JSON)  # {"channels": 1, "height": 128, "width": 431}
+    version = db.Column(db.String(50))
+    is_active = db.Column(db.Boolean, default=True)
+    created_date = db.Column(db.DateTime, default=datetime.utcnow(), nullable=True)
+    updated_date = db.Column(db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow(), nullable=True)
+
+    # Зв'язок з користувачами
+    users = db.relationship('User', back_populates='ml_model')
+
+
 class User(db.Model):
     __tablename__ = "user"
 
@@ -92,6 +111,9 @@ class User(db.Model):
     role = db.relationship('UserRole', back_populates='users')
 
     rights = db.relationship('Rights')
+
+    ml_model_id = db.Column(db.Integer, db.ForeignKey('ml_models.id'), nullable=True)
+    ml_model = db.relationship('MLModel', back_populates='users')
 
     @property
     def permissions(self):

@@ -1,19 +1,20 @@
 import json
 import logging
 import os
+import uuid
 from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
 import pytz
-from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file, g, abort
+from flask import Blueprint, request, flash, redirect, url_for, session, render_template, send_from_directory, send_file, g, abort, jsonify
 from sqlalchemy.orm import class_mapper
 from werkzeug.security import check_password_hash, generate_password_hash
 from functools import wraps
 
 from app.config import variables
 from app.extensions import storage
-from app.models import User, Tariff, RecognitionConfiguration, Rights
+from app.models import User, Tariff, RecognitionConfiguration, Rights, MLModel
 from app.schemas import UserSchema
 from app.extensions.permissions import PermissionTypes
 
@@ -245,10 +246,14 @@ def user(user_id: int):
             'user.html',
             user=searched_user,
             rights=storage.load_simple_rights(),
+            ml_models=storage.get_active_models(),
             current_user=session_user
         )
     else:
         if is_admin() or searched_user.id == session_user["id"]:
+            ml_model_id = request.form.get('ml_model_id')
+            searched_user.ml_model_id = int(ml_model_id) if ml_model_id else None
+
             update_user(request, searched_user)
             storage.update_user(searched_user)
             if is_admin():
@@ -294,6 +299,7 @@ def create_user():
                 )
             ),
             rights=storage.load_simple_rights(),
+            ml_models=storage.get_active_models(),
             current_user=session_user
         )
     else:
@@ -315,6 +321,7 @@ def create_user():
                 'user.html',
                 user=new_user,
                 rights=storage.load_simple_rights(),
+                ml_models=storage.get_active_models(),
                 current_user=session_user
             )
         else:
@@ -323,11 +330,15 @@ def create_user():
                 tariff=Tariff(),
                 recognition=RecognitionConfiguration()
             )
+            ml_model_id = request.form.get('ml_model_id')
+            new_user.ml_model_id = int(ml_model_id) if ml_model_id else None
+
             update_user(request, new_user)
             storage.insert_user(new_user)
             return redirect(url_for('bases.bases_blp.users'))
     else:
         redirect(url_for('bases.bases_blp.user', user_id=session_user["id"]))
+
 
 @bases.route('/rights', methods=["GET"])
 @require_permission(PermissionTypes.TAB_USERS_RIGHTS)
@@ -392,6 +403,223 @@ def create_right():
     else:
         return redirect(url_for('bases.bases_blp.rights'))
 
+
+@bases.route('/models', methods=["GET"])
+@require_permission(PermissionTypes.TAB_ML_MODELS)
+def models():
+    """
+    Handles the ML models list page.
+    """
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
+    offset = (page - 1) * limit
+
+    models = storage.load_models(limit, offset)
+    count = storage.count_models()
+    total_pages = 1 if count <= limit else (count + (limit - 1)) // limit
+
+    return render_template(
+        'models.html',
+        models=models,
+        total_pages=total_pages,
+        page=page,
+        start_page=max(1, page - 2),
+        end_page=min(total_pages, page + 2),
+        current_user=session_user
+    )
+
+
+@bases.route('/models/create', methods=['GET', 'POST'])
+@require_permission(PermissionTypes.ML_MODEL_CREATE)
+def create_ml_model():
+    """
+    Create new ML model.
+    """
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    if request.method == "POST":
+        try:
+            # Parse input_shape from JSON string
+            input_shape_str = request.form.get('input_shape', '{}')
+            input_shape = json.loads(input_shape_str) if input_shape_str else {}
+
+            new_model = MLModel(
+                name=request.form.get('name'),
+                description=request.form.get('description'),
+                model_path=request.form.get('model_path'),
+                indexer_path=request.form.get('indexer_path'),
+                num_classes=int(request.form.get('num_classes', 3)),
+                input_shape=input_shape,
+                version=request.form.get('version'),
+                is_active=request.form.get('is_active') == 'True'
+            )
+
+            storage.insert_ml_model(new_model)
+            logging.info(f'== Created ML model {new_model.name} by user {session_user["id"]}')
+            flash('ML модель успішно створена', 'success')
+
+            return redirect(url_for('bases.bases_blp.models'))
+        except Exception as e:
+            logging.error(f'Error creating ML model: {str(e)}')
+            flash('Помилка при створенні ML моделі', 'error')
+            return redirect(url_for('bases.bases_blp.create_ml_model'))
+
+    model = MLModel()
+    return render_template(
+        'model.html',
+        model=model,
+        current_user=session_user
+    )
+
+
+@bases.route('/models/<int:model_id>', methods=['GET', 'POST'])
+@require_permission(PermissionTypes.ML_MODEL_EDIT)
+def edit_ml_model(model_id):
+    """
+    Edit existing ML model.
+    """
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    model = storage.load_model_by_id(model_id)
+
+    if not model:
+        flash('ML модель не знайдено', 'error')
+        return redirect(url_for('bases.bases_blp.models'))
+
+    if request.method == "POST":
+        try:
+            # Parse input_shape from JSON string
+            input_shape_str = request.form.get('input_shape', '{}')
+            input_shape = json.loads(input_shape_str) if input_shape_str else {}
+
+            model.name = request.form.get('name')
+            model.description = request.form.get('description')
+            model.model_path = request.form.get('model_path')
+            model.indexer_path = request.form.get('indexer_path')
+            model.num_classes = int(request.form.get('num_classes', 3))
+            model.input_shape = input_shape
+            model.version = request.form.get('version')
+            model.is_active = request.form.get('is_active') == 'True'
+            model.updated_date = datetime.utcnow()
+
+            storage.update_ml_model(model)
+            logging.info(f'== Updated ML model {model.name} by user {session_user["id"]}')
+            flash('ML модель успішно оновлена', 'success')
+
+            return redirect(url_for('bases.bases_blp.models'))
+        except Exception as e:
+            logging.error(f'Error updating ML model: {str(e)}')
+            flash('Помилка при оновленні ML моделі', 'error')
+
+    return render_template(
+        'model.html',
+        model=model,
+        current_user=session_user
+    )
+
+
+@bases.route('/models/<int:model_id>/delete', methods=['POST'])
+@require_permission(PermissionTypes.ML_MODEL_DELETE)
+def delete_ml_model(model_id):
+    """
+    Delete ML model.
+    """
+    session_user = get_user()
+
+    if not session_user:
+        return redirect(url_for("bases.bases_blp.login"))
+
+    try:
+        model = storage.load_model_by_id(model_id)
+
+        if not model:
+            flash('ML модель не знайдено', 'error')
+            return redirect(url_for('bases.bases_blp.models'))
+
+        # Check if any users are using this model
+        users_count = storage.count_users_by_model_id(model_id)
+        if users_count > 0:
+            flash(f'Не можна видалити модель, оскільки вона використовується {users_count} користувачами', 'error')
+            return redirect(url_for('bases.bases_blp.models'))
+
+        # 1. Спочатку видаляємо запис з БД
+        storage.delete_ml_model(model)
+
+        # 2. Видаляємо фізичні файли
+        try:
+            # Формуємо повні шляхи до файлів
+            full_model_path = os.path.join(variables.ml_models_dir, model.model_path)
+            # Якщо у вас indexer_path може бути None, додайте перевірку: if model.indexer_path: ...
+            full_indexer_path = os.path.join(variables.ml_models_dir, model.indexer_path)
+
+            # Видаляємо основний файл моделі (.pth)
+            if os.path.exists(full_model_path):
+                os.remove(full_model_path)
+                logging.info(f"File deleted: {full_model_path}")
+            else:
+                logging.warning(f"File not found during deletion: {full_model_path}")
+
+            # Видаляємо файл мапінгу (.json або .pkl)
+            if os.path.exists(full_indexer_path):
+                os.remove(full_indexer_path)
+                logging.info(f"File deleted: {full_indexer_path}")
+
+        except Exception as file_error:
+            # Логуємо помилку файлової системи, але не перериваємо редірект користувача
+            logging.error(f"Error deleting physical files for model {model.name}: {file_error}")
+
+        logging.info(f'== Deleted ML model {model.name} by user {session_user["id"]}')
+        flash('ML модель успішно видалена', 'success')
+
+    except Exception as e:
+        logging.error(f'Error deleting ML model: {str(e)}')
+        flash('Помилка при видаленні ML моделі', 'error')
+
+    return redirect(url_for('bases.bases_blp.models'))
+
+
+@bases.route('/models/upload', methods=['POST'])
+@require_permission(PermissionTypes.ML_MODEL_CREATE)
+def upload_ml_file():
+    """
+    Upload model files (.pth / .json).
+    """
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'Файл не надіслано'}), 400
+
+    # Перевірка формату
+    allowed = {'pth', 'json'}
+    ext = file.filename.rsplit('.', 1)[-1].lower()
+    if ext not in allowed:
+        return jsonify({'error': 'Дозволені лише .pth та .json'}), 400
+
+    # UUID filename
+    file_uuid = f"{uuid.uuid4()}.{ext}"
+
+    # Куди зберігати
+    folder = variables.ml_models_dir
+    os.makedirs(folder, exist_ok=True)
+
+    save_path = os.path.join(folder, file_uuid)
+    file.save(save_path)
+
+    return jsonify({
+        'uuid': file_uuid,
+        'path': save_path,
+        'ext': ext
+    })
 
 
 @bases.route('/recognitions')

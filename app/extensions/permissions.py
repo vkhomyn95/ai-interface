@@ -1,5 +1,6 @@
 from flask import session
 
+
 class PermissionTypes:
     TAB_USERS = 1
     TAB_USERS_RIGHTS = 2
@@ -9,6 +10,10 @@ class PermissionTypes:
     TAB_RECOGNITIONS = 6
     RECOGNITIONS_EXPORT = 7
     TAB_PROFILE = 8
+    TAB_ML_MODELS = 9
+    ML_MODEL_CREATE = 10
+    ML_MODEL_EDIT = 11
+    ML_MODEL_DELETE = 12
 
     MAP = {
         TAB_USERS: "TAB_USERS",
@@ -19,6 +24,10 @@ class PermissionTypes:
         TAB_RECOGNITIONS: "TAB_RECOGNITIONS",
         RECOGNITIONS_EXPORT: "RECOGNITIONS_EXPORT",
         TAB_PROFILE: "TAB_PROFILE",
+        TAB_ML_MODELS: "TAB_ML_MODELS",
+        ML_MODEL_CREATE: "ML_MODEL_CREATE",
+        ML_MODEL_EDIT: "ML_MODEL_EDIT",
+        ML_MODEL_DELETE: "ML_MODEL_DELETE"
     }
 
     MAP_LABELS = {
@@ -30,6 +39,10 @@ class PermissionTypes:
         TAB_RECOGNITIONS: "Розпізнавання",
         RECOGNITIONS_EXPORT: "Експорт розпізнавань",
         TAB_PROFILE: "Профіль",
+        TAB_ML_MODELS: "ML моделі",
+        ML_MODEL_CREATE: "Створення ML",
+        ML_MODEL_EDIT: "Редагування ML",
+        ML_MODEL_DELETE: "Видалення ML",
     }
 
     @classmethod
@@ -42,11 +55,9 @@ class PermissionTypes:
 
     @classmethod
     def has_permission(cls, permission_id):
-        from flask import g
         user = session.get("user")
         if not user:
             return False
 
         permissions = user.get("rights", {}).get("permissions", [])
         return permission_id in permissions
-

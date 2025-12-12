@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash
 
 from app.config import variables
 from app.extensions import db
-from app.models import User, RecognitionConfiguration, Tariff, Recognition, UserRole, Rights
+from app.models import User, RecognitionConfiguration, Tariff, Recognition, UserRole, Rights, MLModel
 from app.schemas.schema import UserSchema
 from app.extensions.permissions import PermissionTypes
 
@@ -399,6 +399,113 @@ class Database:
             logging.error(f'  >> Error during query: {e}')
             db.session.rollback()
             return None
+
+    @staticmethod
+    def load_models(limit: int, offset: int):
+        try:
+            return db.session.query(MLModel).limit(limit).offset(offset).all()
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def count_models():
+        try:
+            return db.session.query(MLModel).count()
+        except Exception as e:
+            logging.error(f'  >> Error during query: {e}')
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def load_model_by_id(model_id: int):
+        """
+        Load ML model by ID.
+
+        Args:
+            model_id: ID of the model
+
+        Returns:
+            MLModel object or None
+        """
+        return db.session.query(MLModel).filter_by(id=model_id).first()
+
+    @staticmethod
+    def insert_ml_model(model: MLModel):
+        """
+        Insert new ML model into database.
+
+        Args:
+            model: MLModel object to insert
+
+        Returns:
+            MLModel: The inserted model
+        """
+        db.session.add(model)
+        db.session.commit()
+        return model
+
+    @staticmethod
+    def update_ml_model(model: MLModel):
+        """
+        Update existing ML model.
+
+        Args:
+            model: MLModel object to update
+
+        Returns:
+            MLModel: The updated model
+        """
+        db.session.commit()
+        return model
+
+    @staticmethod
+    def delete_ml_model(model: MLModel):
+        """
+        Delete ML model from database.
+
+        Args:
+            model: MLModel object to delete
+        """
+        db.session.delete(model)
+        db.session.commit()
+
+    @staticmethod
+    def count_users_by_model_id(model_id: int):
+        """
+        Count how many users are using specific ML model.
+
+        Args:
+            model_id: ID of the model
+
+        Returns:
+            int: Number of users using this model
+        """
+        return db.session.query(User).filter_by(ml_model_id=model_id).count()
+
+    @staticmethod
+    def get_active_models():
+        """
+        Get all active ML models.
+
+        Returns:
+            List of active MLModel objects
+        """
+        return db.session.query(MLModel).filter_by(is_active=True).order_by(MLModel.name).all()
+
+    @staticmethod
+    def load_model_by_name(name: str):
+        """
+        Load ML model by name.
+
+        Args:
+            name: Name of the model
+
+        Returns:
+            MLModel object or None
+        """
+        return db.session.query(MLModel).filter_by(name=name).first()
 
     @staticmethod
     def count_rights():

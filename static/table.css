@@ -1,6 +1,6 @@
 .content {
   position: relative;
-  height: calc(100% - 130px);
+  height: calc(100% - 110px);
   padding: 0 20px;
   width: 100%;
 }
@@ -21,7 +21,7 @@
     height: 100%;
 }
 .content-wrapper {
-  border-radius: 20px;
+  border-radius: 5px;
   background: #ffffff;
   position: relative;
   width: 100%;
@@ -29,11 +29,11 @@
 }
 
 .content-wrapper-head {
-  height: 90px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 19.232px 23.078px 18.27px 23.078px;
+  padding: 10px;
 }
 
 .content-wrapper-head-header {
@@ -47,7 +47,6 @@
   color: #101828;
   font-size: 18px;
   font-weight: 500;
-  line-height: 26.925px;
   margin-bottom: 3.85px;
 }
 
@@ -55,7 +54,6 @@
   color: #92929d;
   font-size: 14px;
   font-weight: 400;
-  line-height: 19.232px;
 }
 
 .content-wrapper-head-actions {

@@ -2,6 +2,7 @@ from marshmallow import fields
 
 from app.extensions import ma, db
 from app.models import Tariff, UserRole, RecognitionConfiguration, User, Rights
+from app.models.core import MLModel
 
 
 class TariffSchema(ma.SQLAlchemyAutoSchema):
@@ -73,6 +74,25 @@ class RightsSchema(ma.SQLAlchemyAutoSchema):
     permissions = fields.List(fields.Raw())
 
 
+class MLModelSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = MLModel
+        load_instance = True
+        sqla_session = db.session
+
+    id = fields.Int(allow_none=True)
+    name = fields.Str(required=True)
+    description = fields.Str(allow_none=True)
+    model_path = fields.Str(required=True)
+    indexer_path = fields.Str(required=True)
+    num_classes = fields.Int()
+    input_shape = fields.Dict()
+    version = fields.Str()
+    is_active = fields.Bool()
+    created_date = fields.Str()
+    updated_date = fields.Str()
+
+
 class UserSchema(ma.SQLAlchemyAutoSchema):
 
     class Meta:
@@ -85,6 +105,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     recognition = fields.Nested(RecognitionConfigurationSchema)
     role = fields.Nested(UserRoleSchema)
     rights = fields.Nested(RightsSchema)
+    ml_model = fields.Nested(MLModelSchema)
 
 
 class TariffAPISchema(ma.SQLAlchemyAutoSchema):

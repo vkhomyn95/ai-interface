@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include 'head.html' %}
+
+<body>
+
+{% include 'header/header-top.html' %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+{% include 'toast.html' %}
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<div class="container">
+
+    {% include 'header/header-left.html' %}
+
+    <div class="container-main">
+        <div class="breadcrumb">
+            <div class="breadcrumb-navigation flex flex-align-center">
+                {% include 'header/icons/icon-breadcrumb.html' %}
+            </div>
+            <div class="breadcrumb-heading flex flex-align-center">
+                <div class="breadcrumb-heading-previous ml-15">
+                    ML моделі
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="content-wrapper">
+                <div class="content-wrapper-head">
+                    <div class="content-head-heading">
+                        <div class="content-wrapper-head-header-heading">
+                            ML моделі
+                        </div>
+                    </div>
+                    {% if has_permission(PermissionTypes.ML_MODEL_CREATE) %}
+                        <div class="content-wrapper-head-actions">
+                            <button class="button button-main">
+                                {% include 'header/icons/icon-add.html' %}
+                                <a href="{{ url_for('bases.bases_blp.create_ml_model') }}" style="text-decoration: none">
+                                    <span style="margin-left: 10px; color: #ffffff;">Додати ML</span>
+                                </a>
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% set headings = [
+                    {'name': 'ID', 'width': '8%'},
+                    {'name': 'Дата створення', 'width': '14%'},
+                    {'name': 'Назва', 'width': '14%'},
+                    {'name': 'Опис', 'width': '18%'},
+                    {'name': 'Шлях', 'width': '16%'},
+                    {'name': 'Версія', 'width': '10%'},
+                    {'name': 'Активний', 'width': '10%'},
+                ] %}
+                {% if has_permission(PermissionTypes.ML_MODEL_EDIT) or has_permission(PermissionTypes.ML_MODEL_DELETE) %}
+                    {% set headings = headings + [{'name': 'Дії', 'actions': True, 'width': '10%'}] %}
+                {% endif %}
+
+                <div class="table-header">
+                    {% for heading in headings %}
+                    <div style="width: {{ heading.width if heading.width else '60px' }};">
+                        {{ heading.name }}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="content-wrapper-info">
+                    <div class="table-content">
+                        {% for model in models %}
+                        <div class="table-row">
+                            <div style="width: 8%">{{ model.id }}</div>
+                            <div style="width: 14%" class="created-date">{{ model.created_date }}</div>
+                            <div style="width: 14%">{{ model.name }}</div>
+                            <div style="width: 18%">{{ model.description if model.description else '-' }}</div>
+                            <div style="width: 16%" title="{{ model.model_path }}">
+                                {{ model.model_path[:30] }}{{ '...' if model.model_path|length > 30 else '' }}
+                            </div>
+                            <div style="width: 10%">{{ model.version if model.version else '-' }}</div>
+                            <div style="width: 10%">
+                                {% if model.is_active %}
+                                    <span class="tag is-success">Так</span>
+                                {% else %}
+                                    <span class="tag is-danger">Ні</span>
+                                {% endif %}
+                            </div>
+                            {% if has_permission(PermissionTypes.ML_MODEL_EDIT) or has_permission(PermissionTypes.ML_MODEL_DELETE) %}
+                                <div style="width: 10%">
+                                    <div class="is-flex-direction-row is-align-content-center">
+                                        {% if has_permission(PermissionTypes.ML_MODEL_EDIT) %}
+                                        <a href="{{ url_for('bases.bases_blp.edit_ml_model', model_id=model.id) }}" style="color: #00475A" title="Редагувати">
+                                          {% include 'header/icons/icon-edit.html' %}
+                                        </a>
+                                        {% endif %}
+                                        {% if has_permission(PermissionTypes.ML_MODEL_DELETE) %}
+                                        <a href="#" onclick="deleteModel({{ model.id }}, '{{ model.name }}'); return false;" style="color: #d32f2f; margin-left: 10px;" title="Видалити">
+                                            {% include 'header/icons/icon-delete.html' %}
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% with page=page, total_pages=total_pages, start_page=start_page, end_page=end_page, template='bases.bases_blp.models' %}
+            {% include "pagination.html" %}
+        {% endwith %}
+    </div>
+</div>
+
+<script>
+    function convertUTCToLocal(utcDateString) {
+      if (utcDateString.endsWith("Z")) {
+            utcDateString = utcDateString.replaceAll("Z", "");
+        }
+        const utcDate = new Date(utcDateString + 'Z')
+
+      const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+
+        const formatter = new Intl.DateTimeFormat('en-CA', options);
+        if (formatter && utcDate) {
+          const formattedDateParts = formatter.formatToParts(utcDate);
+
+          const year = formattedDateParts.find(part => part.type === 'year').value;
+          const month = formattedDateParts.find(part => part.type === 'month').value;
+          const day = formattedDateParts.find(part => part.type === 'day').value;
+          const hour = formattedDateParts.find(part => part.type === 'hour').value;
+          const minute = formattedDateParts.find(part => part.type === 'minute').value;
+          const second = formattedDateParts.find(part => part.type === 'second').value;
+
+          return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+      }
+      return ''
+    }
+
+    document.querySelectorAll('.created-date').forEach(element => {
+      const utcDate = element.textContent.trim();
+      element.textContent = convertUTCToLocal(utcDate);
+    });
+
+    function deleteModel(modelId, modelName) {
+        if (confirm(`Ви впевнені, що хочете видалити ML модель "${modelName}"?\n\nУВАГА: Модель не можна видалити, якщо вона використовується користувачами.\n\nЦю дію неможливо скасувати.`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/models/${modelId}/delete`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>
+</body>
+</html>

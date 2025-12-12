@@ -1,35 +1,42 @@
-
 <header class="left-panel">
     <aside class="left-panel-wrapper">
         <div class="left-panel-wrapper-link{% if not open %} left-panel-wrapper-link-selected{% endif %}">
-         {% if has_permission(PermissionTypes.TAB_DASHBOARD) %}
-              <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.dashboard') }}">
+            {% if has_permission(PermissionTypes.TAB_DASHBOARD) %}
+            <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.dashboard') }}">
                 {% include 'header/icons/icon-dashboard.html' %}
                 <div class="left-panel-wrapper-navigation-content">Звіти та статистика</div>
                 <div class="left-panel-wrapper-divider"></div>
-              </a>
-         {% endif %}
+            </a>
+            {% endif %}
 
-         {% if has_permission(PermissionTypes.TAB_RECOGNITIONS) %}
-              <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.recognitions') }}">
+            {% if has_permission(PermissionTypes.TAB_RECOGNITIONS) %}
+            <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.recognitions') }}">
                 {% include 'header/icons/icon-recognitions.html' %}
                 <div class="left-panel-wrapper-navigation-content">Запити розпізнавання</div>
                 <div class="left-panel-wrapper-divider"></div>
-              </a>
-         {% endif %}
+            </a>
+            {% endif %}
 
-          {% if has_permission(PermissionTypes.TAB_USERS) %}
-              <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.users') }}">
+            {% if has_permission(PermissionTypes.TAB_USERS) %}
+            <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.users') }}">
                 {% include 'header/icons/icon-users.html' %}
                 <div class="left-panel-wrapper-navigation-content">Користувачі</div>
                 <div class="left-panel-wrapper-divider"></div>
-              </a>
-          {% endif %}
+            </a>
+            {% endif %}
 
-          {% if has_permission(PermissionTypes.TAB_USERS_RIGHTS) %}
-              <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.rights') }}">
+            {% if has_permission(PermissionTypes.TAB_USERS_RIGHTS) %}
+            <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.rights') }}">
                 {% include 'header/icons/icon-permission.html' %}
                 <div class="left-panel-wrapper-navigation-content">Права доступу</div>
+                <div class="left-panel-wrapper-divider"></div>
+            </a>
+            {% endif %}
+
+            {% if has_permission(PermissionTypes.TAB_ML_MODELS) %}
+              <a class="left-panel-wrapper-navigation" href="{{ url_for('bases.bases_blp.models') }}">
+                {% include 'header/icons/icon-ml-model.html' %}
+                <div class="left-panel-wrapper-navigation-content">ML моделі</div>
                 <div class="left-panel-wrapper-divider"></div>
               </a>
           {% endif %}
@@ -39,36 +46,37 @@
             <div class="left-panel-wrapper-trigger-divider">
                 <div class="left-panel-wrapper-navigation" onclick="toggleMenu()">
                     <div class="flex flex-align-center" id="menu-toggle-open">
-                      {% include 'header/icons/icon-open.html' %}
+                        {% include 'header/icons/icon-open.html' %}
                     </div>
                     <div class="flex flex-align-center" style="display: none" id="menu-toggle-close">
-                      {% include 'header/icons/icon-close.html' %}
+                        {% include 'header/icons/icon-close.html' %}
                     </div>
                     <div class="left-panel-wrapper-navigation-content">Згорнути меню</div>
-              </div>
+                </div>
             </div>
         </div>
     </aside>
 </header>
 
 <script>
-  let isOpen = false;
-  function toggleMenu() {
-      let menuToggleOpen = document.getElementById('menu-toggle-open');
-      let menuToggleClose = document.getElementById('menu-toggle-close');
-      let menu = document.querySelector('.left-panel-wrapper');
+    let isOpen = false;
 
-      // Toggle the 'open' class to change the appearance of the menu button
-      if (isOpen) {
-          menuToggleOpen.style.display = 'flex';
-          menuToggleClose.style.display = 'none';
-          menu.classList.remove('left-panel-wrapper-open');
-          isOpen = false;
-      } else {
-          menuToggleOpen.style.display = 'none';
-          menuToggleClose.style.display = 'flex';
-          menu.classList.add('left-panel-wrapper-open');
-          isOpen = true;
-      }
-  }
+    function toggleMenu() {
+        let menuToggleOpen = document.getElementById('menu-toggle-open');
+        let menuToggleClose = document.getElementById('menu-toggle-close');
+        let menu = document.querySelector('.left-panel-wrapper');
+
+        // Toggle the 'open' class to change the appearance of the menu button
+        if (isOpen) {
+            menuToggleOpen.style.display = 'flex';
+            menuToggleClose.style.display = 'none';
+            menu.classList.remove('left-panel-wrapper-open');
+            isOpen = false;
+        } else {
+            menuToggleOpen.style.display = 'none';
+            menuToggleClose.style.display = 'flex';
+            menu.classList.add('left-panel-wrapper-open');
+            isOpen = true;
+        }
+    }
 </script>

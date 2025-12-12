@@ -134,3 +134,4 @@ class UserAPISchema(ma.SQLAlchemyAutoSchema):
     tariff = fields.Nested(TariffAPISchema)
     recognition = fields.Nested(RecognitionConfigurationSchema)
     role = fields.Nested(UserRoleSchema)
+    rights = fields.Nested(RightsSchema)

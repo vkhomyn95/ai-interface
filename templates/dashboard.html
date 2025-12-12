@@ -25,7 +25,7 @@
 
         <div class="content">
             <form action="{{ url_for('bases.bases_blp.dashboard') }}" class="flex flex-direction-row flex-align-end mb-20" id="filterForm">
-                {% if current_user.role.name == 'admin' %}
+                {% if current_user.role.name == 'admin' or current_user.role.name == 'supervisor' %}
                 <div class="flex flex-direction-column">
                     <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
                     <div class="w-100">

@@ -56,7 +56,7 @@
                     <div class="content-wrapper-head-actions">
                         <form id="filterForm" action="{{ url_for('bases.bases_blp.recognitions') }}" class="flex flex-direction-row flex-align-end" style="position: absolute; overflow: hidden">
                             <div class="flex flex-direction-row flex-align-end">
-                              {% if current_user.role.name == 'admin' %}
+                              {% if current_user.role.name == 'admin' or current_user.role.name == 'supervisor' %}
                                 <div class="flex flex-direction-column ml-15">
                                     <label class="label label-required_danger mb-5" for="user_id" style="white-space: nowrap">Користувач</label>
                                     <div class="w-100">

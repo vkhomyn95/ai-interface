@@ -65,7 +65,7 @@
                             <div class="w-50">Номер</div>
                             <div class="w-50">{{ recognition.extension }}</div>
                         </div>
-                        {% if current_user.role.name == 'admin' %}
+                        {% if current_user.role.name == 'admin' or current_user.role.name == 'supervisor' %}
                         <div class="p-20">
                             <span class="card-title">
                                 Користувач

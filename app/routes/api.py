@@ -57,10 +57,12 @@ def create_user():
         return {"success": False, "data": "User already exists with defined email or username"}
 
     user_schema = UserAPISchema(
-        exclude=("id", "tariff", "role", "recognition", "api_key"),
+        exclude=("id", "tariff", "role", "rights", "recognition", "api_key"),
         unknown=EXCLUDE
     ).load(request.json)
+
     user_schema.role_id = 2
+    user_schema.right_id = 3
     user_schema.password = generate_password_hash(request.json["password"])
     user_schema.api_key = uuid.uuid4()
     user_schema.tariff = Tariff()
